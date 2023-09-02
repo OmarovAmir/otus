@@ -1,2 +1,2 @@
 # otus
-Learning C++ on OTUS
+Система сборки: build, test and deploy

@@ -63,7 +63,7 @@ void show_ip_pool(const std::vector<std::vector<std::string>> &ip_pool)
     }
 }
 
-bool is_ip_greater_or_equal(const std::vector<std::string> &left, const std::vector<std::string> &right)
+bool is_ip_greater(const std::vector<std::string> &left, const std::vector<std::string> &right)
 {
     std::vector<std::string>::const_iterator left_ip_part = left.cbegin();
     std::vector<std::string>::const_iterator right_ip_part = right.cbegin();
@@ -82,13 +82,13 @@ bool is_ip_greater_or_equal(const std::vector<std::string> &left, const std::vec
         ++left_ip_part;
         ++right_ip_part;
     }
-    return true;
+    return false;
 }
 
 void sort_ip_pool(std::vector<std::vector<std::string>> &ip_pool)
 {
     std::sort(ip_pool.begin(), ip_pool.end(), [](std::vector<std::string> a, std::vector<std::string> b)
-              { return is_ip_greater_or_equal(a, b); });
+              { return is_ip_greater(a, b); });
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])

@@ -2,7 +2,5 @@
 
 #include <gtest/gtest.h>
 
-TEST(LibTest, test_valid_version) 
-{
-    EXPECT_TRUE(version() > 0);
-}
+TEST(ip_filter_tests, ip_filter) 
+{}

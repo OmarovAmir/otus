@@ -3,9 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
-project(helloworld VERSION ${PROJECT_VESRION})
-
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+project(ip_filter VERSION ${PROJECT_VESRION})
 
 include(FetchContent)
 FetchContent_Declare(
@@ -25,21 +23,12 @@ set_target_properties(ip_filter test_version_googletest PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-target_include_directories(helloworld
+target_include_directories(ip_filter
     PRIVATE "${CMAKE_BINARY_DIR}"
-)
-set_target_properties(test_version PROPERTIES
-    COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK
-    INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR}
-)
-
-target_link_libraries(ip_filter PRIVATE
-    ip_filter
 )
 
 target_link_libraries(test_version_googletest
     GTest::gtest_main
-    helloworld
 )
 
 if (MSVC)

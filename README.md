@@ -1,2 +1,2 @@
 # otus
-Система сборки: build, test and deploy
+Особенности C++11. auto, lambda, tuple

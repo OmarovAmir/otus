@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -38,26 +39,57 @@ void read_ip_pool(std::vector<std::vector<std::string>> &ip_pool)
     }
 }
 
+void show_ip(const std::vector<std::string> &ip)
+{
+    for (std::vector<std::string>::const_iterator ip_part = ip.cbegin();
+         ip_part != ip.cend(); ++ip_part)
+    {
+        if (ip_part != ip.cbegin())
+        {
+            std::cout << ".";
+        }
+        std::cout << *ip_part;
+    }
+}
+
 void show_ip_pool(const std::vector<std::vector<std::string>> &ip_pool)
 {
     for (std::vector<std::vector<std::string>>::const_iterator ip =
              ip_pool.cbegin();
          ip != ip_pool.cend(); ++ip)
     {
-        for (std::vector<std::string>::const_iterator ip_part = ip->cbegin();
-             ip_part != ip->cend(); ++ip_part)
-        {
-            if (ip_part != ip->cbegin())
-            {
-                std::cout << ".";
-            }
-            std::cout << *ip_part;
-        }
+        show_ip(*ip);
         std::cout << std::endl;
     }
 }
 
-void sort_ip_pool(std::vector<std::vector<std::string>> &ip_pool) {}
+bool is_ip_greater_or_equal(const std::vector<std::string> &left, const std::vector<std::string> &right)
+{
+    std::vector<std::string>::const_iterator left_ip_part = left.cbegin();
+    std::vector<std::string>::const_iterator right_ip_part = right.cbegin();
+    while (left_ip_part != left.cend())
+    {
+        auto left_ip_part_int = std::stoi(*left_ip_part);
+        auto right_ip_part_int = std::stoi(*right_ip_part);
+        if (left_ip_part_int > right_ip_part_int)
+        {
+            return true;
+        }
+        if (left_ip_part_int < right_ip_part_int)
+        {
+            return false;
+        }
+        ++left_ip_part;
+        ++right_ip_part;
+    }
+    return true;
+}
+
+void sort_ip_pool(std::vector<std::vector<std::string>> &ip_pool)
+{
+    std::sort(ip_pool.begin(), ip_pool.end(), [](std::vector<std::string> a, std::vector<std::string> b)
+              { return is_ip_greater_or_equal(a, b); });
+}
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 {
@@ -65,7 +97,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
     {
         std::vector<std::vector<std::string>> ip_pool;
         read_ip_pool(ip_pool);
-        // TODO reverse lexicographically sort
+        sort_ip_pool(ip_pool);
         show_ip_pool(ip_pool);
 
         // 222.173.235.246

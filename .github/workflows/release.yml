@@ -3,8 +3,7 @@ name: 'C++ CI'
 on:
   push:
     branches:
-      - main
-      - ci_cd
+      - hw1
   workflow_dispatch:
 
 jobs:

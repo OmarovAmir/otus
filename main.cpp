@@ -8,7 +8,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
         read_ip_pool(ip_pool);
         // Reverse lexicographically sort
         sort_ip_pool(ip_pool);
-        show_ip_pool(ip_pool);
+        show_ip_pool(ip_pool, "\n");
 
         // 222.173.235.246
         // 222.130.177.64
@@ -20,7 +20,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 
         // Filter by first byte and output
         // ip = filter(1)
-        filter(ip_pool, 1);
+        show_ip_pool(filter(ip_pool, 1), "\n");
 
         // 1.231.69.33
         // 1.87.203.225
@@ -30,7 +30,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 
         // Filter by first and second bytes and output
         // ip = filter(46, 70)
-        filter(ip_pool, 46, 70);
+        show_ip_pool(filter(ip_pool, 46, 70), "\n");
 
         // 46.70.225.39
         // 46.70.147.26
@@ -39,7 +39,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 
         // Filter by any byte and output
         // ip = filter_any(46)
-        filter_any(ip_pool, 46);
+        show_ip_pool(filter_any(ip_pool, 46), "\n");
 
         // 186.204.34.46
         // 186.46.222.194

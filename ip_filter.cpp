@@ -87,51 +87,62 @@ void sort_ip_pool(std::vector<std::vector<std::string>> &ip_pool)
               { return is_ip_greater(a, b); });
 }
 
-void filter(std::vector<std::vector<std::string>> &ip_pool, int first)
+std::vector<std::vector<std::string>> filter(std::vector<std::vector<std::string>> &ip_pool, int first)
 {
-    std::for_each(ip_pool.begin(), ip_pool.end(),
-                  [&first](std::vector<std::string> ip)
-                  {
-                      std::vector<std::string>::const_iterator ip_part = ip.cbegin();
-                      if (std::stoi(*ip_part) == first)
-                      {
-                          show_ip(ip, "\n");
-                      }
-                  });
+    std::vector<std::vector<std::string>> result;
+    std::copy_if(ip_pool.begin(), ip_pool.end(),
+                 std::back_inserter(result),
+                 [&first](std::vector<std::string> ip)
+                 {
+                     std::vector<std::string>::const_iterator ip_part = ip.cbegin();
+                     if (std::stoi(*ip_part) == first)
+                     {
+                         return true;
+                     }
+                     return false;
+                 });
+    return result;
 }
 
-void filter(std::vector<std::vector<std::string>> &ip_pool, int first, int second)
+std::vector<std::vector<std::string>> filter(std::vector<std::vector<std::string>> &ip_pool, int first, int second)
 {
-    std::for_each(ip_pool.begin(), ip_pool.end(),
-                  [&first, &second](std::vector<std::string> ip)
-                  {
-                      std::vector<std::string>::const_iterator ip_part = ip.cbegin();
-
-                      if (std::stoi(*ip_part) == first)
-                      {
-                          ++ip_part;
-                          if (std::stoi(*ip_part) == second)
-                          {
-                              show_ip(ip, "\n");
-                          }
-                      }
-                  });
+    std::vector<std::vector<std::string>> result;
+    std::copy_if(ip_pool.begin(), ip_pool.end(),
+                 std::back_inserter(result),
+                 [&first, &second](std::vector<std::string> ip)
+                 {
+                     std::vector<std::string>::const_iterator ip_part = ip.cbegin();
+                     if (std::stoi(*ip_part) == first)
+                     {
+                         ++ip_part;
+                         if (std::stoi(*ip_part) == second)
+                         {
+                             return true;
+                         }
+                     }
+                     return false;
+                 });
+    return result;
 }
 
-void filter_any(std::vector<std::vector<std::string>> &ip_pool, int any)
+std::vector<std::vector<std::string>> filter_any(std::vector<std::vector<std::string>> &ip_pool, int any)
 {
-    std::for_each(ip_pool.begin(), ip_pool.end(),
-                  [&any](std::vector<std::string> ip)
-                  {
-                      std::vector<std::string>::const_iterator ip_part = ip.cbegin();
-                      while (ip_part != ip.cend())
-                      {
-                          if (std::stoi(*ip_part) == any)
-                          {
-                              show_ip(ip, "\n");
-                              break;
-                          }
-                          ++ip_part;
-                      }
-                  });
+    std::vector<std::vector<std::string>> result;
+    std::copy_if(ip_pool.begin(), ip_pool.end(),
+                 std::back_inserter(result),
+                 [&any](std::vector<std::string> ip)
+                 {
+                     std::vector<std::string>::const_iterator ip_part = ip.cbegin();
+                     while (ip_part != ip.cend())
+                     {
+                         if (std::stoi(*ip_part) == any)
+                         {
+                             return true;
+                             break;
+                         }
+                         ++ip_part;
+                     }
+                     return false;
+                 });
+    return result;
 }

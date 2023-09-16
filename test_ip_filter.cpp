@@ -1,6 +1,43 @@
 #include "ip_filter.hpp"
 #include <gtest/gtest.h>
 
+namespace
+{
+[[maybe_unused]] bool is_ip_equal(const std::vector<std::string> &left, const std::vector<std::string> &right)
+{
+    auto left_ip_part = (left.size() <= right.size()) ? left.cbegin() : right.cbegin();
+    auto right_ip_part = (left.size() <= right.size()) ? right.cbegin() : left.cbegin();
+    while (left_ip_part != left.cend())
+    {
+        auto left_ip_part_int = std::stoi(*left_ip_part);
+        auto right_ip_part_int = std::stoi(*right_ip_part);
+        if (left_ip_part_int != right_ip_part_int)
+        {
+            return false;
+        }
+        ++left_ip_part;
+        ++right_ip_part;
+    }
+    return true;
+}
+
+[[maybe_unused]] bool is_ip_pool_equal(const std::vector<std::vector<std::string>> &left, const std::vector<std::vector<std::string>> &right)
+{
+    auto left_ip = (left.size() <= right.size()) ? left.cbegin() : right.cbegin();
+    auto right_ip = (left.size() <= right.size()) ? right.cbegin() : left.cbegin();
+    while (left_ip != left.cend())
+    {
+        if (!is_ip_equal(*left_ip, *right_ip))
+        {
+            return false;
+        }
+        ++left_ip;
+        ++right_ip;
+    }
+    return true;
+}
+} // namespace
+
 TEST(ip_filter_tests, greater4)
 {
     auto ip1 = split("192.168.127.2", '.');
@@ -86,40 +123,6 @@ TEST(ip_filter_tests, sort)
         ip_pool_after.push_back(split(ip_str, '.'));
     }
 
-    auto is_ip_equal = [](const std::vector<std::string> &left, const std::vector<std::string> &right)
-    {
-        auto left_ip_part = left.cbegin();
-        auto right_ip_part = right.cbegin();
-        while (left_ip_part != left.cend())
-        {
-            auto left_ip_part_int = std::stoi(*left_ip_part);
-            auto right_ip_part_int = std::stoi(*right_ip_part);
-            if (left_ip_part_int != right_ip_part_int)
-            {
-                return false;
-            }
-            ++left_ip_part;
-            ++right_ip_part;
-        }
-        return true;
-    };
-
-    auto is_ip_pool_equal = [&is_ip_equal](const std::vector<std::vector<std::string>> &left, const std::vector<std::vector<std::string>> &right)
-    {
-        auto left_ip = left.cbegin();
-        auto right_ip = right.cbegin();
-        while (left_ip != left.cend())
-        {
-            if (!is_ip_equal(*left_ip, *right_ip))
-            {
-                return false;
-            }
-            ++left_ip;
-            ++right_ip;
-        }
-        return true;
-    };
-
     for (int i = 0; i < 10; ++i)
     {
         std::random_shuffle(ip_pool_before.begin(), ip_pool_before.end());
@@ -127,4 +130,110 @@ TEST(ip_filter_tests, sort)
         sort_ip_pool(ip_pool_before);
         EXPECT_TRUE(is_ip_pool_equal(ip_pool_before, ip_pool_after));
     }
+}
+
+TEST(ip_filter_tests, filter_first)
+{
+    auto ip_string = "219.102.120.135\t"
+                     "185.69.186.168\t"
+                     "179.210.145.4\t"
+                     "157.39.22.224\t"
+                     "113.162.145.156\t"
+                     "85.254.10.197\t"
+                     "79.180.73.190\t"
+                     "67.232.81.208\t"
+                     "23.240.215.189\t"
+                     "1.29.168.152";
+
+    auto ip_string_after_filter = "1.29.168.152";
+
+    std::vector<std::string> ip_string_pool = split(ip_string, '\t');
+    std::vector<std::vector<std::string>> ip_pool_before;
+    for (const auto &ip_str : ip_string_pool)
+    {
+        ip_pool_before.push_back(split(ip_str, '.'));
+    }
+
+    ip_string_pool.clear();
+
+    ip_string_pool = split(ip_string_after_filter, '\t');
+    std::vector<std::vector<std::string>> ip_pool_after;
+    for (const auto &ip_str : ip_string_pool)
+    {
+        ip_pool_after.push_back(split(ip_str, '.'));
+    }
+
+    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before, 1), ip_pool_after));
+    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before, 23), ip_pool_after));
+}
+
+TEST(ip_filter_tests, filter_first_second)
+{
+    auto ip_string = "219.102.120.135\t"
+                     "185.69.186.168\t"
+                     "179.210.145.4\t"
+                     "179.39.22.224\t"
+                     "113.162.145.156\t"
+                     "85.254.10.197\t"
+                     "79.180.73.190\t"
+                     "67.232.81.208\t"
+                     "23.240.215.189\t"
+                     "1.29.168.152";
+
+    auto ip_string_after_filter = "179.39.22.224";
+
+    std::vector<std::string> ip_string_pool = split(ip_string, '\t');
+    std::vector<std::vector<std::string>> ip_pool_before;
+    for (const auto &ip_str : ip_string_pool)
+    {
+        ip_pool_before.push_back(split(ip_str, '.'));
+    }
+
+    ip_string_pool.clear();
+
+    ip_string_pool = split(ip_string_after_filter, '\t');
+    std::vector<std::vector<std::string>> ip_pool_after;
+    for (const auto &ip_str : ip_string_pool)
+    {
+        ip_pool_after.push_back(split(ip_str, '.'));
+    }
+
+    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before, 179, 39), ip_pool_after));
+    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before, 179, 210), ip_pool_after));
+}
+
+TEST(ip_filter_tests, filter_any)
+{
+    auto ip_string = "219.102.120.135\t"
+                     "185.69.186.168\t"
+                     "179.210.145.4\t"
+                     "179.39.22.224\t"
+                     "113.162.145.156\t"
+                     "85.254.10.197\t"
+                     "79.180.73.190\t"
+                     "67.232.81.208\t"
+                     "23.240.215.189\t"
+                     "1.29.168.152";
+
+    auto ip_string_after_filter = "185.69.186.168\t"
+                                  "1.29.168.152";
+
+    std::vector<std::string> ip_string_pool = split(ip_string, '\t');
+    std::vector<std::vector<std::string>> ip_pool_before;
+    for (const auto &ip_str : ip_string_pool)
+    {
+        ip_pool_before.push_back(split(ip_str, '.'));
+    }
+
+    ip_string_pool.clear();
+
+    ip_string_pool = split(ip_string_after_filter, '\t');
+    std::vector<std::vector<std::string>> ip_pool_after;
+    for (const auto &ip_str : ip_string_pool)
+    {
+        ip_pool_after.push_back(split(ip_str, '.'));
+    }
+
+    EXPECT_TRUE(is_ip_pool_equal(filter_any(ip_pool_before, 168), ip_pool_after));
+    EXPECT_FALSE(is_ip_pool_equal(filter_any(ip_pool_before, 152), ip_pool_after));
 }

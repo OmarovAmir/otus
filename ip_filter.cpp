@@ -16,7 +16,7 @@ std::vector<std::string> split(const std::string &str, char d)
 
     std::string::size_type start = 0;
     std::string::size_type stop = str.find_first_of(d);
-    while(stop != std::string::npos)
+    while (stop != std::string::npos)
     {
         r.push_back(str.substr(start, stop - start));
 
@@ -29,33 +29,44 @@ std::vector<std::string> split(const std::string &str, char d)
     return r;
 }
 
+void read_ip_pool(std::vector<std::vector<std::string>> &ip_pool)
+{
+    for (std::string line; std::getline(std::cin, line);)
+    {
+        std::vector<std::string> v = split(line, '\t');
+        ip_pool.push_back(split(v.at(0), '.'));
+    }
+}
+
+void show_ip_pool(const std::vector<std::vector<std::string>> &ip_pool)
+{
+    for (std::vector<std::vector<std::string>>::const_iterator ip =
+             ip_pool.cbegin();
+         ip != ip_pool.cend(); ++ip)
+    {
+        for (std::vector<std::string>::const_iterator ip_part = ip->cbegin();
+             ip_part != ip->cend(); ++ip_part)
+        {
+            if (ip_part != ip->cbegin())
+            {
+                std::cout << ".";
+            }
+            std::cout << *ip_part;
+        }
+        std::cout << std::endl;
+    }
+}
+
+void sort_ip_pool(std::vector<std::vector<std::string>> &ip_pool) {}
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 {
     try
     {
-        std::vector<std::vector<std::string> > ip_pool;
-
-        for(std::string line; std::getline(std::cin, line);)
-        {
-            std::vector<std::string> v = split(line, '\t');
-            ip_pool.push_back(split(v.at(0), '.'));
-        }
-
+        std::vector<std::vector<std::string>> ip_pool;
+        read_ip_pool(ip_pool);
         // TODO reverse lexicographically sort
-
-        for(std::vector<std::vector<std::string> >::const_iterator ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
-        {
-            for(std::vector<std::string>::const_iterator ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
-            {
-                if (ip_part != ip->cbegin())
-                {
-                    std::cout << ".";
-
-                }
-                std::cout << *ip_part;
-            }
-            std::cout << std::endl;
-        }
+        show_ip_pool(ip_pool);
 
         // 222.173.235.246
         // 222.130.177.64
@@ -120,7 +131,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
         // 39.46.86.85
         // 5.189.203.46
     }
-    catch(const std::exception &e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << std::endl;
     }

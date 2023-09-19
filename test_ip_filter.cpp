@@ -9,9 +9,7 @@ namespace
     auto right_ip_part = (left.size() <= right.size()) ? right.cbegin() : left.cbegin();
     while (left_ip_part != left.cend())
     {
-        auto left_ip_part_int = std::stoi(*left_ip_part);
-        auto right_ip_part_int = std::stoi(*right_ip_part);
-        if (left_ip_part_int != right_ip_part_int)
+        if (*left_ip_part != *right_ip_part)
         {
             return false;
         }
@@ -163,8 +161,18 @@ TEST(ip_filter_tests, filter_first)
         ip_pool_after.push_back(split(ip_str, '.'));
     }
 
-    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before, 1), ip_pool_after));
-    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before, 23), ip_pool_after));
+    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
+                                        [](ip_t ip)
+                                        {
+                                            return (ip[0] == "1");
+                                        }),
+                                 ip_pool_after));
+    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
+                                         [](ip_t ip)
+                                         {
+                                             return (ip[0] == "23");
+                                         }),
+                                  ip_pool_after));
 }
 
 TEST(ip_filter_tests, filter_first_second)
@@ -198,8 +206,20 @@ TEST(ip_filter_tests, filter_first_second)
         ip_pool_after.push_back(split(ip_str, '.'));
     }
 
-    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before, 179, 39), ip_pool_after));
-    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before, 179, 210), ip_pool_after));
+    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
+                                        [](ip_t ip)
+                                        {
+                                            return (ip[0] == "179") &&
+                                                   (ip[1] == "39");
+                                        }),
+                                 ip_pool_after));
+    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
+                                         [](ip_t ip)
+                                         {
+                                             return (ip[0] == "179") &&
+                                                    (ip[1] == "210");
+                                         }),
+                                  ip_pool_after));
 }
 
 TEST(ip_filter_tests, filter_any)
@@ -234,6 +254,30 @@ TEST(ip_filter_tests, filter_any)
         ip_pool_after.push_back(split(ip_str, '.'));
     }
 
-    EXPECT_TRUE(is_ip_pool_equal(filter_any(ip_pool_before, 168), ip_pool_after));
-    EXPECT_FALSE(is_ip_pool_equal(filter_any(ip_pool_before, 152), ip_pool_after));
+    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
+                                        [](ip_t ip)
+                                        {
+                                            for (auto ip_part : ip)
+                                            {
+                                                if (ip_part == "168")
+                                                {
+                                                    return true;
+                                                }
+                                            }
+                                            return false;
+                                        }),
+                                 ip_pool_after));
+    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
+                                         [](ip_t ip)
+                                         {
+                                             for (auto ip_part : ip)
+                                             {
+                                                 if (ip_part == "152")
+                                                 {
+                                                     return true;
+                                                 }
+                                             }
+                                             return false;
+                                         }),
+                                  ip_pool_after));
 }

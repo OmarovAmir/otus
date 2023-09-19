@@ -4,7 +4,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 {
     try
     {
-        std::vector<std::vector<std::string>> ip_pool;
+        ip_pool_t ip_pool;
         read_ip_pool(ip_pool);
         // Reverse lexicographically sort
         sort_ip_pool(ip_pool);
@@ -20,7 +20,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 
         // Filter by first byte and output
         // ip = filter(1)
-        show_ip_pool(filter(ip_pool, 1), "\n");
+        show_ip_pool(filter(ip_pool,
+                            [](ip_t ip)
+                            {
+                                return (ip[0] == "1");
+                            }),
+                     "\n");
 
         // 1.231.69.33
         // 1.87.203.225
@@ -30,7 +35,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 
         // Filter by first and second bytes and output
         // ip = filter(46, 70)
-        show_ip_pool(filter(ip_pool, 46, 70), "\n");
+        show_ip_pool(filter(ip_pool,
+                            [](ip_t ip)
+                            {
+                                return (ip[0] == "46") &&
+                                       (ip[1] == "70");
+                            }),
+                     "\n");
 
         // 46.70.225.39
         // 46.70.147.26
@@ -39,7 +50,19 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 
         // Filter by any byte and output
         // ip = filter_any(46)
-        show_ip_pool(filter_any(ip_pool, 46), "\n");
+        show_ip_pool(filter(ip_pool,
+                            [](ip_t ip)
+                            {
+                                for (auto ip_part : ip)
+                                {
+                                    if (ip_part == "46")
+                                    {
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            }),
+                     "\n");
 
         // 186.204.34.46
         // 186.46.222.194

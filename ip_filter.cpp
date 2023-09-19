@@ -6,9 +6,9 @@
 // ("11.", '.') -> ["11", ""]
 // (".11", '.') -> ["", "11"]
 // ("11.22", '.') -> ["11", "22"]
-std::vector<std::string> split(const std::string &str, char d)
+ip_t split(const std::string &str, char d)
 {
-    std::vector<std::string> r;
+    ip_t r;
 
     std::string::size_type start = 0;
     std::string::size_type stop = str.find_first_of(d);
@@ -25,18 +25,18 @@ std::vector<std::string> split(const std::string &str, char d)
     return r;
 }
 
-void read_ip_pool(std::vector<std::vector<std::string>> &ip_pool)
+void read_ip_pool(ip_pool_t &ip_pool)
 {
     for (std::string line; std::getline(std::cin, line);)
     {
-        std::vector<std::string> v = split(line, '\t');
+        ip_t v = split(line, '\t');
         ip_pool.push_back(split(v.at(0), '.'));
     }
 }
 
-void show_ip(const std::vector<std::string> &ip, std::string end)
+void show_ip(const ip_t &ip, std::string end)
 {
-    for (std::vector<std::string>::const_iterator ip_part = ip.cbegin();
+    for (auto ip_part = ip.cbegin();
          ip_part != ip.cend(); ++ip_part)
     {
         if (ip_part != ip.cbegin())
@@ -48,9 +48,9 @@ void show_ip(const std::vector<std::string> &ip, std::string end)
     std::cout << end;
 }
 
-void show_ip_pool(const std::vector<std::vector<std::string>> &ip_pool, std::string end)
+void show_ip_pool(const ip_pool_t &ip_pool, std::string end)
 {
-    for (std::vector<std::vector<std::string>>::const_iterator ip =
+    for (auto ip =
              ip_pool.cbegin();
          ip != ip_pool.cend(); ++ip)
     {
@@ -58,21 +58,34 @@ void show_ip_pool(const std::vector<std::vector<std::string>> &ip_pool, std::str
     }
 }
 
-bool is_ip_greater(const std::vector<std::string> &left, const std::vector<std::string> &right)
+bool is_ip_greater(const ip_t &left, const ip_t &right)
 {
-    std::vector<std::string>::const_iterator left_ip_part = left.cbegin();
-    std::vector<std::string>::const_iterator right_ip_part = right.cbegin();
+    auto left_ip_part = left.cbegin();
+    auto right_ip_part = right.cbegin();
     while (left_ip_part != left.cend())
     {
-        auto left_ip_part_int = std::stoi(*left_ip_part);
-        auto right_ip_part_int = std::stoi(*right_ip_part);
-        if (left_ip_part_int > right_ip_part_int)
+        if (left_ip_part->size() > right_ip_part->size())
         {
             return true;
         }
-        if (left_ip_part_int < right_ip_part_int)
+        if (left_ip_part->size() < right_ip_part->size())
         {
             return false;
+        }
+        auto left_ip_part_ch = left_ip_part->cbegin();
+        auto right_ip_part_ch = right_ip_part->cbegin();
+        while (left_ip_part_ch != left_ip_part->cend())
+        {
+            if (*left_ip_part_ch > *right_ip_part_ch)
+            {
+                return true;
+            }
+            if (*left_ip_part_ch < *right_ip_part_ch)
+            {
+                return false;
+            }
+            ++left_ip_part_ch;
+            ++right_ip_part_ch;
         }
         ++left_ip_part;
         ++right_ip_part;
@@ -80,69 +93,18 @@ bool is_ip_greater(const std::vector<std::string> &left, const std::vector<std::
     return false;
 }
 
-void sort_ip_pool(std::vector<std::vector<std::string>> &ip_pool)
+void sort_ip_pool(ip_pool_t &ip_pool)
 {
     std::sort(ip_pool.begin(), ip_pool.end(),
-              [](const std::vector<std::string> &a, const std::vector<std::string> &b)
+              [](const ip_t &a, const ip_t &b)
               { return is_ip_greater(a, b); });
 }
 
-std::vector<std::vector<std::string>> filter(std::vector<std::vector<std::string>> &ip_pool, int first)
+ip_pool_t filter(ip_pool_t &ip_pool, std::function<bool(ip_t)> predicate)
 {
-    std::vector<std::vector<std::string>> result;
+    ip_pool_t result;
     std::copy_if(ip_pool.begin(), ip_pool.end(),
                  std::back_inserter(result),
-                 [&first](std::vector<std::string> ip)
-                 {
-                     std::vector<std::string>::const_iterator ip_part = ip.cbegin();
-                     if (std::stoi(*ip_part) == first)
-                     {
-                         return true;
-                     }
-                     return false;
-                 });
-    return result;
-}
-
-std::vector<std::vector<std::string>> filter(std::vector<std::vector<std::string>> &ip_pool, int first, int second)
-{
-    std::vector<std::vector<std::string>> result;
-    std::copy_if(ip_pool.begin(), ip_pool.end(),
-                 std::back_inserter(result),
-                 [&first, &second](std::vector<std::string> ip)
-                 {
-                     std::vector<std::string>::const_iterator ip_part = ip.cbegin();
-                     if (std::stoi(*ip_part) == first)
-                     {
-                         ++ip_part;
-                         if (std::stoi(*ip_part) == second)
-                         {
-                             return true;
-                         }
-                     }
-                     return false;
-                 });
-    return result;
-}
-
-std::vector<std::vector<std::string>> filter_any(std::vector<std::vector<std::string>> &ip_pool, int any)
-{
-    std::vector<std::vector<std::string>> result;
-    std::copy_if(ip_pool.begin(), ip_pool.end(),
-                 std::back_inserter(result),
-                 [&any](std::vector<std::string> ip)
-                 {
-                     std::vector<std::string>::const_iterator ip_part = ip.cbegin();
-                     while (ip_part != ip.cend())
-                     {
-                         if (std::stoi(*ip_part) == any)
-                         {
-                             return true;
-                             break;
-                         }
-                         ++ip_part;
-                     }
-                     return false;
-                 });
+                 predicate);
     return result;
 }

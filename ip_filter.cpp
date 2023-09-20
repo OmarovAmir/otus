@@ -36,8 +36,7 @@ void read_ip_pool(ip_pool_t &ip_pool)
 
 void show_ip(const ip_t &ip, std::string end)
 {
-    for (auto ip_part = ip.cbegin();
-         ip_part != ip.cend(); ++ip_part)
+    for (auto ip_part = ip.cbegin(); ip_part != ip.cend(); ++ip_part)
     {
         if (ip_part != ip.cbegin())
         {
@@ -50,9 +49,7 @@ void show_ip(const ip_t &ip, std::string end)
 
 void show_ip_pool(const ip_pool_t &ip_pool, std::string end)
 {
-    for (auto ip =
-             ip_pool.cbegin();
-         ip != ip_pool.cend(); ++ip)
+    for (auto ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
     {
         show_ip(*ip, end);
     }

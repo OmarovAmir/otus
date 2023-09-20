@@ -6,9 +6,9 @@
 // ("11.", '.') -> ["11", ""]
 // (".11", '.') -> ["", "11"]
 // ("11.22", '.') -> ["11", "22"]
-ip_t split(const std::string &str, char d)
+std::vector<std::string> split(const std::string &str, char d)
 {
-    ip_t r;
+    std::vector<std::string> r;
 
     std::string::size_type start = 0;
     std::string::size_type stop = str.find_first_of(d);
@@ -25,12 +25,22 @@ ip_t split(const std::string &str, char d)
     return r;
 }
 
+ip_t split_to_ip_t(std::vector<std::string> vs)
+{
+    ip_t ip;
+    for (auto &ip_str: vs)
+    {
+        ip.push_back(std::stoi(ip_str));
+    }
+    return std::move(ip);
+}
+
 void read_ip_pool(ip_pool_t &ip_pool)
 {
     for (std::string line; std::getline(std::cin, line);)
     {
-        ip_t v = split(line, '\t');
-        ip_pool.push_back(split(v.at(0), '.'));
+        auto v = split(line, '\t');
+        ip_pool.push_back(split_to_ip_t(split(v.at(0), '.')));
     }
 }
 
@@ -42,7 +52,7 @@ void show_ip(const ip_t &ip, std::string end)
         {
             std::cout << ".";
         }
-        std::cout << *ip_part;
+        std::cout << unsigned(*ip_part);
     }
     std::cout << end;
 }
@@ -61,28 +71,13 @@ bool is_ip_greater(const ip_t &left, const ip_t &right)
     auto right_ip_part = right.cbegin();
     while (left_ip_part != left.cend())
     {
-        if (left_ip_part->size() > right_ip_part->size())
+        if (*left_ip_part > *right_ip_part)
         {
             return true;
         }
-        if (left_ip_part->size() < right_ip_part->size())
+        if (*left_ip_part < *right_ip_part)
         {
             return false;
-        }
-        auto left_ip_part_ch = left_ip_part->cbegin();
-        auto right_ip_part_ch = right_ip_part->cbegin();
-        while (left_ip_part_ch != left_ip_part->cend())
-        {
-            if (*left_ip_part_ch > *right_ip_part_ch)
-            {
-                return true;
-            }
-            if (*left_ip_part_ch < *right_ip_part_ch)
-            {
-                return false;
-            }
-            ++left_ip_part_ch;
-            ++right_ip_part_ch;
         }
         ++left_ip_part;
         ++right_ip_part;

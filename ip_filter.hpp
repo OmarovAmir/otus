@@ -6,10 +6,11 @@
 #include <string>
 #include <vector>
 
-using ip_t = std::vector<std::string>;
+using ip_t = std::vector<std::uint8_t>;
 using ip_pool_t = std::vector<ip_t>;
 
-ip_t split(const std::string &str, char d);
+std::vector<std::string> split(const std::string &str, char d);
+ip_t split_to_ip_t(std::vector<std::string> vs);
 void read_ip_pool(ip_pool_t &ip_pool);
 void show_ip(const ip_t &ip, std::string end = "");
 void show_ip_pool(const ip_pool_t &ip_pool, std::string end = "");

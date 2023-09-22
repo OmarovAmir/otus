@@ -6,13 +6,45 @@
 #include <string>
 #include <vector>
 
-union IP
+struct ip_t
 {
-    uint32_t all;
-    uint8_t byte[4];
+    uint8_t get_part(const uint8_t index) const
+    {
+        assert(index < 4);
+        IP l_ip;
+        l_ip.all = this->ip;
+        return l_ip.byte[index];
+    }
+
+    void set_part(const uint8_t index, const uint8_t value)
+    {
+        assert(index < 4);
+        IP l_ip;
+        l_ip.all = this->ip;
+        l_ip.byte[index] = value;
+        this->ip = l_ip.all;
+    }
+
+    bool operator>(const ip_t &ip) const
+    {
+        return (this->ip > ip.ip);
+    }
+
+    bool operator!=(const ip_t &ip) const
+    {
+        return (this->ip != ip.ip);
+    }
+
+  private:
+    union IP
+    {
+        uint32_t all;
+        uint8_t byte[4];
+    };
+
+    uint32_t ip;
 };
 
-using ip_t = uint32_t;
 using ip_pool_t = std::vector<ip_t>;
 
 std::vector<std::string> split(const std::string &str, char d);

@@ -27,12 +27,12 @@ std::vector<std::string> split(const std::string &str, char d)
 
 ip_t split_to_ip_t(std::vector<std::string> vs)
 {
-    IP ip;
-    ip.byte[3] = std::stoi(vs[0]);
-    ip.byte[2] = std::stoi(vs[1]);
-    ip.byte[1] = std::stoi(vs[2]);
-    ip.byte[0] = std::stoi(vs[3]);
-    return ip.all;
+    ip_t ip;
+    ip.set_part(3, std::stoi(vs[0]));
+    ip.set_part(2, std::stoi(vs[1]));
+    ip.set_part(1, std::stoi(vs[2]));
+    ip.set_part(0, std::stoi(vs[3]));
+    return ip;
 }
 
 void read_ip_pool(ip_pool_t &ip_pool)
@@ -46,9 +46,10 @@ void read_ip_pool(ip_pool_t &ip_pool)
 
 void show_ip(const ip_t &ip, std::string end)
 {
-    IP ip_;
-    ip_.all = ip;
-    std::cout << unsigned(ip_.byte[3]) << '.' << unsigned(ip_.byte[2]) << '.' << unsigned(ip_.byte[1]) << '.' << unsigned(ip_.byte[0]) << end;
+    std::cout << unsigned(ip.get_part(3)) << '.'
+              << unsigned(ip.get_part(2)) << '.'
+              << unsigned(ip.get_part(1)) << '.'
+              << unsigned(ip.get_part(0)) << end;
 }
 
 void show_ip_pool(const ip_pool_t &ip_pool, std::string end)

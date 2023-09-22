@@ -152,17 +152,13 @@ TEST(ip_filter_tests, filter_first)
     EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
                                         [](ip_t ip)
                                         {
-                                            IP ip_;
-                                            ip_.all = ip;
-                                            return (ip_.byte[3] == 1);
+                                            return (ip.get_part(3) == 1);
                                         }),
                                  ip_pool_after));
     EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
                                          [](ip_t ip)
                                          {
-                                             IP ip_;
-                                             ip_.all = ip;
-                                             return (ip_.byte[3] == 23);
+                                             return (ip.get_part(3) == 23);
                                          }),
                                   ip_pool_after));
 }
@@ -201,19 +197,15 @@ TEST(ip_filter_tests, filter_first_second)
     EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
                                         [](ip_t ip)
                                         {
-                                            IP ip_;
-                                            ip_.all = ip;
-                                            return (ip_.byte[3] == 179) &&
-                                                   (ip_.byte[2] == 39);
+                                            return (ip.get_part(3) == 179) &&
+                                                   (ip.get_part(2) == 39);
                                         }),
                                  ip_pool_after));
     EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
                                          [](ip_t ip)
                                          {
-                                             IP ip_;
-                                             ip_.all = ip;
-                                             return (ip_.byte[3] == 179) &&
-                                                    (ip_.byte[2] == 210);
+                                             return (ip.get_part(3) == 179) &&
+                                                    (ip.get_part(2) == 210);
                                          }),
                                   ip_pool_after));
 }
@@ -253,23 +245,19 @@ TEST(ip_filter_tests, filter_any)
     EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
                                         [](ip_t ip)
                                         {
-                                            IP ip_;
-                                            ip_.all = ip;
-                                            return (ip_.byte[3] == 168) ||
-                                                   (ip_.byte[2] == 168) ||
-                                                   (ip_.byte[1] == 168) ||
-                                                   (ip_.byte[0] == 168);
+                                            return (ip.get_part(3) == 168) ||
+                                                   (ip.get_part(2) == 168) ||
+                                                   (ip.get_part(1) == 168) ||
+                                                   (ip.get_part(0) == 168);
                                         }),
                                  ip_pool_after));
     EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
                                          [](ip_t ip)
                                          {
-                                             IP ip_;
-                                             ip_.all = ip;
-                                             return (ip_.byte[3] == 46) ||
-                                                    (ip_.byte[2] == 46) ||
-                                                    (ip_.byte[1] == 46) ||
-                                                    (ip_.byte[0] == 46);
+                                             return (ip.get_part(3) == 46) ||
+                                                    (ip.get_part(2) == 46) ||
+                                                    (ip.get_part(1) == 46) ||
+                                                    (ip.get_part(0) == 46);
                                          }),
                                   ip_pool_after));
 }

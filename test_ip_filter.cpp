@@ -1,29 +1,6 @@
 #include "ip_filter.hpp"
 #include <gtest/gtest.h>
 
-namespace
-{
-[[maybe_unused]] bool is_ip_pool_equal(const ip_pool_t &left, const ip_pool_t &right)
-{
-    if (left.size() != right.size())
-    {
-        return false;
-    }
-    auto left_ip = left.cbegin();
-    auto right_ip = right.cbegin();
-    while (left_ip != left.cend())
-    {
-        if (*left_ip != *right_ip)
-        {
-            return false;
-        }
-        ++left_ip;
-        ++right_ip;
-    }
-    return true;
-}
-} // namespace
-
 TEST(ip_filter_tests, greater4)
 {
     auto ip1 = split_to_ip_t(split("192.168.127.2", '.'));
@@ -112,9 +89,9 @@ TEST(ip_filter_tests, sort)
     for (int i = 0; i < 10; ++i)
     {
         std::random_shuffle(ip_pool_before.begin(), ip_pool_before.end());
-        EXPECT_FALSE(is_ip_pool_equal(ip_pool_before, ip_pool_after));
+        EXPECT_TRUE(ip_pool_before != ip_pool_after);
         sort_ip_pool(ip_pool_before);
-        EXPECT_TRUE(is_ip_pool_equal(ip_pool_before, ip_pool_after));
+        EXPECT_TRUE(ip_pool_before == ip_pool_after);
     }
 }
 
@@ -149,18 +126,18 @@ TEST(ip_filter_tests, filter_first)
         ip_pool_after.push_back(split_to_ip_t(split(ip_str, '.')));
     }
 
-    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
-                                        [](ip_t ip)
-                                        {
-                                            return (ip.get_part(3) == 1);
-                                        }),
-                                 ip_pool_after));
-    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
-                                         [](ip_t ip)
-                                         {
-                                             return (ip.get_part(3) == 23);
-                                         }),
-                                  ip_pool_after));
+    EXPECT_TRUE(filter(ip_pool_before,
+                       [](ip_t ip)
+                       {
+                           return (ip.get_part(3) == 1);
+                       }) ==
+                ip_pool_after);
+    EXPECT_TRUE(filter(ip_pool_before,
+                       [](ip_t ip)
+                       {
+                           return (ip.get_part(3) == 23);
+                       }) !=
+                ip_pool_after);
 }
 
 TEST(ip_filter_tests, filter_first_second)
@@ -194,20 +171,20 @@ TEST(ip_filter_tests, filter_first_second)
         ip_pool_after.push_back(split_to_ip_t(split(ip_str, '.')));
     }
 
-    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
-                                        [](ip_t ip)
-                                        {
-                                            return (ip.get_part(3) == 179) &&
-                                                   (ip.get_part(2) == 39);
-                                        }),
-                                 ip_pool_after));
-    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
-                                         [](ip_t ip)
-                                         {
-                                             return (ip.get_part(3) == 179) &&
-                                                    (ip.get_part(2) == 210);
-                                         }),
-                                  ip_pool_after));
+    EXPECT_TRUE(filter(ip_pool_before,
+                       [](ip_t ip)
+                       {
+                           return (ip.get_part(3) == 179) &&
+                                  (ip.get_part(2) == 39);
+                       }) ==
+                ip_pool_after);
+    EXPECT_TRUE(filter(ip_pool_before,
+                       [](ip_t ip)
+                       {
+                           return (ip.get_part(3) == 179) &&
+                                  (ip.get_part(2) == 210);
+                       }) !=
+                ip_pool_after);
 }
 
 TEST(ip_filter_tests, filter_any)
@@ -242,22 +219,22 @@ TEST(ip_filter_tests, filter_any)
         ip_pool_after.push_back(split_to_ip_t(split(ip_str, '.')));
     }
 
-    EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
-                                        [](ip_t ip)
-                                        {
-                                            return (ip.get_part(3) == 168) ||
-                                                   (ip.get_part(2) == 168) ||
-                                                   (ip.get_part(1) == 168) ||
-                                                   (ip.get_part(0) == 168);
-                                        }),
-                                 ip_pool_after));
-    EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
-                                         [](ip_t ip)
-                                         {
-                                             return (ip.get_part(3) == 46) ||
-                                                    (ip.get_part(2) == 46) ||
-                                                    (ip.get_part(1) == 46) ||
-                                                    (ip.get_part(0) == 46);
-                                         }),
-                                  ip_pool_after));
+    EXPECT_TRUE(filter(ip_pool_before,
+                       [](ip_t ip)
+                       {
+                           return (ip.get_part(3) == 168) ||
+                                  (ip.get_part(2) == 168) ||
+                                  (ip.get_part(1) == 168) ||
+                                  (ip.get_part(0) == 168);
+                       }) ==
+                ip_pool_after);
+    EXPECT_TRUE(filter(ip_pool_before,
+                       [](ip_t ip)
+                       {
+                           return (ip.get_part(3) == 46) ||
+                                  (ip.get_part(2) == 46) ||
+                                  (ip.get_part(1) == 46) ||
+                                  (ip.get_part(0) == 46);
+                       }) !=
+                ip_pool_after);
 }

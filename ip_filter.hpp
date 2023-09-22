@@ -35,6 +35,11 @@ struct ip_t
         return (this->ip != ip.ip);
     }
 
+    bool operator==(const ip_t &ip) const
+    {
+        return !(*this != ip);
+    }
+
   private:
     union IP
     {

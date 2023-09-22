@@ -23,7 +23,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
         show_ip_pool(filter(ip_pool,
                             [](ip_t ip)
                             {
-                                return (ip[0] == 1);
+                                IP ip_;
+                                ip_.all = ip;
+                                return (ip_.byte[3] == 1);
                             }),
                      "\n");
 
@@ -38,8 +40,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
         show_ip_pool(filter(ip_pool,
                             [](ip_t ip)
                             {
-                                return (ip[0] == 46) &&
-                                       (ip[1] == 70);
+                                IP ip_;
+                                ip_.all = ip;
+                                return (ip_.byte[3] == 46) &&
+                                       (ip_.byte[2] == 70);
                             }),
                      "\n");
 
@@ -53,14 +57,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
         show_ip_pool(filter(ip_pool,
                             [](ip_t ip)
                             {
-                                for (auto ip_part : ip)
-                                {
-                                    if (ip_part == 46)
-                                    {
-                                        return true;
-                                    }
-                                }
-                                return false;
+                                IP ip_;
+                                ip_.all = ip;
+                                return (ip_.byte[3] == 46) ||
+                                       (ip_.byte[2] == 46) ||
+                                       (ip_.byte[1] == 46) ||
+                                       (ip_.byte[0] == 46);
                             }),
                      "\n");
 

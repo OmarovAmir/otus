@@ -3,29 +3,17 @@
 
 namespace
 {
-[[maybe_unused]] bool is_ip_equal(const ip_t &left, const ip_t &right)
-{
-    auto left_ip_part = (left.size() <= right.size()) ? left.cbegin() : right.cbegin();
-    auto right_ip_part = (left.size() <= right.size()) ? right.cbegin() : left.cbegin();
-    while (left_ip_part != left.cend())
-    {
-        if (*left_ip_part != *right_ip_part)
-        {
-            return false;
-        }
-        ++left_ip_part;
-        ++right_ip_part;
-    }
-    return true;
-}
-
 [[maybe_unused]] bool is_ip_pool_equal(const ip_pool_t &left, const ip_pool_t &right)
 {
-    auto left_ip = (left.size() <= right.size()) ? left.cbegin() : right.cbegin();
-    auto right_ip = (left.size() <= right.size()) ? right.cbegin() : left.cbegin();
+    if (left.size() != right.size())
+    {
+        return false;
+    }
+    auto left_ip = left.cbegin();
+    auto right_ip = right.cbegin();
     while (left_ip != left.cend())
     {
-        if (!is_ip_equal(*left_ip, *right_ip))
+        if (*left_ip != *right_ip)
         {
             return false;
         }
@@ -40,63 +28,63 @@ TEST(ip_filter_tests, greater4)
 {
     auto ip1 = split_to_ip_t(split("192.168.127.2", '.'));
     auto ip2 = split_to_ip_t(split("192.168.127.1", '.'));
-    EXPECT_TRUE(is_ip_greater(ip1, ip2));
+    EXPECT_TRUE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, not_greater4)
 {
     auto ip1 = split_to_ip_t(split("192.168.127.1", '.'));
     auto ip2 = split_to_ip_t(split("192.168.127.2", '.'));
-    EXPECT_FALSE(is_ip_greater(ip1, ip2));
+    EXPECT_FALSE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, greater3)
 {
     auto ip1 = split_to_ip_t(split("192.168.2.127", '.'));
     auto ip2 = split_to_ip_t(split("192.168.1.127", '.'));
-    EXPECT_TRUE(is_ip_greater(ip1, ip2));
+    EXPECT_TRUE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, not_greater3)
 {
     auto ip1 = split_to_ip_t(split("192.168.1.127", '.'));
     auto ip2 = split_to_ip_t(split("192.168.2.127", '.'));
-    EXPECT_FALSE(is_ip_greater(ip1, ip2));
+    EXPECT_FALSE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, greater2)
 {
     auto ip1 = split_to_ip_t(split("192.2.168.127", '.'));
     auto ip2 = split_to_ip_t(split("192.1.168.127", '.'));
-    EXPECT_TRUE(is_ip_greater(ip1, ip2));
+    EXPECT_TRUE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, not_greater2)
 {
     auto ip1 = split_to_ip_t(split("192.1.168.127", '.'));
     auto ip2 = split_to_ip_t(split("192.2.168.127", '.'));
-    EXPECT_FALSE(is_ip_greater(ip1, ip2));
+    EXPECT_FALSE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, greater1)
 {
     auto ip1 = split_to_ip_t(split("2.192.168.127", '.'));
     auto ip2 = split_to_ip_t(split("1.192.168.127", '.'));
-    EXPECT_TRUE(is_ip_greater(ip1, ip2));
+    EXPECT_TRUE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, not_greater1)
 {
     auto ip1 = split_to_ip_t(split("1.192.168.127", '.'));
     auto ip2 = split_to_ip_t(split("2.192.168.127", '.'));
-    EXPECT_FALSE(is_ip_greater(ip1, ip2));
+    EXPECT_FALSE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, equal)
 {
     auto ip1 = split_to_ip_t(split("192.168.127.1", '.'));
     auto ip2 = split_to_ip_t(split("192.168.127.1", '.'));
-    EXPECT_FALSE(is_ip_greater(ip1, ip2));
+    EXPECT_FALSE(ip1 > ip2);
 }
 
 TEST(ip_filter_tests, sort)
@@ -164,13 +152,17 @@ TEST(ip_filter_tests, filter_first)
     EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
                                         [](ip_t ip)
                                         {
-                                            return (ip[0] == 1);
+                                            IP ip_;
+                                            ip_.all = ip;
+                                            return (ip_.byte[3] == 1);
                                         }),
                                  ip_pool_after));
     EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
                                          [](ip_t ip)
                                          {
-                                             return (ip[0] == 23);
+                                             IP ip_;
+                                             ip_.all = ip;
+                                             return (ip_.byte[3] == 23);
                                          }),
                                   ip_pool_after));
 }
@@ -209,15 +201,19 @@ TEST(ip_filter_tests, filter_first_second)
     EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
                                         [](ip_t ip)
                                         {
-                                            return (ip[0] == 179) &&
-                                                   (ip[1] == 39);
+                                            IP ip_;
+                                            ip_.all = ip;
+                                            return (ip_.byte[3] == 179) &&
+                                                   (ip_.byte[2] == 39);
                                         }),
                                  ip_pool_after));
     EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
                                          [](ip_t ip)
                                          {
-                                             return (ip[0] == 179) &&
-                                                    (ip[1] == 210);
+                                             IP ip_;
+                                             ip_.all = ip;
+                                             return (ip_.byte[3] == 179) &&
+                                                    (ip_.byte[2] == 210);
                                          }),
                                   ip_pool_after));
 }
@@ -257,27 +253,23 @@ TEST(ip_filter_tests, filter_any)
     EXPECT_TRUE(is_ip_pool_equal(filter(ip_pool_before,
                                         [](ip_t ip)
                                         {
-                                            for (auto ip_part : ip)
-                                            {
-                                                if (ip_part == 168)
-                                                {
-                                                    return true;
-                                                }
-                                            }
-                                            return false;
+                                            IP ip_;
+                                            ip_.all = ip;
+                                            return (ip_.byte[3] == 168) ||
+                                                   (ip_.byte[2] == 168) ||
+                                                   (ip_.byte[1] == 168) ||
+                                                   (ip_.byte[0] == 168);
                                         }),
                                  ip_pool_after));
     EXPECT_FALSE(is_ip_pool_equal(filter(ip_pool_before,
                                          [](ip_t ip)
                                          {
-                                             for (auto ip_part : ip)
-                                             {
-                                                 if (ip_part == 152)
-                                                 {
-                                                     return true;
-                                                 }
-                                             }
-                                             return false;
+                                             IP ip_;
+                                             ip_.all = ip;
+                                             return (ip_.byte[3] == 46) ||
+                                                    (ip_.byte[2] == 46) ||
+                                                    (ip_.byte[1] == 46) ||
+                                                    (ip_.byte[0] == 46);
                                          }),
                                   ip_pool_after));
 }

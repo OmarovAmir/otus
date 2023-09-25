@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
-project(ip_filter VERSION ${PROJECT_VESRION})
+project(fast_allocator VERSION ${PROJECT_VESRION})
 
 include(FetchContent)
 FetchContent_Declare(
@@ -16,46 +16,46 @@ FetchContent_MakeAvailable(googletest)
 
 configure_file(version.h.in version.h)
 
-add_executable(ip_filter main.cpp)
-add_executable(test_ip_filter test_ip_filter.cpp)
-add_library(ip_filter_lib ip_filter.cpp)
+add_executable(fast_allocator main.cpp)
+add_executable(test_fast_allocator test_fast_allocator.cpp)
+add_library(fast_allocator_lib fast_allocator.cpp)
 
-set_target_properties(ip_filter test_ip_filter PROPERTIES
+set_target_properties(fast_allocator test_fast_allocator PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-target_include_directories(ip_filter_lib
+target_include_directories(fast_allocator_lib
     PRIVATE "${CMAKE_BINARY_DIR}"
 )
 
-target_link_libraries(ip_filter
-    ip_filter_lib
+target_link_libraries(fast_allocator
+    fast_allocator_lib
 )
 
-target_link_libraries(test_ip_filter
+target_link_libraries(test_fast_allocator
     GTest::gtest_main
-    ip_filter_lib
+    fast_allocator_lib
 )
 
 if (MSVC)
-    target_compile_options(ip_filter PRIVATE
+    target_compile_options(fast_allocator PRIVATE
         /W4
     )
-    target_compile_options(test_ip_filter PRIVATE
+    target_compile_options(test_fast_allocator PRIVATE
         /W4
     )
 else ()
-    target_compile_options(ip_filter PRIVATE
+    target_compile_options(fast_allocator PRIVATE
         -Wall -Wextra -pedantic -Werror
     )
-    target_compile_options(test_ip_filter PRIVATE
+    target_compile_options(test_fast_allocator PRIVATE
         -Wall -Wextra -pedantic -Werror
     )
 endif()
 
 
 
-install(TARGETS ip_filter RUNTIME DESTINATION bin)
+install(TARGETS fast_allocator RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 
@@ -69,4 +69,4 @@ include(CPack)
 
 enable_testing()
 
-add_test(test_ip_filter test_ip_filter)
+add_test(test_fast_allocator test_fast_allocator)

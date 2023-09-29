@@ -18,23 +18,14 @@ configure_file(version.h.in version.h)
 
 add_executable(pool_allocator main.cpp)
 add_executable(test_pool_allocator test_pool_allocator.cpp)
-add_library(pool_allocator_lib pool_allocator.cpp)
 
 set_target_properties(pool_allocator test_pool_allocator PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-target_include_directories(pool_allocator_lib
-    PRIVATE "${CMAKE_BINARY_DIR}"
-)
-
-target_link_libraries(pool_allocator
-    pool_allocator_lib
-)
 
 target_link_libraries(test_pool_allocator
     GTest::gtest_main
-    pool_allocator_lib
 )
 
 if (MSVC)

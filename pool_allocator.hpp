@@ -39,12 +39,12 @@ struct pool_allocator
     using pool_t = std::list<pool_item_t>;
 
     using alloc_map_t = std::unordered_map<std::size_t, pool_t>;
-    using dealloc_map_t = std::unordered_map<T *, pool_item_weak_t>;
+    using dealloc_map_t = std::unordered_map<T*, pool_item_weak_t>;
 
     static alloc_map_t alloc_map;
     static dealloc_map_t dealloc_map;
 
-    void show_state(const pool_allocator<T> &allocator)
+    void show_state(const pool_allocator<T>& allocator)
     {
         if (!LOG_ON)
         {
@@ -53,12 +53,12 @@ struct pool_allocator
         if (!allocator.alloc_map.empty())
         {
             std::cout << "-----  alloc_map  -----" << std::endl;
-            for (const auto &pool : allocator.alloc_map)
+            for (const auto& pool : allocator.alloc_map)
             {
                 if (!pool.second.empty())
                 {
                     std::cout << "[" << pool.first << "][" << pool.second.size() << "]" << std::endl;
-                    for (const auto &pool_item : pool.second)
+                    for (const auto& pool_item : pool.second)
                     {
                         std::cout << "{ " << pool_item.get() << " }" << std::endl;
                     }
@@ -69,7 +69,7 @@ struct pool_allocator
         if (!allocator.dealloc_map.empty())
         {
             std::cout << "----- dealloc_map -----" << std::endl;
-            for (const auto &pool : allocator.dealloc_map)
+            for (const auto& pool : allocator.dealloc_map)
             {
                 std::cout << "{ " << pool.first << " }" << std::endl;
             }
@@ -78,13 +78,13 @@ struct pool_allocator
     }
 
     pool_allocator() = default;
-    pool_allocator(const pool_allocator<T> &allocator) = default;
-    pool_allocator(pool_allocator<T> &&allocator) = default;
-    pool_allocator &operator=(const pool_allocator<T> &allocator) = default;
-    pool_allocator &operator=(pool_allocator<T> &&allocator) = default;
+    pool_allocator(const pool_allocator<T>& allocator) = default;
+    pool_allocator(pool_allocator<T>&& allocator) = default;
+    pool_allocator& operator=(const pool_allocator<T>& allocator) = default;
+    pool_allocator& operator=(pool_allocator<T>&& allocator) = default;
 
     template <class U>
-    pool_allocator([[maybe_unused]]const pool_allocator<U> &allocator)
+    pool_allocator([[maybe_unused]] const pool_allocator<U>& allocator)
     {
         dealloc_map = allocator.dealloc_map;
         alloc_map = allocator.alloc_map;
@@ -98,13 +98,13 @@ struct pool_allocator
         show_state(*this);
     }
 
-    T *allocate([[maybe_unused]] std::size_t n)
+    T* allocate([[maybe_unused]] std::size_t n)
     {
         SHOW_FUNC;
         auto find_list = alloc_map.find(n);
         if (find_list == alloc_map.end())
         {
-            pool_item_t new_pool_item{static_cast<T *>(::operator new(sizeof(T) * n))};
+            pool_item_t new_pool_item{static_cast<T*>(::operator new(sizeof(T) * n))};
             if (!new_pool_item)
             {
                 std::bad_alloc();
@@ -116,7 +116,7 @@ struct pool_allocator
         find_list = alloc_map.find(n);
         if (dealloc_map.find(find_list->second.front().get()) != dealloc_map.end())
         {
-            pool_item_t new_pool_item{static_cast<T *>(::operator new(sizeof(T) * n))};
+            pool_item_t new_pool_item{static_cast<T*>(::operator new(sizeof(T) * n))};
             if (!new_pool_item)
             {
                 std::bad_alloc();
@@ -136,7 +136,7 @@ struct pool_allocator
         }
     }
 
-    void deallocate(T *p, [[maybe_unused]] std::size_t n)
+    void deallocate(T* p, [[maybe_unused]] std::size_t n)
     {
         SHOW_FUNC;
         auto item = dealloc_map.find(p);
@@ -157,13 +157,13 @@ template <typename T>
 typename pool_allocator<T>::dealloc_map_t pool_allocator<T>::dealloc_map;
 
 template <class T, class U>
-constexpr bool operator==([[maybe_unused]] const pool_allocator<T> &a1, [[maybe_unused]] const pool_allocator<U> &a2) noexcept
+constexpr bool operator==([[maybe_unused]] const pool_allocator<T>& a1, [[maybe_unused]] const pool_allocator<U>& a2) noexcept
 {
     return false;
 }
 
 template <class T, class U>
-constexpr bool operator!=([[maybe_unused]] const pool_allocator<T> &a1, [[maybe_unused]] const pool_allocator<U> &a2) noexcept
+constexpr bool operator!=([[maybe_unused]] const pool_allocator<T>& a1, [[maybe_unused]] const pool_allocator<U>& a2) noexcept
 {
     return true;
 }

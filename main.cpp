@@ -51,7 +51,7 @@ int main()
         //     l[i].clear();
         // }
 
-        std::map<int,int, std::less<int>, pool_allocator<std::pair<int,int>>> m[10];
+        std::map<int, int, std::less<int>, pool_allocator<std::pair<int, int>>> m[10];
         // std::map<int,int> m[10];
         for (int i = 0; i < 10; ++i)
         {

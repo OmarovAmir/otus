@@ -23,6 +23,11 @@ struct pool_allocator
     using propagate_on_container_move_assignment = std::true_type;
     using propagate_on_container_swap = std::true_type;
 
+    pool_allocator select_on_container_copy_construction() const
+    {
+        return pool_allocator();
+    }
+
     template <class U>
     struct rebind
     {
@@ -77,6 +82,13 @@ struct pool_allocator
     pool_allocator(pool_allocator<T> &&allocator) = default;
     pool_allocator &operator=(const pool_allocator<T> &allocator) = default;
     pool_allocator &operator=(pool_allocator<T> &&allocator) = default;
+
+    template <class U>
+    pool_allocator([[maybe_unused]]const pool_allocator<U> &allocator)
+    {
+        dealloc_map = allocator.dealloc_map;
+        alloc_map = allocator.alloc_map;
+    }
 
     ~pool_allocator() noexcept
     {

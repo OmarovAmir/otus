@@ -1,8 +1,11 @@
 #include "pool_allocator.hpp"
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <random>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 int main()
@@ -22,20 +25,20 @@ int main()
 
     auto begin = std::chrono::steady_clock::now();
 
-    for (unsigned long j = 0; j < 1000; ++j)
+    for (unsigned long j = 0; j < 100; ++j)
     {
         auto n = distrib(gen);
 
-        std::vector<int, pool_allocator<int>> v[10];
+        // std::vector<int, pool_allocator<int>> v[10];
         // std::vector<int> v[10];
-        for (int i = 0; i < 10; ++i)
-        {
-            for (std::size_t j = 0; j < n; ++j)
-            {
-                v[i].push_back(j);
-            }
-            v[i].clear();
-        }
+        // for (int i = 0; i < 10; ++i)
+        // {
+        //     for (std::size_t j = 0; j < n; ++j)
+        //     {
+        //         v[i].push_back(j);
+        //     }
+        //     v[i].clear();
+        // }
 
         // std::list<int, pool_allocator<int>> l[10];
         // std::list<int> l[10];
@@ -48,8 +51,20 @@ int main()
         //     l[i].clear();
         // }
 
-        // std::map<int,int, std::less<int>, pool_allocator<std::pair<int,int>>> m[10];
+        std::map<int,int, std::less<int>, pool_allocator<std::pair<int,int>>> m[10];
         // std::map<int,int> m[10];
+        for (int i = 0; i < 10; ++i)
+        {
+            for (std::size_t j = 0; j < n; ++j)
+            {
+                m[i][j] = j + 1;
+            }
+            m[i].clear();
+        }
+
+        // ??? Не выходит определить копирующий конструктор для типа U
+        // std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, pool_allocator<std::pair<int, int>>> m[10];
+        // std::unordered_map<int,int> m[10];
         // for (int i = 0; i < 10; ++i)
         // {
         //     for (std::size_t j = 0; j < n; ++j)

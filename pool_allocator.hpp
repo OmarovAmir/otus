@@ -4,8 +4,8 @@
 #include <memory>
 #include <unordered_map>
 
-#define LOG_NAME_ON (false)
-#define LOG_ON (false)
+#define LOG_NAME_ON (true)
+#define LOG_ON (true)
 
 #define SHOW_FUNC                                      \
     if (LOG_NAME_ON)                                   \
@@ -22,17 +22,6 @@ struct pool_allocator
     using propagate_on_container_copy_assignment = std::true_type;
     using propagate_on_container_move_assignment = std::true_type;
     using propagate_on_container_swap = std::true_type;
-
-    pool_allocator select_on_container_copy_construction() const
-    {
-        return pool_allocator();
-    }
-
-    template <class U>
-    struct rebind
-    {
-        typedef pool_allocator<U> other;
-    };
 
     using pool_item_t = std::shared_ptr<T>;
     using pool_item_weak_t = std::weak_ptr<T>;
@@ -82,13 +71,6 @@ struct pool_allocator
     pool_allocator(pool_allocator<T>&& allocator) = default;
     pool_allocator& operator=(const pool_allocator<T>& allocator) = default;
     pool_allocator& operator=(pool_allocator<T>&& allocator) = default;
-
-    template <class U>
-    pool_allocator([[maybe_unused]] const pool_allocator<U>& allocator)
-    {
-        dealloc_map = allocator.dealloc_map;
-        alloc_map = allocator.alloc_map;
-    }
 
     ~pool_allocator() noexcept
     {
@@ -147,6 +129,22 @@ struct pool_allocator
             return;
         }
         std::bad_alloc();
+    }
+
+    template <class U>
+    pool_allocator([[maybe_unused]] const pool_allocator<U>& allocator)
+    {
+        // SHOW_FUNC;
+        // *this = allocator;
+        // show_state(*this);
+    }
+
+    template <class U>
+    using rebind = pool_allocator<U>;
+
+    pool_allocator select_on_container_copy_construction() const
+    {
+        return pool_allocator();
     }
 };
 

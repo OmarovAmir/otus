@@ -21,63 +21,39 @@ int main()
                                                      .count());
 
     std::mt19937 gen(seed);
-    std::uniform_int_distribution<std::size_t> distrib(2048, 4096);
+    std::uniform_int_distribution<std::size_t> distrib(5, 5);
+
+    auto n = distrib(gen);
 
     auto begin = std::chrono::steady_clock::now();
 
-    for (unsigned long j = 0; j < 100; ++j)
+
+    std::vector<int, pool_allocator<int>> v;
+    std::list<int, pool_allocator<int>> l;
+    std::map<int, int, std::less<int>, pool_allocator<std::pair<int, int>>> m;
+    // std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, pool_allocator<std::pair<int, int>>> um;// ???
+    
+    // std::vector<int> v;
+    // std::list<int> l;
+    // std::map<int,int> m;
+    // std::unordered_map<int,int> um;
+
+    for (std::size_t i = 0; i < n; ++i)
     {
-        auto n = distrib(gen);
-
-        // std::vector<int, pool_allocator<int>> v[10];
-        // std::vector<int> v[10];
-        // for (int i = 0; i < 10; ++i)
-        // {
-        //     for (std::size_t j = 0; j < n; ++j)
-        //     {
-        //         v[i].push_back(j);
-        //     }
-        //     v[i].clear();
-        // }
-
-        // std::list<int, pool_allocator<int>> l[10];
-        // std::list<int> l[10];
-        // for (int i = 0; i < 10; ++i)
-        // {
-        //     for (std::size_t j = 0; j < n; ++j)
-        //     {
-        //         l[i].push_back(j);
-        //     }
-        //     l[i].clear();
-        // }
-
-        std::map<int, int, std::less<int>, pool_allocator<std::pair<int, int>>> m[10];
-        // std::map<int,int> m[10];
-        for (int i = 0; i < 10; ++i)
-        {
-            for (std::size_t j = 0; j < n; ++j)
-            {
-                m[i][j] = j + 1;
-            }
-            m[i].clear();
-        }
-
-        // ??? Не выходит определить копирующий конструктор для типа U
-        // std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, pool_allocator<std::pair<int, int>>> m[10];
-        // std::unordered_map<int,int> m[10];
-        // for (int i = 0; i < 10; ++i)
-        // {
-        //     for (std::size_t j = 0; j < n; ++j)
-        //     {
-        //         m[i][j] = j + 1;
-        //     }
-        //     m[i].clear();
-        // }
+        v.push_back(i);
+        l.push_back(i);
+        m[i] = i + 1;
+        // um[i] = i + 1;
     }
+
+    v.clear();
+    l.clear();
+    m.clear();
+    // um.clear();
 
     auto end = std::chrono::steady_clock::now();
 
-    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
     std::cout << "The time: " << elapsed_ms.count() << " ms\n";
 
     return 0;

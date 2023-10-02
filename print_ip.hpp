@@ -86,8 +86,8 @@ struct all_same_type<std::tuple<T...>> : all_same_type<T...>
 template <typename... T>
 constexpr bool all_same_type_v = all_same_type<T...>::value;
 
-template <typename... T>
-struct type_select<std::tuple<T...>>
+template <typename T>
+struct type_select<T, typename std::enable_if<is_specialization<T, std::tuple>::value>::type>
 {
     template <typename TupleT, std::size_t... Is>
     static void print_tuple(std::ostream& os, const TupleT& tp, std::index_sequence<Is...>)
@@ -103,10 +103,10 @@ struct type_select<std::tuple<T...>>
         os << std::endl;
     }
 
-    static void print_ip(const std::tuple<T...>& v)
+    static void print_ip(const T& v)
     {
-        static_assert(all_same_type_v<std::tuple<T...>>);
-        print_tuple(std::cout, v, std::make_index_sequence<std::tuple_size<std::tuple<T...>>::value>{});
+        static_assert(all_same_type_v<T>);
+        print_tuple(std::cout, v, std::make_index_sequence<std::tuple_size<T>::value>{});
     }
 };
 

@@ -7,6 +7,7 @@
 
 namespace type_select
 {
+
 template <typename T, typename Enable = void>
 struct type_select
 {
@@ -44,27 +45,20 @@ struct type_select<T, typename std::enable_if<std::is_same<std::string, T>::valu
     }
 };
 
-template <typename T>
-struct type_select<std::vector<T>>
+template <typename Test, template <typename...> typename Ref>
+struct is_specialization : std::false_type
 {
-    static void print_ip(const std::vector<T>& v)
-    {
-        for (auto i = v.cbegin(); i != v.cend(); ++i)
-        {
-            if (i != v.cbegin())
-            {
-                std::cout << ".";
-            }
-            std::cout << *i;
-        }
-        std::cout << std::endl;
-    }
+};
+
+template <template <typename...> typename Ref, typename... Args>
+struct is_specialization<Ref<Args...>, Ref> : std::true_type
+{
 };
 
 template <typename T>
-struct type_select<std::list<T>>
+struct type_select<T, typename std::enable_if<is_specialization<T, std::vector>::value || is_specialization<T, std::list>::value>::type>
 {
-    static void print_ip(const std::list<T>& v)
+    static void print_ip(const T& v)
     {
         for (auto i = v.cbegin(); i != v.cend(); ++i)
         {
@@ -122,4 +116,4 @@ template <typename T>
 void print_ip(const T& v)
 {
     type_select::type_select<T>::print_ip(v);
-};
+}

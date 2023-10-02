@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - run: sudo apt-get update && sudo apt-get install cmake -y
+      - run: sudo apt-get update && sudo apt-get install cmake doxygen -y
       - run: cmake . -DPATCH_VERSION=${{ github.run_number }}
       - run: cmake --build .
       - run: cmake --build . --target package
@@ -28,6 +28,20 @@ jobs:
           release_name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
+      - name: Doxygen Action
+        uses: mattnotmitt/doxygen-action@v1.1.0
+        with:
+            doxyfile-path: ./Doxyfile
+            working-directory: .
+      - name: GH Pages Deployment
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/html/
+          enable_jekyll: false
+          allow_empty_commit: false
+          force_orphan: true
+          publish_branch: gh-pages
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1

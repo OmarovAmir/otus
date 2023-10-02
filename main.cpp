@@ -1,20 +1,5 @@
 #include "print_ip.hpp"
 
-
-template <typename First, typename... Last>
-struct all_same_type
-{
-    constexpr static bool value = std::is_same_v<std::tuple<First, Last...>, std::tuple<Last..., First>>;
-};
-
-template <typename... Types>
-struct all_same_type<std::tuple<Types...>> : all_same_type<Types...>
-{
-};
-
-template <typename... Types>
-constexpr bool all_same_type_v = all_same_type<Types...>::value;
-
 int main()
 {
     print_ip(int8_t{-1});                           // 255

@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <iostream>
-#include <list>
+#include <deque>
 #include <memory>
 #include <unordered_map>
 
-#define LOG_NAME_ON (true)
-#define LOG_ON (true)
+#define LOG_NAME_ON (false)
+#define LOG_ON (false)
 
 #define SHOW_FUNC                                      \
     if (LOG_NAME_ON)                                   \
@@ -25,7 +25,7 @@ struct pool_allocator
 
     using pool_item_t = std::shared_ptr<T>;
     using pool_item_weak_t = std::weak_ptr<T>;
-    using pool_t = std::list<pool_item_t>;
+    using pool_t = std::deque<pool_item_t>;
 
     using alloc_map_t = std::unordered_map<std::size_t, pool_t>;
     using dealloc_map_t = std::unordered_map<T*, pool_item_weak_t>;
@@ -71,14 +71,7 @@ struct pool_allocator
     pool_allocator(pool_allocator<T>&& allocator) = default;
     pool_allocator& operator=(const pool_allocator<T>& allocator) = default;
     pool_allocator& operator=(pool_allocator<T>&& allocator) = default;
-
-    ~pool_allocator() noexcept
-    {
-        SHOW_FUNC;
-        dealloc_map.clear();
-        alloc_map.clear();
-        show_state(*this);
-    }
+    ~pool_allocator() noexcept {};
 
     T* allocate([[maybe_unused]] std::size_t n)
     {
@@ -86,12 +79,13 @@ struct pool_allocator
         auto find_list = alloc_map.find(n);
         if (find_list == alloc_map.end())
         {
+            pool_t new_pool;
             pool_item_t new_pool_item{static_cast<T*>(::operator new(sizeof(T) * n))};
             if (!new_pool_item)
             {
                 std::bad_alloc();
             }
-            pool_t new_pool{new_pool_item};
+            new_pool.emplace_front(std::move(new_pool_item));
             alloc_map.emplace(n, std::move(new_pool));
         }
 
@@ -103,16 +97,18 @@ struct pool_allocator
             {
                 std::bad_alloc();
             }
-            find_list->second.emplace_back(std::move(new_pool_item));
-            dealloc_map.emplace(find_list->second.back().get(), find_list->second.back());
+            find_list->second.emplace_front(std::move(new_pool_item));
+            dealloc_map.emplace(find_list->second.front().get(), find_list->second.front());
+            find_list->second.emplace_back(find_list->second.front());
+            find_list->second.pop_front();
             show_state(*this);
             return find_list->second.back().get();
         }
         else
         {
+            dealloc_map.emplace(find_list->second.front().get(), find_list->second.front());
             find_list->second.emplace_back(find_list->second.front());
             find_list->second.pop_front();
-            dealloc_map.emplace(find_list->second.back().get(), find_list->second.back());
             show_state(*this);
             return find_list->second.back().get();
         }
@@ -132,19 +128,12 @@ struct pool_allocator
     }
 
     template <class U>
-    pool_allocator([[maybe_unused]] const pool_allocator<U>& allocator)
-    {
-        // SHOW_FUNC;
-        // *this = allocator;
-        // show_state(*this);
-    }
-
-    template <class U>
     using rebind = pool_allocator<U>;
 
-    pool_allocator select_on_container_copy_construction() const
+    template <class U>
+    pool_allocator([[maybe_unused]] const pool_allocator<U>& allocator)
     {
-        return pool_allocator();
+        SHOW_FUNC;
     }
 };
 
@@ -157,11 +146,11 @@ typename pool_allocator<T>::dealloc_map_t pool_allocator<T>::dealloc_map;
 template <class T, class U>
 constexpr bool operator==([[maybe_unused]] const pool_allocator<T>& a1, [[maybe_unused]] const pool_allocator<U>& a2) noexcept
 {
-    return false;
+    return true;
 }
 
 template <class T, class U>
 constexpr bool operator!=([[maybe_unused]] const pool_allocator<T>& a1, [[maybe_unused]] const pool_allocator<U>& a2) noexcept
 {
-    return true;
+    return false;
 }

@@ -1,60 +1,61 @@
 #include "pool_allocator.hpp"
-#include <chrono>
-#include <functional>
 #include <iostream>
 #include <map>
-#include <random>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+#include <math.h>
+
+int factorial(int n)
+{
+    int res = 1;
+    for (int i = 1; i <= n; i++)
+    {
+        res = res * i;
+    }
+    return res;
+}
 
 int main()
 {
-    std::random_device rd;
-    std::mt19937::result_type seed = rd() ^ ((std::mt19937::result_type)
-                                                 std::chrono::duration_cast<std::chrono::seconds>(
-                                                     std::chrono::system_clock::now().time_since_epoch())
-                                                     .count() +
-                                             (std::mt19937::result_type)
-                                                 std::chrono::duration_cast<std::chrono::microseconds>(
-                                                     std::chrono::high_resolution_clock::now().time_since_epoch())
-                                                     .count());
+    std::map<int, int> std_a_m;
+    std::map<int, int, std::less<int>, pool_allocator<std::pair<int, int>>> custom_a_m;
 
-    std::mt19937 gen(seed);
-    std::uniform_int_distribution<std::size_t> distrib(5, 5);
-
-    auto n = distrib(gen);
-
-    auto begin = std::chrono::steady_clock::now();
-
-
-    std::vector<int, pool_allocator<int>> v;
-    std::list<int, pool_allocator<int>> l;
-    std::map<int, int, std::less<int>, pool_allocator<std::pair<int, int>>> m;
-    // std::unordered_map<int, int, std::hash<int>, std::equal_to<int>, pool_allocator<std::pair<int, int>>> um;// ???
-    
-    // std::vector<int> v;
-    // std::list<int> l;
-    // std::map<int,int> m;
-    // std::unordered_map<int,int> um;
-
-    for (std::size_t i = 0; i < n; ++i)
+    for (int i = 0; i < 10; ++i)
     {
-        v.push_back(i);
-        l.push_back(i);
-        m[i] = i + 1;
-        // um[i] = i + 1;
+        auto fact_i = factorial(i);
+        std_a_m.emplace(i, fact_i);
+        custom_a_m.emplace(i, fact_i);
     }
 
-    v.clear();
-    l.clear();
-    m.clear();
-    // um.clear();
+    std::cout << "--- map with std::allocator before erase ---" << std::endl; 
+    for (const auto i: std_a_m)
+    {
+        std::cout << i.first << " " << i.second << std::endl;
+    }
 
-    auto end = std::chrono::steady_clock::now();
+    std::cout << std::endl << "--- map with custom allocator before erase ---" << std::endl;
+    for (const auto i: custom_a_m)
+    {
+        std::cout << i.first << " " << i.second << std::endl;
+    }
 
-    auto elapsed_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << "The time: " << elapsed_ms.count() << " ms\n";
+    std_a_m.erase(5);
+    custom_a_m.erase(5);
+
+    std::cout << "--- map with std::allocator after erase element with key = 5 ---" << std::endl; 
+    for (const auto i: std_a_m)
+    {
+        std::cout << i.first << " " << i.second << std::endl;
+    }
+
+    std::cout << std::endl << "--- map with custom allocator after erase element with key = 5 ---" << std::endl;
+    for (const auto i: custom_a_m)
+    {
+        std::cout << i.first << " " << i.second << std::endl;
+    }
+
+    std_a_m.clear();
+    custom_a_m.clear();
+
+    
 
     return 0;
 }

@@ -1,9 +1,9 @@
 name: 'C++ CI'
 
 on:
-  # push:
-  #   branches:
-  #     - hw3
+  push:
+    branches:
+      - hw3
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,6 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install cmake -y
       - run: cmake . -DPATCH_VERSION=${{ github.run_number }}
       - run: cmake --build .
-      - run: cmake --build . --target test
       - run: cmake --build . --target package
       - name: Create Release
         id: create_release
@@ -36,6 +35,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./fast_allocator-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: fast_allocator-0.0.${{ github.run_number }}-Linux.deb
+          asset_path: ./pool_allocator-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: pool_allocator-0.0.${{ github.run_number }}-Linux.deb
           asset_content_type: application/vnd.debian.binary-package

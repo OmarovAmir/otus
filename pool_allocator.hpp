@@ -3,6 +3,7 @@
 #include <deque>
 #include <memory>
 #include <unordered_map>
+#include <cassert>
 
 #define LOG_NAME_ON (false)
 #define LOG_ON (false)
@@ -86,10 +87,9 @@ struct pool_allocator
                 std::bad_alloc();
             }
             new_pool.emplace_front(std::move(new_pool_item));
-            alloc_map.emplace(n, std::move(new_pool));
+            find_list = alloc_map.emplace(n, std::move(new_pool)).first;
         }
-
-        find_list = alloc_map.find(n);
+        
         if (dealloc_map.find(find_list->second.front().get()) != dealloc_map.end())
         {
             pool_item_t new_pool_item{static_cast<T*>(::operator new(sizeof(T) * n))};
@@ -124,7 +124,7 @@ struct pool_allocator
             show_state(*this);
             return;
         }
-        std::bad_alloc();
+        assert((item == dealloc_map.end()) && "Deallocate Error");
     }
 
     template <class U>

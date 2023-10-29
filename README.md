@@ -1,2 +1,2 @@
 # otus
-Learning C++ on OTUS
+Принципы проектирования ПО

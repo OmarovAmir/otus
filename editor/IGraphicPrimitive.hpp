@@ -3,6 +3,7 @@
 
 #include <CPoint.hpp>
 #include <iostream>
+#include <string>
 
 /**
  * @brief Интерфейс графического примитива
@@ -11,6 +12,11 @@
 class IGraphicPrimitive
 {
   public:
+    explicit IGraphicPrimitive(double x, double y)
+    {
+        _coordanates.set(x, y);
+    }
+
     /**
      * @brief Метод отрисовки
      *
@@ -23,6 +29,17 @@ class IGraphicPrimitive
                   << std::endl;
     };
 
+    virtual std::string exportData() const
+    {
+        return "Данные примитива";
+    }
+
+    virtual bool importData([[maybe_unused]] std::string dataString)
+    {
+        std::cout << dataString << std::endl;
+        return true;
+    }
+
     /**
      * @brief Установка координат
      *
@@ -32,6 +49,16 @@ class IGraphicPrimitive
     void setCoordinates(double x, double y)
     {
         _coordanates.set(x, y);
+    }
+
+    /**
+     * @brief Получить координаты
+     *
+     * @return Координаты
+     */
+    CPoint getCoordinates()
+    {
+        return _coordanates;
     }
 
   private:

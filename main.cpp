@@ -28,7 +28,7 @@ void openDocument()
 void addGraphicPrimitiveNew()
 {
     std::cout << std::endl
-              << "Добавление графического примитива" << std::endl;
+              << "Добавление графического примитива в новый файл" << std::endl;
     auto fileManager = std::make_shared<CFileManager>();
     auto document = std::make_shared<CDocument>(fileManager);
     document->add({IGraphicPrimitive{0.0, 0.0}});
@@ -38,10 +38,20 @@ void addGraphicPrimitiveNew()
 void addGraphicPrimitiveExist()
 {
     std::cout << std::endl
-              << "Добавление графического примитива" << std::endl;
+              << "Добавление графического примитива в существующий файл" << std::endl;
     auto fileManager = std::make_shared<CFileManager>();
     auto document = std::make_shared<CDocument>(fileManager, "filePath");
     document->add({IGraphicPrimitive{0.0, 0.0}});
+    document->setPath("filePath");
+}
+
+void removeGraphicPrimitive()
+{
+    std::cout << std::endl
+              << "Удаление графического примитива" << std::endl;
+    auto fileManager = std::make_shared<CFileManager>();
+    auto document = std::make_shared<CDocument>(fileManager, "filePath");
+    document->remove(5);
     document->setPath("filePath");
 }
 
@@ -51,5 +61,6 @@ int main()
     openDocument();
     addGraphicPrimitiveNew();
     addGraphicPrimitiveExist();
+    removeGraphicPrimitive();
     return 0;
 }

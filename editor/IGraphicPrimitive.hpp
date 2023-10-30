@@ -31,7 +31,7 @@ class IGraphicPrimitive
 
     virtual std::string exportData() const
     {
-        return "Данные примитива";
+        return "Данные примитива { " + std::to_string(_coordanates.getX()) + "; " + std::to_string(_coordanates.getY()) + " }";
     }
 
     virtual bool importData([[maybe_unused]] std::string dataString)

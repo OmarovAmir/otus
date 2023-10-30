@@ -13,14 +13,14 @@ class CPoint
      *
      * @return double Значение коордитаны X
      */
-    double getX() { return _x; }
+    double getX() const { return _x; }
 
     /**
      * @brief Получить значение координаты Y
      *
      * @return double Значение коордитаны Y
      */
-    double getY() { return _y; }
+    double getY() const { return _y; }
 
     /**
      * @brief Установить значение координаты X

@@ -34,7 +34,8 @@ class CFileManager : std::enable_shared_from_this<CFileManager>
         for (int i = 0; i < 10; ++i)
         {
             IGraphicPrimitive gp{0.0 + i, 0.0 + i + 1};
-            std::string gpData = std::to_string(i) + ". Данные примитива";
+            std::string gpData = std::to_string(i) + ". Данные примитива"
+            + " { " + std::to_string(gp.getCoordinates().getX()) + "; " + std::to_string(gp.getCoordinates().getY()) + " }";
             gp.importData(gpData);
             data.push_back(gp);
         }

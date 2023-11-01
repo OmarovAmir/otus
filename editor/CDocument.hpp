@@ -33,6 +33,10 @@ class CDocument : std::enable_shared_from_this<CDocument>
                 std::cout << "При импорте документа произошла ошибка" << std::endl;
             }
         }
+        else
+        {
+            setPath("tmp");
+        }
     }
 
     /**
@@ -42,7 +46,7 @@ class CDocument : std::enable_shared_from_this<CDocument>
     ~CDocument()
     {
         std::cout << "Деструктор документа" << std::endl;
-        if(!_path.empty())
+        if(!_data.empty())
         {
             if (!_fileManager->exportData(_path, _data))
             {

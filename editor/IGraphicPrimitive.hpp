@@ -12,7 +12,8 @@
 class IGraphicPrimitive
 {
   public:
-    explicit IGraphicPrimitive(double x, double y)
+    explicit IGraphicPrimitive(std::string name, double x, double y)
+        : _name{name}
     {
         _coordanates.set(x, y);
     }
@@ -31,7 +32,7 @@ class IGraphicPrimitive
 
     virtual std::string exportData() const
     {
-        return "Данные примитива { " + std::to_string(_coordanates.getX()) + "; " + std::to_string(_coordanates.getY()) + " }";
+        return "Данные примитива { " + getName() + "; " + std::to_string(_coordanates.getX()) + "; " + std::to_string(_coordanates.getY()) + " }";
     }
 
     virtual bool importData([[maybe_unused]] std::string dataString)
@@ -56,9 +57,19 @@ class IGraphicPrimitive
      *
      * @return Координаты
      */
-    CPoint getCoordinates()
+    CPoint getCoordinates() const
     {
         return _coordanates;
+    }
+
+    /**
+     * @brief Получить координаты
+     *
+     * @return Координаты
+     */
+    std::string getName() const
+    {
+        return _name;
     }
 
   private:
@@ -67,6 +78,7 @@ class IGraphicPrimitive
      *
      */
     CPoint _coordanates;
+    std::string _name;
 };
 
 #endif /* B895D1D7_C15F_4227_B2FF_449793A16AB0 */

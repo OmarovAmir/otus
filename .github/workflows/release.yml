@@ -15,8 +15,12 @@ jobs:
         with:
           submodules: true
       - run: sudo apt-get update && sudo apt-get install cmake doxygen -y
-      - run: mkdir build ; cd build
-      - run: cmake .. -DPATCH_VERSION=${{ github.run_number }}
+      - run: ls -l
+      - run: mkdir build
+      - run: ls -l
+      - run: cd build
+      - run: ls -l
+      - run: cmake -DPATCH_VERSION=${{ github.run_number }} ..
       - run: cmake --build .
       - run: cmake --build . --target package
       - name: Create Release

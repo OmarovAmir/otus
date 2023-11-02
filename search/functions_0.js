@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['main_0',['main',['../main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'main.cpp']]]
+  ['add_0',['add',['../classCDocument.html#a3fb75bffd63026ad84fc7f0263426acc',1,'CDocument']]],
+  ['addgraphicprimitive_1',['addGraphicPrimitive',['../classCController.html#a75a2e1f00520bea283c324c2fcfe6b5b',1,'CController']]]
 ];

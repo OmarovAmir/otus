@@ -7,8 +7,8 @@ project(editor VERSION ${PROJECT_VESRION})
 
 configure_file(version.h.in version.h)
 
+include_directories(libeditor)
 add_executable(editor main.cpp)
-target_include_directories(editor PRIVATE editor)
 
 set_target_properties(editor PROPERTIES
     CXX_STANDARD 17

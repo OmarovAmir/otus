@@ -3,10 +3,8 @@
 
 #include <CDocument.hpp>
 #include <CFileManager.hpp>
-#include <functional>
 #include <map>
 #include <memory>
-#include <vector>
 
 class CController
 {

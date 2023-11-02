@@ -1,12 +1,4 @@
 #include <CController.hpp>
-#include <CDocument.hpp>
-#include <CFileManager.hpp>
-#include <CPoint.hpp>
-#include <IGraphicPrimitive.hpp>
-#include <filesystem>
-#include <iostream>
-#include <memory>
-#include <vector>
 
 int main()
 {

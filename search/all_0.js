@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['_5f_5fhas_5finclude_0',['__has_include',['../CMakeCCompilerId_8c.html#ae5510d82e4946f1656f4969911c54736',1,'__has_include:&#160;CMakeCCompilerId.c'],['../CMakeCXXCompilerId_8cpp.html#ae5510d82e4946f1656f4969911c54736',1,'__has_include:&#160;CMakeCXXCompilerId.cpp']]]
+  ['add_0',['add',['../classCDocument.html#a3fb75bffd63026ad84fc7f0263426acc',1,'CDocument']]],
+  ['addgraphicprimitive_1',['addGraphicPrimitive',['../classCController.html#a75a2e1f00520bea283c324c2fcfe6b5b',1,'CController']]]
 ];

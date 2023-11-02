@@ -22,23 +22,33 @@ class IGraphicPrimitive
      * @brief Метод отрисовки
      *
      */
-    virtual void draw()
+    virtual void draw() const
     {
-        std::cout << "Отрисовка графического примитива с начальными координатами {"
+        std::cout << "Отрисовка графического примитива {"
+                  << "name = " << _name << ", "
                   << "x = " << _coordanates.getX() << ", "
                   << "y = " << _coordanates.getY() << "}"
                   << std::endl;
     };
 
+    /**
+     * @brief Экспорт данных примитива
+     * 
+     * @return Данные примитива
+     */
     virtual std::string exportData() const
     {
         return "Данные примитива { " + getName() + "; " + std::to_string(_coordanates.getX()) + "; " + std::to_string(_coordanates.getY()) + " }";
     }
 
-    virtual bool importData([[maybe_unused]] std::string dataString)
+    /**
+     * @brief Импорт данных примитива
+     * 
+     * @param dataString Данные примитива
+     */
+    virtual void importData([[maybe_unused]] std::string dataString)
     {
         std::cout << dataString << std::endl;
-        return true;
     }
 
     /**
@@ -78,6 +88,11 @@ class IGraphicPrimitive
      *
      */
     CPoint _coordanates;
+
+    /**
+     * @brief Название примитива
+     * 
+     */
     std::string _name;
 };
 

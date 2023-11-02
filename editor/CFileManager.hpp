@@ -31,11 +31,10 @@ class CFileManager : std::enable_shared_from_this<CFileManager>
     bool importData([[maybe_unused]] const std::filesystem::path& path, [[maybe_unused]] std::vector<IGraphicPrimitive>& data)
     {
         std::cout << "Импорта данных из файла " << path << std::endl;
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 5; ++i)
         {
             IGraphicPrimitive gp{"Линия", 0.0 + i, 0.0 + i + 1};
-            std::string gpData = std::to_string(i) + ". Данные примитива"
-            + " { " + gp.getName() + "; " + std::to_string(gp.getCoordinates().getX()) + "; " + std::to_string(gp.getCoordinates().getY()) + " }";
+            std::string gpData = std::to_string(i) + ". Данные примитива" + " { " + gp.getName() + "; " + std::to_string(gp.getCoordinates().getX()) + "; " + std::to_string(gp.getCoordinates().getY()) + " }";
             gp.importData(gpData);
             data.push_back(gp);
         }
@@ -54,7 +53,7 @@ class CFileManager : std::enable_shared_from_this<CFileManager>
     {
         std::cout << "Экспорт данных в файл " << path << std::endl;
         int count = 0;
-        for (auto& gp: data)
+        for (auto& gp : data)
         {
             auto gpData = std::to_string(count) + ". " + gp.exportData();
             std::cout << gpData << std::endl;

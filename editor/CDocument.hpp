@@ -3,11 +3,11 @@
 
 #include <CFileManager.hpp>
 #include <IGraphicPrimitive.hpp>
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 /**
  * @brief Класс представляющий абстракцию для работы с документами
@@ -46,7 +46,7 @@ class CDocument : std::enable_shared_from_this<CDocument>
     ~CDocument()
     {
         std::cout << "Деструктор документа" << std::endl;
-        if(!_data.empty())
+        if (!_data.empty())
         {
             if (!_fileManager->exportData(_path, _data))
             {
@@ -102,7 +102,7 @@ class CDocument : std::enable_shared_from_this<CDocument>
 
     /**
      * @brief Получить графический примитив по индексу
-     * 
+     *
      * @param index Индекс примитива
      * @param gp Ссылка на объект куда будет сохраняться данные примитива
      * @return true примитив получили
@@ -120,6 +120,29 @@ class CDocument : std::enable_shared_from_this<CDocument>
     }
 
     /**
+     * @brief Проверка пуст ли документ
+     *
+     * @return true Пуст
+     * @return false Не пуст
+     */
+    bool empty() const
+    {
+        return _data.empty();
+    }
+
+    /**
+     * @brief Отрисовка содержимого документа
+     *
+     */
+    void draw() const
+    {
+        for (const auto& gp : _data)
+        {
+            gp.draw();
+        }
+    }
+
+    /**
      * @brief Получить массив графических примитивов
      *
      * @return Массив графических примитивов
@@ -129,11 +152,21 @@ class CDocument : std::enable_shared_from_this<CDocument>
         return _data;
     }
 
+    /**
+     * @brief Получить путь к документу
+     * 
+     * @return Путь к документу
+     */
     std::filesystem::path getPath() const
     {
         return _path;
     }
 
+    /**
+     * @brief Установить путь документа
+     * 
+     * @param path Путь документа
+     */
     void setPath(std::filesystem::path path)
     {
         _path = path;

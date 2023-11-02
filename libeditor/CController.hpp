@@ -68,7 +68,7 @@ class CController
     /**
      * @brief Закрыть документ
      * 
-     * @param documentHandler Хендлер документа
+     * @param[in] documentHandler Хендлер документа
      * @return true Документ закрыт
      * @return false Документ не закрыт
      */
@@ -92,8 +92,8 @@ class CController
     /**
      * @brief Добавить графический примитив
      * 
-     * @param documentHandler Хендлер документа
-     * @param gpName Имя графического примитива
+     * @param[in] documentHandler Хендлер документа
+     * @param[in] gpName Имя графического примитива
      * @return true Примитив добавлен
      * @return false Примитив не добавлен
      */
@@ -118,8 +118,8 @@ class CController
     /**
      * @brief Удалить графический примитив
      * 
-     * @param documentHandler Хердлер документа
-     * @param gpIndex Индекс графического примитива
+     * @param[in] documentHandler Хердлер документа
+     * @param[in] gpIndex Индекс графического примитива
      * @return true Примитив удалён
      * @return false Примитив не удалён
      */
@@ -157,7 +157,7 @@ class CController
     /**
      * @brief Отрисовать содержимое документа
      * 
-     * @param document 
+     * @param[in] document 
      */
     void drawDocument(const uint64_t& documentHandler)
     {

@@ -33,7 +33,7 @@ class IGraphicPrimitive
 
     /**
      * @brief Экспорт данных примитива
-     * 
+     *
      * @return Данные примитива
      */
     virtual std::string exportData() const
@@ -43,10 +43,10 @@ class IGraphicPrimitive
 
     /**
      * @brief Импорт данных примитива
-     * 
-     * @param dataString Данные примитива
+     *
+     * @param[in] dataString Данные примитива
      */
-    virtual void importData([[maybe_unused]] std::string dataString)
+    virtual void importData(std::string dataString)
     {
         std::cout << dataString << std::endl;
     }
@@ -91,7 +91,7 @@ class IGraphicPrimitive
 
     /**
      * @brief Название примитива
-     * 
+     *
      */
     std::string _name;
 };

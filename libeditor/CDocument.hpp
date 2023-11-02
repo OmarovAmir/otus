@@ -103,8 +103,8 @@ class CDocument : std::enable_shared_from_this<CDocument>
     /**
      * @brief Получить графический примитив по индексу
      *
-     * @param index Индекс примитива
-     * @param gp Ссылка на объект куда будет сохраняться данные примитива
+     * @param[in] index Индекс примитива
+     * @param[out] gp Ссылка на объект куда будет сохраняться данные примитива
      * @return true примитив получили
      * @return false примитив не получили
      */
@@ -165,7 +165,7 @@ class CDocument : std::enable_shared_from_this<CDocument>
     /**
      * @brief Установить путь документа
      * 
-     * @param path Путь документа
+     * @param[in] path Путь документа
      */
     void setPath(std::filesystem::path path)
     {

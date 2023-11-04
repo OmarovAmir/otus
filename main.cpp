@@ -1,15 +1,56 @@
-#include "print_ip.hpp"
+#include <matrix.hpp>
+
+    template <typename _T, std::size_t _depth>
+    struct matrix_type
+    {
+        typedef std::map<std::size_t, matrix_type<_T, _depth - 1>> type;
+        type _m;
+        matrix_type<_T, _depth - 1> operator[](std::size_t n)
+        {
+            std::cout << __PRETTY_FUNCTION__ << std::endl;
+            std::cout << n << std::endl;
+            auto _fm = _m.find(n);
+            if (_fm != _m.end())
+            {
+                std::cout << "Найден" << std::endl;
+                return _fm->second;
+            }
+            std::cout << "Не найден" << std::endl;
+            return matrix_type<_T, _depth - 1>{};
+        }
+    };
+
+    template <typename _T>
+    struct matrix_type<_T, 1>
+    {
+        typedef std::map<std::size_t, _T> type;
+        type _m;
+        int _default{-1};
+        int operator[](std::size_t n)
+        {
+            std::cout << __PRETTY_FUNCTION__ << std::endl;
+            std::cout << n << std::endl;
+            auto _fm = _m.find(n);
+            if (_fm != _m.end())
+            {
+                std::cout << "Найден" << std::endl;
+                return _fm->second;
+            }
+            std::cout << "Не найден" << std::endl;
+            return _default;
+        }
+    };
+
+    template <typename _T, std::size_t _depth>
+    using matrix_t = typename matrix_type<_T, _depth>::type;
 
 int main()
 {
-    print_ip(int8_t{-1});                           // 255
-    print_ip(int16_t{0});                           // 0.0
-    print_ip(int32_t{2130706433});                  // 127.0.0.1
-    print_ip(int64_t{8875824491850138409});         // 123.45.67.89.101.112.131.41
-    print_ip(std::string{"Hello, World!"});         // Hello, World!
-    print_ip(std::vector<int>{100, 200, 300, 400}); // 100.200.300.400
-    print_ip(std::list<short>{400, 300, 200, 100}); // 400.300.200.100
-    print_ip(std::make_tuple(123, 456, 789, 0));    // 123.456.789.0
+    // matrix<int, -1, 3> m;
+    // m[3][1][1];
+
+    matrix_type<int, 5> m;
+    m[4][3][2][1][0];
 
     return 0;
 }

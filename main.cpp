@@ -11,6 +11,7 @@ struct matrix
     std::shared_ptr<std::map<std::array<std::size_t, dimension>, T>> _data;
     T _default_value;
     std::size_t _level;
+    const std::size_t _last_level = 1;
 
     explicit matrix()
         : _index{std::make_shared<std::array<std::size_t, dimension>>()}
@@ -35,7 +36,7 @@ struct matrix
     auto& operator[](std::size_t n)
     {
         _index->at(dimension - _level) = n;
-        if (_level > 1)
+        if (_level > _last_level)
         {
             --_level;
         }
@@ -44,31 +45,17 @@ struct matrix
 
     auto& operator=(const T& value)
     {
-        if (_level > 1)
-        {
-            throw std::length_error("HAHAHA");
-        }
-        else
-        {
-            (*_data)[(*_index)] = value;
-            return *this;
-        }
+        (*_data)[(*_index)] = value;
+        return *this;
     }
 
     T& get()
     {
-        if (_level > 1)
+        if (_data->find((*_index)) != _data->end())
         {
-            throw std::length_error("HAHAHA");
+            return (*_data)[(*_index)];
         }
-        else
-        {
-            if (_data->find((*_index)) != _data->end())
-            {
-                return (*_data)[(*_index)];
-            }
-            return _default_value;
-        }
+        return _default_value;
     }
 
     std::size_t size()
@@ -78,19 +65,12 @@ struct matrix
 
     bool operator==(const T& value)
     {
-        if (_level > 1)
+        T res = _default_value;
+        if (_data->find((*_index)) != _data->end())
         {
-            throw std::length_error("HAHAHA");
+            res = (*_data)[(*_index)];
         }
-        else
-        {
-            T res = _default_value;
-            if (_data->find((*_index)) != _data->end())
-            {
-                res = (*_data)[(*_index)];
-            }
-            return (res == value);
-        }
+        return (res == value);
     }
 };
 
@@ -101,10 +81,19 @@ int main()
         std::cout << "x: " << ml[3][2][1].get() << std::endl;
         std::cout << "size: " << ml.size() << std::endl;
         std::cout << std::boolalpha << (ml[3][2][1] == 5) << std::endl;
-        ml[3][2][1] = 5;
-        std::cout << std::boolalpha << (ml[3][2][1] == 5) << std::endl;
+        ((ml[3][2][1] = 5) = 4);
+        std::cout << std::boolalpha << (ml[3][2][1] == 4) << std::endl;
         std::cout << "x: " << ml[3][2][1].get() << std::endl;
         std::cout << "size: " << ml.size() << std::endl;
+
+        auto ml2 = ml;
+        std::cout << "x: " << ml2[3][2][1].get() << std::endl;
+        std::cout << "size: " << ml2.size() << std::endl;
+        std::cout << std::boolalpha << (ml2[3][2][1] == 5) << std::endl;
+        ((ml2[3][2][1] = 5) = 4);
+        std::cout << std::boolalpha << (ml2[3][2][1] == 4) << std::endl;
+        std::cout << "x: " << ml2[3][2][1].get() << std::endl;
+        std::cout << "size: " << ml2.size() << std::endl;
     }
 
     return 0;

@@ -75,6 +75,23 @@ struct matrix
     {
         return _data->size();
     }
+
+    bool operator==(const T& value)
+    {
+        if (_level > 1)
+        {
+            throw std::length_error("HAHAHA");
+        }
+        else
+        {
+            T res = _default_value;
+            if (_data->find((*_index)) != _data->end())
+            {
+                res = (*_data)[(*_index)];
+            }
+            return (res == value);
+        }
+    }
 };
 
 int main()
@@ -83,7 +100,9 @@ int main()
         matrix<int, -1, 3> ml;
         std::cout << "x: " << ml[3][2][1].get() << std::endl;
         std::cout << "size: " << ml.size() << std::endl;
+        std::cout << std::boolalpha << (ml[3][2][1] == 5) << std::endl;
         ml[3][2][1] = 5;
+        std::cout << std::boolalpha << (ml[3][2][1] == 5) << std::endl;
         std::cout << "x: " << ml[3][2][1].get() << std::endl;
         std::cout << "size: " << ml.size() << std::endl;
     }

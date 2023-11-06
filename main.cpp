@@ -64,6 +64,16 @@ struct matrix
         return _data->size();
     }
 
+    std::size_t getLevel()
+    {
+        return _level;
+    }
+
+    void setLevel(std::size_t level)
+    {
+        _level = level;
+    }
+
     bool operator==(const T& value)
     {
         T res = _default_value;

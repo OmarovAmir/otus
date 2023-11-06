@@ -1,10 +1,11 @@
 #include <array>
+#include <cassert>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <stdexcept>
 
-template <typename T, T default_value, std::size_t dimension>
+template <typename T, T default_value, std::size_t dimension = 2>
 struct matrix
 {
     std::shared_ptr<std::array<std::size_t, dimension>> _index;
@@ -77,23 +78,25 @@ struct matrix
 int main()
 {
     {
-        matrix<int, -1, 3> ml;
-        std::cout << "x: " << ml[3][2][1].get() << std::endl;
-        std::cout << "size: " << ml.size() << std::endl;
-        std::cout << std::boolalpha << (ml[3][2][1] == 5) << std::endl;
-        ((ml[3][2][1] = 5) = 4);
-        std::cout << std::boolalpha << (ml[3][2][1] == 4) << std::endl;
-        std::cout << "x: " << ml[3][2][1].get() << std::endl;
-        std::cout << "size: " << ml.size() << std::endl;
+        matrix<int, -1> matrix;
+        assert(matrix.size() == 0); // все ячейки свободны
+        auto a = matrix[0][0];
+        assert(a == -1);
+        assert(matrix.size() == 0);
+        matrix[100][100] = 314;
+        assert(matrix[100][100] == 314);
+        assert(matrix.size() == 1);
 
-        auto ml2 = ml;
-        std::cout << "x: " << ml2[3][2][1].get() << std::endl;
-        std::cout << "size: " << ml2.size() << std::endl;
-        std::cout << std::boolalpha << (ml2[3][2][1] == 5) << std::endl;
-        ((ml2[3][2][1] = 5) = 4);
-        std::cout << std::boolalpha << (ml2[3][2][1] == 4) << std::endl;
-        std::cout << "x: " << ml2[3][2][1].get() << std::endl;
-        std::cout << "size: " << ml2.size() << std::endl;
+        // // выведется одна строка
+        // // 100100314
+        // for (auto c : matrix)
+        // {
+        //     int x;
+        //     int y;
+        //     int v;
+        //     std::tie(x, y, v) = c;
+        //     std::cout << x << y << v << std::endl;
+        // }
     }
 
     return 0;

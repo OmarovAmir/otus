@@ -1,56 +1,92 @@
-#include <matrix.hpp>
+#include <array>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <stdexcept>
 
-    template <typename _T, std::size_t _depth>
-    struct matrix_type
+template <typename T, T default_value, std::size_t dimension>
+struct matrix
+{
+    std::shared_ptr<std::array<std::size_t, dimension>> _index;
+    std::shared_ptr<std::map<std::array<std::size_t, dimension>, T>> _data;
+    T _default_value;
+    std::size_t _level;
+
+    explicit matrix()
+        : _index{std::make_shared<std::array<std::size_t, dimension>>()}
+        , _data{std::make_shared<std::map<std::array<std::size_t, dimension>, T>>()}
+        , _default_value{default_value}
+        , _level{dimension}
     {
-        typedef std::map<std::size_t, matrix_type<_T, _depth - 1>> type;
-        type _m;
-        matrix_type<_T, _depth - 1> operator[](std::size_t n)
-        {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-            std::cout << n << std::endl;
-            auto _fm = _m.find(n);
-            if (_fm != _m.end())
-            {
-                std::cout << "Найден" << std::endl;
-                return _fm->second;
-            }
-            std::cout << "Не найден" << std::endl;
-            return matrix_type<_T, _depth - 1>{};
-        }
-    };
+    }
 
-    template <typename _T>
-    struct matrix_type<_T, 1>
+    explicit matrix(
+        std::shared_ptr<std::array<std::size_t, dimension>>& index,
+        std::shared_ptr<std::map<std::array<std::size_t, dimension>, T>>& data,
+        T _default_value = default_value,
+        std::size_t level = dimension)
+        : _index{index}
+        , _data{data}
+        , _default_value{_default_value}
+        , _level{level}
     {
-        typedef std::map<std::size_t, _T> type;
-        type _m;
-        int _default{-1};
-        int operator[](std::size_t n)
-        {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-            std::cout << n << std::endl;
-            auto _fm = _m.find(n);
-            if (_fm != _m.end())
-            {
-                std::cout << "Найден" << std::endl;
-                return _fm->second;
-            }
-            std::cout << "Не найден" << std::endl;
-            return _default;
-        }
-    };
+    }
 
-    template <typename _T, std::size_t _depth>
-    using matrix_t = typename matrix_type<_T, _depth>::type;
+    auto& operator[](std::size_t n)
+    {
+        _index->at(dimension - _level) = n;
+        if (_level > 1)
+        {
+            --_level;
+        }
+        return *this;
+    }
+
+    auto& operator=(const T& value)
+    {
+        if (_level > 1)
+        {
+            throw std::length_error("HAHAHA");
+        }
+        else
+        {
+            (*_data)[(*_index)] = value;
+            return *this;
+        }
+    }
+
+    T& get()
+    {
+        if (_level > 1)
+        {
+            throw std::length_error("HAHAHA");
+        }
+        else
+        {
+            if (_data->find((*_index)) != _data->end())
+            {
+                return (*_data)[(*_index)];
+            }
+            return _default_value;
+        }
+    }
+
+    std::size_t size()
+    {
+        return _data->size();
+    }
+};
 
 int main()
 {
-    // matrix<int, -1, 3> m;
-    // m[3][1][1];
-
-    matrix_type<int, 5> m;
-    m[4][3][2][1][0];
+    {
+        matrix<int, -1, 3> ml;
+        std::cout << "x: " << ml[3][2][1].get() << std::endl;
+        std::cout << "size: " << ml.size() << std::endl;
+        ml[3][2][1] = 5;
+        std::cout << "x: " << ml[3][2][1].get() << std::endl;
+        std::cout << "size: " << ml.size() << std::endl;
+    }
 
     return 0;
 }

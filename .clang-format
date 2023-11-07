@@ -7,6 +7,13 @@ BraceWrapping:
   AfterStruct: true
   AfterEnum: true
   AfterFunction: true
+  AfterUnion: true
+  BeforeElse: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeLambdaBody: true
+  BeforeWhile: true
+  AfterControlStatement: Always
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false

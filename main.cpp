@@ -100,9 +100,12 @@ struct matrix
     auto& operator[](const std::size_t n)
     {
         _index->at(_max_level - _level) = n;
-        if (_level > _min_level) {
+        if (_level > _min_level)
+        {
             --(*this);
-        } else {
+        }
+        else
+        {
             +(*this);
         }
         return *this;
@@ -149,7 +152,8 @@ struct matrix
 
     data_type operator*() const
     {
-        if (_data->find((*_index)) != _data->end()) {
+        if (_data->find((*_index)) != _data->end())
+        {
             return (*_data)[(*_index)];
         }
         return _default_value;
@@ -163,7 +167,8 @@ struct matrix
     bool operator==(const data_type& value) const
     {
         data_type res = _default_value;
-        if (_data->find((*_index)) != _data->end()) {
+        if (_data->find((*_index)) != _data->end())
+        {
             res = (*_data)[(*_index)];
         }
         return (res == value);
@@ -177,7 +182,8 @@ struct matrix
     void info() const
     {
         std::cout << "_index: { Address: " << _index.get() << "; Data: [ ";
-        for (const auto& i : *_index) {
+        for (const auto& i : *_index)
+        {
             std::cout << i << " ";
         }
         std::cout << "] } _data: { Address: " << _data.get() << "; size: " << _data->size() << " }" << std::endl;

@@ -14,6 +14,7 @@ AlignAfterOpenBracket: Align
 BreakInheritanceList: BeforeComma
 PackConstructorInitializers: Never
 BreakConstructorInitializers: BeforeComma
+AllowAllArgumentsOnNextLine: false
 AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
 ColumnLimit: 0

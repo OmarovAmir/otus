@@ -165,6 +165,11 @@ struct matrix
         _level = level;
     }
 
+    void resetLevel(std::size_t level)
+    {
+        _level = dimension;
+    }
+
     bool operator==(const T& value)
     {
         T res = _default_value;

@@ -26,12 +26,11 @@ struct matrix
     explicit matrix(
         const std::shared_ptr<std::array<std::size_t, dimension>>& index,
         const std::shared_ptr<std::map<std::array<std::size_t, dimension>, T>>& data,
-        T _default_value = default_value,
-        std::size_t level = dimension)
+        T _default_value = default_value)
         : _index{index}
         , _data{data}
         , _default_value{_default_value}
-        , _level{level}
+        , _level{dimension}
     {
         // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -39,12 +38,11 @@ struct matrix
     explicit matrix(
         std::shared_ptr<std::array<std::size_t, dimension>>&& index,
         std::shared_ptr<std::map<std::array<std::size_t, dimension>, T>>&& data,
-        T _default_value = default_value,
-        std::size_t level = dimension)
+        T _default_value = default_value)
         : _index{std::move(index)}
         , _data{std::move(data)}
         , _default_value{_default_value}
-        , _level{level}
+        , _level{dimension}
     {
         // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -52,12 +50,10 @@ struct matrix
     explicit matrix(
         const std::array<std::size_t, dimension>& index,
         const std::map<std::array<std::size_t, dimension>, T>& data,
-        T _default_value = default_value,
-        std::size_t level = dimension)
+        T _default_value = default_value)
         : matrix(std::make_shared<std::array<std::size_t, dimension>>(index),
                  std::make_shared<std::map<std::array<std::size_t, dimension>, T>>(data),
-                 _default_value, 
-                 level)
+                 _default_value)
     {
         // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -65,12 +61,10 @@ struct matrix
     explicit matrix(
         std::array<std::size_t, dimension>&& index,
         std::map<std::array<std::size_t, dimension>, T>&& data,
-        T _default_value = default_value,
-        std::size_t level = dimension)
+        T _default_value = default_value)
         : matrix(std::make_shared<std::array<std::size_t, dimension>>(std::move(index)),
                  std::make_shared<std::map<std::array<std::size_t, dimension>, T>>(std::move(data)),
-                 _default_value, 
-                 level)
+                 _default_value)
     {
         // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -79,8 +73,7 @@ struct matrix
         const matrix<T, default_value, dimension>& other)
         : matrix(*(other._index),
                  *(other._data),
-                 other._default_value, 
-                 other._level)
+                 other._default_value)
     {
         // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -89,8 +82,7 @@ struct matrix
         matrix<T, default_value, dimension>&& other)
         : matrix(std::move(*(other._index)),
                  std::move(*(other._data)),
-                 other._default_value, 
-                 other._level)
+                 other._default_value)
     {
         // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -102,7 +94,7 @@ struct matrix
         *(this->_index) = {*(other._index)};
         *(this->_data) = {*(other._data)};
         this->_default_value = other._default_value;
-        this->_level = _level;
+        this->_level = dimension;
         return *this;
     }
 
@@ -113,7 +105,7 @@ struct matrix
         *(this->_index) = std::move(*(other._index));
         *(this->_data) = std::move(*(other._data));
         this->_default_value = other._default_value;
-        this->_level = _level;
+        this->_level = dimension;
         return *this;
     }
 
@@ -135,12 +127,17 @@ struct matrix
         {
             --_level;
         }
+        else
+        {
+            _level = dimension;
+        }
         return *this;
     }
 
     matrix<T, default_value, dimension>& operator=(const T& value)
     {
         (*_data)[(*_index)] = value;
+        _level = dimension;
         return *this;
     }
 
@@ -294,6 +291,10 @@ int main()
         assert(matrix5.size() == 4);
         matrix1.info();
         matrix5.info();
+
+        std::cout << std::endl << "Каноничная форма оператора присваивания" << std::endl;
+        assert((((matrix1[9][9] = 99 ) = 88 ) = 77) == 77);
+        matrix1.info();
     }
 
 

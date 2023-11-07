@@ -20,7 +20,7 @@ struct matrix
         , _default_value{default_value}
         , _level{dimension}
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -33,7 +33,7 @@ struct matrix
         , _default_value{_default_value}
         , _level{level}
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -46,7 +46,7 @@ struct matrix
         , _default_value{_default_value}
         , _level{level}
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -59,7 +59,7 @@ struct matrix
                  _default_value, 
                  level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -72,7 +72,7 @@ struct matrix
                  _default_value, 
                  level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     matrix(
@@ -82,7 +82,7 @@ struct matrix
                  other._default_value, 
                  other._level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     matrix(
@@ -92,13 +92,13 @@ struct matrix
                  other._default_value, 
                  other._level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     matrix<T, default_value, dimension>& operator=(
         const matrix<T, default_value, dimension>& other)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
         *(this->_index) = {*(other._index)};
         *(this->_data) = {*(other._data)};
         this->_default_value = other._default_value;
@@ -109,7 +109,7 @@ struct matrix
     matrix<T, default_value, dimension>& operator=(
         matrix<T, default_value, dimension>&& other)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
         *(this->_index) = std::move(*(other._index));
         *(this->_data) = std::move(*(other._data));
         this->_default_value = other._default_value;
@@ -117,9 +117,20 @@ struct matrix
         return *this;
     }
 
-    auto& operator[](std::size_t n)
+    matrix<T, default_value, dimension>& operator[](std::size_t n)
     {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        std::cout << "level: " << _level << std::endl;
+        std::cout << "n: " << n << std::endl;
+        std::cout << "dimension: " << dimension << std::endl;
         _index->at(dimension - _level) = n;
+
+        for(const auto& i: *_index)
+        {
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+
         if (_level > _last_level)
         {
             --_level;
@@ -127,7 +138,7 @@ struct matrix
         return *this;
     }
 
-    auto& operator=(const T& value)
+    matrix<T, default_value, dimension>& operator=(const T& value)
     {
         (*_data)[(*_index)] = value;
         return *this;

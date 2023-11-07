@@ -189,6 +189,15 @@ struct matrix
         std::cout << "] } _data: { Address: " << _data.get() << "; size: " << _data->size() << " }" << std::endl;
     }
 
+    // std::map<int, int> m;
+    // auto im = m.begin();
+    // im++;
+    // im--;
+    // ++im;
+    // --im;
+    // *im;
+    // im->first;
+
     // struct iterator
     // {
     //     storage_type::iterator
@@ -331,17 +340,6 @@ int main()
                   << "Каноничная форма оператора присваивания" << std::endl;
         assert((((matrix1[9][9] = 99) = 88) = 77) == 77);
         matrix1.info();
-    }
-
-    {
-        // std::map<int, int> m;
-        // auto im = m.begin();
-        // im++;
-        // im--;
-        // ++im;
-        // --im;
-        // *im;
-        // im->first;
     }
 
     return 0;

@@ -20,7 +20,6 @@ struct matrix
         , _default_value{default_value}
         , _level{dimension}
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -33,7 +32,6 @@ struct matrix
         , _default_value{_default_value}
         , _level{level}
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -46,7 +44,6 @@ struct matrix
         , _default_value{_default_value}
         , _level{level}
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -59,7 +56,6 @@ struct matrix
                  _default_value, 
                  level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     explicit matrix(
@@ -72,7 +68,6 @@ struct matrix
                  _default_value, 
                  level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     matrix(
@@ -82,7 +77,6 @@ struct matrix
                  other._default_value, 
                  other._level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     matrix(
@@ -92,7 +86,6 @@ struct matrix
                  other._default_value, 
                  other._level)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     matrix<T, default_value, dimension>& operator=(
@@ -166,6 +159,16 @@ struct matrix
         }
         return (res == value);
     }
+
+    void info()
+    {
+        std::cout << "_index: { Address: " << _index.get() << "; Data: [ ";
+        for(const auto& i: *_index)
+        {
+            std::cout << i << " ";
+        }
+        std::cout << "] } _data: { Address: " << _data.get() << "; size: " << _data->size() << " }" << std::endl;
+    }
 };
 
 int main()
@@ -186,36 +189,68 @@ int main()
         // // 100100314
         // for (auto c : matrix)
         // {
-        //     int x;
+        //     int matrix2;
         //     int y;
         //     int v;
-        //     std::tie(x, y, v) = c;
-        //     std::cout << x << y << v << std::endl;
+        //     std::tie(matrix2, y, v) = c;
+        //     std::cout << matrix2 << y << v << std::endl;
         // }
     }
 
     {
-        matrix<int, -1> matrix;
-        assert(matrix.size() == 0);
-        matrix[0][0] = 10;
-        matrix[0][1] = 20;
-        assert(matrix.size() == 2);
+        matrix<int, -1> matrix1;
+        assert(matrix1.size() == 0);
+        matrix1[0][0] = 10;
+        assert(matrix1.size() == 1);
+        matrix1.info();
         std::cout << std::endl << std::endl;
-        auto x = matrix;
-        assert(x.size() == 2);
-        assert(matrix.size() == 2);
+
+        auto matrix2 = matrix1;
+        assert(matrix1.size() == 1);
+        assert(matrix2.size() == 1);
+        matrix1.info();
+        matrix2.info();
+        matrix1[0][2] = 30;
+        assert(matrix1.size() == 2);
+        assert(matrix2.size() == 1);
+        matrix1.info();
+        matrix2.info();
         std::cout << std::endl << std::endl;
-        auto b = std::move(matrix);
-        assert(b.size() == 2);
-        assert(matrix.size() == 0);
+
+        auto matrix3 = std::move(matrix2);
+        assert(matrix2.size() == 0);
+        assert(matrix3.size() == 1);
+        matrix2.info();
+        matrix3.info();
+        matrix2[0][2] = 30;
+        assert(matrix2.size() == 1);
+        assert(matrix3.size() == 1);
+        matrix2.info();
+        matrix3.info();
         std::cout << std::endl << std::endl;
-        auto k{b};
-        assert(b.size() == 2);
-        assert(k.size() == 2);
+
+        auto matrix4{matrix3};
+        assert(matrix3.size() == 1);
+        assert(matrix4.size() == 1);
+        matrix3.info();
+        matrix4.info();
+        matrix3[0][2] = 30;
+        assert(matrix3.size() == 2);
+        assert(matrix4.size() == 1);
+        matrix3.info();
+        matrix4.info();
         std::cout << std::endl << std::endl;
-        auto l{std::move(b)};
-        assert(b.size() == 0);
-        assert(k.size() == 2);
+
+        auto matrix5{std::move(matrix4)};
+        assert(matrix4.size() == 0);
+        assert(matrix5.size() == 1);
+        matrix4.info();
+        matrix5.info();
+        matrix4[0][2] = 30;
+        assert(matrix4.size() == 1);
+        assert(matrix5.size() == 1);
+        matrix4.info();
+        matrix5.info();
 
     }
 

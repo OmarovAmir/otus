@@ -23,8 +23,20 @@ struct matrix
     }
 
     explicit matrix(
-        std::shared_ptr<std::array<std::size_t, dimension>>& index,
-        std::shared_ptr<std::map<std::array<std::size_t, dimension>, T>>& data,
+        const std::array<std::size_t, dimension>& index,
+        const std::map<std::array<std::size_t, dimension>, T>& data,
+        T _default_value = default_value,
+        std::size_t level = dimension)
+        : matrix(std::make_shared<std::array<std::size_t, dimension>>(index),
+                 std::make_shared<std::map<std::array<std::size_t, dimension>, T>>(data),
+                 _default_value, 
+                 level)
+    {
+    }
+
+    explicit matrix(
+        const std::shared_ptr<std::array<std::size_t, dimension>>& index,
+        const std::shared_ptr<std::map<std::array<std::size_t, dimension>, T>>& data,
         T _default_value = default_value,
         std::size_t level = dimension)
         : _index{index}
@@ -83,6 +95,12 @@ struct matrix
         }
         return (res == value);
     }
+    
+    auto clone()
+    {
+        matrix<T, default_value, dimension> clone{*_index, *_data, _default_value, _level};
+        return clone;
+    }
 };
 
 int main()
@@ -96,6 +114,12 @@ int main()
         matrix[100][100] = 314;
         assert(matrix[100][100] == 314);
         assert(matrix.size() == 1);
+        auto x = matrix.clone();
+        assert(x.size() == 1);
+        matrix[0][0] = 3;
+        assert(matrix.size() == 2);
+        assert(x.size() == 1);
+
 
         // // выведется одна строка
         // // 100100314

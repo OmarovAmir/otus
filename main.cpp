@@ -19,9 +19,7 @@ struct matrix
         , _data{std::make_shared<std::map<std::array<std::size_t, dimension>, T>>()}
         , _default_value{default_value}
         , _level{dimension}
-    {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
+    {}
 
     explicit matrix(
         const std::shared_ptr<std::array<std::size_t, dimension>>& index,
@@ -31,9 +29,7 @@ struct matrix
         , _data{data}
         , _default_value{_default_value}
         , _level{dimension}
-    {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
+    {}
 
     explicit matrix(
         std::shared_ptr<std::array<std::size_t, dimension>>&& index,
@@ -43,9 +39,7 @@ struct matrix
         , _data{std::move(data)}
         , _default_value{_default_value}
         , _level{dimension}
-    {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
+    {}
 
     explicit matrix(
         const std::array<std::size_t, dimension>& index,
@@ -54,9 +48,7 @@ struct matrix
         : matrix(std::make_shared<std::array<std::size_t, dimension>>(index),
                  std::make_shared<std::map<std::array<std::size_t, dimension>, T>>(data),
                  _default_value)
-    {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
+    {}
 
     explicit matrix(
         std::array<std::size_t, dimension>&& index,
@@ -65,32 +57,25 @@ struct matrix
         : matrix(std::make_shared<std::array<std::size_t, dimension>>(std::move(index)),
                  std::make_shared<std::map<std::array<std::size_t, dimension>, T>>(std::move(data)),
                  _default_value)
-    {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
+    {}
 
     matrix(
         const matrix<T, default_value, dimension>& other)
         : matrix(*(other._index),
                  *(other._data),
                  other._default_value)
-    {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
+    {}
 
     matrix(
         matrix<T, default_value, dimension>&& other)
         : matrix(std::move(*(other._index)),
                  std::move(*(other._data)),
                  other._default_value)
-    {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
+    {}
 
     matrix<T, default_value, dimension>& operator=(
         const matrix<T, default_value, dimension>& other)
     {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
         *(this->_index) = {*(other._index)};
         *(this->_data) = {*(other._data)};
         this->_default_value = other._default_value;
@@ -101,7 +86,6 @@ struct matrix
     matrix<T, default_value, dimension>& operator=(
         matrix<T, default_value, dimension>&& other)
     {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
         *(this->_index) = std::move(*(other._index));
         *(this->_data) = std::move(*(other._data));
         this->_default_value = other._default_value;
@@ -109,27 +93,22 @@ struct matrix
         return *this;
     }
 
-    matrix<T, default_value, dimension>& operator[](std::size_t n)
+    matrix<T, default_value, dimension>& operator()(const std::size_t level = dimension)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        std::cout << "level: " << _level << std::endl;
-        std::cout << "n: " << n << std::endl;
-        std::cout << "dimension: " << dimension << std::endl;
+        _level = level;
+        return *this;
+    }
+
+    matrix<T, default_value, dimension>& operator[](const std::size_t n)
+    {
         _index->at(dimension - _level) = n;
-
-        for(const auto& i: *_index)
-        {
-            std::cout << i << " ";
-        }
-        std::cout << std::endl;
-
-        if (_level > _last_level)
+        if(_level > _last_level)
         {
             --_level;
         }
         else
         {
-            _level = dimension;
+            ~(*this);
         }
         return *this;
     }
@@ -137,54 +116,47 @@ struct matrix
     matrix<T, default_value, dimension>& operator=(const T& value)
     {
         (*_data)[(*_index)] = value;
+        ~(*this);
+        return *this;
+    }
+
+    matrix<T, default_value, dimension>& operator~()
+    {
         _level = dimension;
         return *this;
     }
 
-    T get()
+    T operator*() const
     {
-        if (_data->find((*_index)) != _data->end())
-        {
+        if (_data->find((*_index)) != _data->end()) {
             return (*_data)[(*_index)];
         }
         return _default_value;
     }
 
-    std::size_t size()
+    std::size_t size() const
     {
         return _data->size();
     }
 
-    std::size_t getLevel()
-    {
-        return _level;
-    }
-
-    void setLevel(std::size_t level)
-    {
-        _level = level;
-    }
-
-    void resetLevel(std::size_t level)
-    {
-        _level = dimension;
-    }
-
-    bool operator==(const T& value)
+    bool operator==(const T& value) const
     {
         T res = _default_value;
-        if (_data->find((*_index)) != _data->end())
-        {
+        if (_data->find((*_index)) != _data->end()) {
             res = (*_data)[(*_index)];
         }
         return (res == value);
     }
 
-    void info()
+    bool operator!=(const T& value) const
+    {
+        return (*this != value);
+    }
+
+    void info() const
     {
         std::cout << "_index: { Address: " << _index.get() << "; Data: [ ";
-        for(const auto& i: *_index)
-        {
+        for (const auto& i : *_index) {
             std::cout << i << " ";
         }
         std::cout << "] } _data: { Address: " << _data.get() << "; size: " << _data->size() << " }" << std::endl;
@@ -203,7 +175,7 @@ int main()
 
         // matrix[100][100] = 314;
         // assert(matrix[100][100] == 314);
-        // assert(matrix.size() == 1);      
+        // assert(matrix.size() == 1);
 
         // // выведется одна строка
         // // 100100314
@@ -218,14 +190,16 @@ int main()
     }
 
     {
-        std::cout << std::endl << "Конструктор по умолчанию" << std::endl;
+        std::cout << std::endl
+                  << "Конструктор по умолчанию" << std::endl;
         matrix<int, -1> matrix1;
         assert(matrix1.size() == 0);
         matrix1[0][0] = 0;
         assert(matrix1.size() == 1);
         matrix1.info();
 
-        std::cout << std::endl << "Конструктор копирования" << std::endl;
+        std::cout << std::endl
+                  << "Конструктор копирования" << std::endl;
         auto matrix2 = matrix1;
         assert(matrix1.size() == 1);
         assert(matrix2.size() == 1);
@@ -237,7 +211,8 @@ int main()
         matrix1.info();
         matrix2.info();
 
-        std::cout << std::endl << "Конструктор перемещения" << std::endl;
+        std::cout << std::endl
+                  << "Конструктор перемещения" << std::endl;
         auto matrix3 = std::move(matrix2);
         assert(matrix2.size() == 0);
         assert(matrix3.size() == 1);
@@ -249,7 +224,8 @@ int main()
         matrix2.info();
         matrix3.info();
 
-        std::cout << std::endl << "Конструктор копирования" << std::endl;
+        std::cout << std::endl
+                  << "Конструктор копирования" << std::endl;
         auto matrix4{matrix3};
         assert(matrix3.size() == 1);
         assert(matrix4.size() == 1);
@@ -261,7 +237,8 @@ int main()
         matrix3.info();
         matrix4.info();
 
-        std::cout << std::endl << "Конструктор перемещения" << std::endl;
+        std::cout << std::endl
+                  << "Конструктор перемещения" << std::endl;
         auto matrix5{std::move(matrix4)};
         assert(matrix4.size() == 0);
         assert(matrix5.size() == 1);
@@ -273,7 +250,8 @@ int main()
         matrix4.info();
         matrix5.info();
 
-        std::cout << std::endl << "Копирующий оператор присваивания" << std::endl;
+        std::cout << std::endl
+                  << "Копирующий оператор присваивания" << std::endl;
         matrix1[2][2] = 11;
         assert(matrix1.size() == 3);
         assert(matrix5.size() == 1);
@@ -285,7 +263,8 @@ int main()
         matrix1.info();
         matrix5.info();
 
-        std::cout << std::endl << "Перемещающий оператор присваивания" << std::endl;
+        std::cout << std::endl
+                  << "Перемещающий оператор присваивания" << std::endl;
         matrix1[3][3] = 11;
         assert(matrix1.size() == 4);
         assert(matrix5.size() == 3);
@@ -297,11 +276,30 @@ int main()
         matrix1.info();
         matrix5.info();
 
-        std::cout << std::endl << "Каноничная форма оператора присваивания" << std::endl;
-        assert((((matrix1[9][9] = 99 ) = 88 ) = 77) == 77);
+        matrix1[0][0];
+        ~matrix1[1];
+        matrix1.info();
+        ~matrix1[2];
+        matrix1.info();
+        ~matrix1[3];
+        matrix1.info();
+        ~matrix1[4];
+        matrix1.info();
+
+        matrix1()[5];
+        matrix1.info();
+        matrix1(1)[6];
+        matrix1.info();
+        matrix1()[7];
+        matrix1.info();
+        matrix1(1)[8];
+        matrix1.info();
+
+        std::cout << std::endl
+                  << "Каноничная форма оператора присваивания" << std::endl;
+        assert((((matrix1[9][9] = 99) = 88) = 77) == 77);
         matrix1.info();
     }
-
 
     return 0;
 }

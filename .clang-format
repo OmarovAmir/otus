@@ -1,6 +1,15 @@
 UseTab: Never
 IndentWidth: 4
-BreakBeforeBraces: Allman
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterStruct: true
+  AfterEnum: true
+  AfterFunction: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
 AlignAfterOpenBracket: Align
 BreakInheritanceList: BeforeComma
 PackConstructorInitializers: Never

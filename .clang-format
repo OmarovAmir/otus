@@ -1,3 +1,4 @@
+# clang-format version 14.0.6
 UseTab: Never
 IndentWidth: 4
 BreakBeforeBraces: Custom

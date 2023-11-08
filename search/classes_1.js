@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['igraphicprimitive_0',['IGraphicPrimitive',['../classIGraphicPrimitive.html',1,'']]]
+  ['matrix_0',['matrix',['../structmatrix.html',1,'']]]
 ];

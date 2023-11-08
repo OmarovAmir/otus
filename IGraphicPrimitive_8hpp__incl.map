@@ -1,9 +1,0 @@
-<map id="libeditor/IGraphicPrimitive.hpp" name="libeditor/IGraphicPrimitive.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="52,5,246,31"/>
-<area shape="rect" id="Node000002" href="$CPoint_8hpp.html" title=" " alt="" coords="5,79,90,105"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,34,79,72,76,67,130,29"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="113,79,185,105"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,31,152,63,146,63,146,31"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="209,79,262,105"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="165,29,211,67,208,71,162,34"/>
-</map>

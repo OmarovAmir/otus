@@ -1,11 +1,5 @@
 var searchData=
 [
-  ['get_0',['get',['../classCDocument.html#a4d1a513d32a9382bd05d9f999dc7ade3',1,'CDocument']]],
-  ['getcoordinates_1',['getCoordinates',['../classIGraphicPrimitive.html#acef10c18e5922d1a4f9b0ff0005b0389',1,'IGraphicPrimitive']]],
-  ['getdata_2',['getData',['../classCDocument.html#afc445a8ea7ce5dd6adfc3d31031c22ec',1,'CDocument']]],
-  ['getname_3',['getName',['../classIGraphicPrimitive.html#a470912d4bec76805a3e951c7aa656ad1',1,'IGraphicPrimitive']]],
-  ['getpath_4',['getPath',['../classCDocument.html#a35b16bbfa9cd7ddabfd4bb58562da322',1,'CDocument']]],
-  ['getptr_5',['getptr',['../classCFileManager.html#a96ba12b59e832a04f1c446c5bd59e6eb',1,'CFileManager']]],
-  ['getx_6',['getX',['../classCPoint.html#a5e353fdbf043584feef118d9bbc2e5b4',1,'CPoint']]],
-  ['gety_7',['getY',['../classCPoint.html#ac5ac67e32fcbd22ff79d1190cf41dc70',1,'CPoint']]]
+  ['main_0',['main',['../main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'main.cpp']]],
+  ['matrix_1',['matrix',['../structmatrix.html#ad8a194444a7bd8b30723af7b0507a564',1,'matrix::matrix()'],['../structmatrix.html#ad7027d8dfd6a2bc87700083d18460837',1,'matrix::matrix(const std::shared_ptr&lt; key_type &gt; &amp;index, const std::shared_ptr&lt; storage_type &gt; &amp;data)'],['../structmatrix.html#aa7ccf78670f7f0b890731d0e40b1f57e',1,'matrix::matrix(std::shared_ptr&lt; key_type &gt; &amp;&amp;index, std::shared_ptr&lt; storage_type &gt; &amp;&amp;data)'],['../structmatrix.html#a33bd111a71ad4b7bc9858a883d7664ef',1,'matrix::matrix(const key_type &amp;index, const storage_type &amp;data)'],['../structmatrix.html#ac1af23184a2020b5d9d29e23b6214494',1,'matrix::matrix(key_type &amp;&amp;index, storage_type &amp;&amp;data)'],['../structmatrix.html#a6ebe7c7afe16af56eadf57be594a6268',1,'matrix::matrix(const matrix&lt; T, default_value, dimension_number &gt; &amp;other)'],['../structmatrix.html#a7e7a4008fba1b0f9d3095c80438202ba',1,'matrix::matrix(matrix&lt; T, default_value, dimension_number &gt; &amp;&amp;other)']]]
 ];

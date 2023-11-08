@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['opendocument_0',['openDocument',['../classCController.html#a52409a54cad4ca7b1d6e57616e97b857',1,'CController']]]
+  ['size_0',['size',['../structmatrix.html#a4b9a988954c8b6a348cb7260e6cabc51',1,'matrix']]]
 ];

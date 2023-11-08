@@ -169,17 +169,6 @@ struct matrix
         return (res != value);
     }
 
-    void info() const
-    {
-        std::cout << "_level: " << _level << " ";
-        std::cout << "_index: { Address: " << _index.get() << "; Data: [ ";
-        for (const auto& i : *_index)
-        {
-            std::cout << i << " ";
-        }
-        std::cout << "] } _data: { Address: " << _data.get() << "; size: " << _data->size() << " }" << std::endl;
-    }
-
     template <typename iterator_type>
     struct iterator
     {
@@ -306,117 +295,62 @@ int main()
     }
 
     {
-        std::cout << std::endl
-                  << "Конструктор по умолчанию" << std::endl;
+        // Конструктор по умолчанию
         matrix<int, -1> matrix1;
-        matrix1.info();
         assert(matrix1.size() == 0);
         matrix1[0][0] = 0;
         assert(matrix1.size() == 1);
-        matrix1.info();
 
-        std::cout << std::endl
-                  << "Конструктор копирования" << std::endl;
+        // Конструктор копирования
         auto matrix2 = matrix1;
         assert(matrix1.size() == 1);
         assert(matrix2.size() == 1);
-        matrix1.info();
-        matrix2.info();
         matrix1[1][1] = 11;
         assert(matrix1.size() == 2);
         assert(matrix2.size() == 1);
-        matrix1.info();
-        matrix2.info();
 
-        std::cout << std::endl
-                  << "Конструктор перемещения" << std::endl;
+        // Конструктор перемещения
         auto matrix3 = std::move(matrix2);
         assert(matrix2.size() == 0);
         assert(matrix3.size() == 1);
-        matrix2.info();
-        matrix3.info();
         matrix2[1][1] = 11;
         assert(matrix2.size() == 1);
         assert(matrix3.size() == 1);
-        matrix2.info();
-        matrix3.info();
 
-        std::cout << std::endl
-                  << "Конструктор копирования" << std::endl;
+        // Конструктор копирования
         auto matrix4{matrix3};
         assert(matrix3.size() == 1);
         assert(matrix4.size() == 1);
-        matrix3.info();
-        matrix4.info();
         matrix3[1][1] = 11;
         assert(matrix3.size() == 2);
         assert(matrix4.size() == 1);
-        matrix3.info();
-        matrix4.info();
 
-        std::cout << std::endl
-                  << "Конструктор перемещения" << std::endl;
+        // Конструктор перемещения
         auto matrix5{std::move(matrix4)};
         assert(matrix4.size() == 0);
         assert(matrix5.size() == 1);
-        matrix4.info();
-        matrix5.info();
         matrix4[1][1] = 11;
         assert(matrix4.size() == 1);
         assert(matrix5.size() == 1);
-        matrix4.info();
-        matrix5.info();
 
-        std::cout << std::endl
-                  << "Копирующий оператор присваивания" << std::endl;
+        // Копирующий оператор присваивания
         matrix1[2][2] = 11;
         assert(matrix1.size() == 3);
         assert(matrix5.size() == 1);
-        matrix1.info();
-        matrix5.info();
         matrix5 = matrix1;
         assert(matrix1.size() == 3);
         assert(matrix5.size() == 3);
-        matrix1.info();
-        matrix5.info();
 
-        std::cout << std::endl
-                  << "Перемещающий оператор присваивания" << std::endl;
+        // Перемещающий оператор присваивания
         matrix1[3][3] = 11;
         assert(matrix1.size() == 4);
         assert(matrix5.size() == 3);
-        matrix1.info();
-        matrix5.info();
         matrix5 = std::move(matrix1);
         assert(matrix1.size() == 0);
         assert(matrix5.size() == 4);
-        matrix1.info();
-        matrix5.info();
 
-        matrix1[0][0];
-        matrix1.info();
-        -matrix1[1];
-        matrix1.info();
-        -matrix1[2];
-        matrix1.info();
-        -matrix1[3];
-        matrix1.info();
-        -matrix1[4];
-        matrix1.info();
-
-        matrix1()[5];
-        matrix1.info();
-        matrix1(1)[6];
-        matrix1.info();
-        matrix1()[7];
-        matrix1.info();
-        matrix1(5)[8];
-        matrix1.info();
-
-        std::cout << std::endl
-                  << "Каноничная форма оператора присваивания" << std::endl;
+        // Каноничная форма оператора присваивания
         assert((((matrix1[9][9] = 99) = 88) = 77) == 77);
-        matrix1.info();
     }
 
     return 0;

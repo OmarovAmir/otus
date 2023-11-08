@@ -1,8 +1,10 @@
+#include <iostream>
 #include <matrix.hpp>
 
 int main()
 {
     {
+        std::cout << "Пример из задания" << std::endl;
         matrix<int, -1> matrix;
         assert(matrix.size() == 0); // все ячейки свободны
 
@@ -27,6 +29,7 @@ int main()
     }
 
     {
+        std::cout << std::endl;
         // Конструктор по умолчанию
         matrix<int, -1> matrix1;
         assert(matrix1.size() == 0);
@@ -88,6 +91,33 @@ int main()
         assert(matrix1[1][1] == 11);
         assert(matrix1[2][2] == 22);
         assert(matrix1[3][3] == 33);
+    }
+
+    {
+        std::cout << "Задание" << std::endl;
+        matrix<int, 0> matrix;
+        for (int i = 0; i < 10; ++i)
+        {
+            matrix[i][i] = i;
+            matrix[i][9 - i] = 9 - i;
+        }
+        for (int i = 1; i < 9; ++i)
+        {
+            for (int j = 1; j < 9; ++j)
+            {
+                std::cout << *matrix[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "" << matrix.size() << std::endl;
+        for (const auto& c : matrix)
+        {
+            int x;
+            int y;
+            int v;
+            std::tie(x, y, v) = c;
+            std::cout << "[" << x << "][" << y << "] = " << v << std::endl;
+        }
     }
 
     return 0;

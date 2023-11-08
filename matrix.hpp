@@ -105,7 +105,10 @@ struct matrix
 
     auto& operator=(const data_type& value)
     {
-        (*_data)[(*_index)] = value;
+        if (value != _default_value)
+        {
+            (*_data)[(*_index)] = value;
+        }
         -(*this);
         return *this;
     }

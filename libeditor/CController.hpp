@@ -11,16 +11,15 @@ class CController
   public:
     /**
      * @brief Конструктор
-     * 
+     *
      */
     explicit CController()
         : _documents{}, _fileManager{std::make_shared<CFileManager>()}
-    {
-    }
+    {}
 
     /**
      * @brief Деструктор
-     * 
+     *
      */
     ~CController()
     {
@@ -37,7 +36,7 @@ class CController
 
     /**
      * @brief Открыть документ
-     * 
+     *
      * @param[out] documentHandler Хендлер документа
      * @param[in] filePath Путь к документу
      * @return true Документ открыт
@@ -67,7 +66,7 @@ class CController
 
     /**
      * @brief Закрыть документ
-     * 
+     *
      * @param[in] documentHandler Хендлер документа
      * @return true Документ закрыт
      * @return false Документ не закрыт
@@ -91,7 +90,7 @@ class CController
 
     /**
      * @brief Добавить графический примитив
-     * 
+     *
      * @param[in] documentHandler Хендлер документа
      * @param[in] gpName Имя графического примитива
      * @return true Примитив добавлен
@@ -117,7 +116,7 @@ class CController
 
     /**
      * @brief Удалить графический примитив
-     * 
+     *
      * @param[in] documentHandler Хердлер документа
      * @param[in] gpIndex Индекс графического примитива
      * @return true Примитив удалён
@@ -144,20 +143,20 @@ class CController
   private:
     /**
      * @brief Документы
-     * 
+     *
      */
     std::map<uint64_t, std::shared_ptr<CDocument>> _documents;
 
     /**
      * @brief Файловый менеджер
-     * 
+     *
      */
     std::shared_ptr<CFileManager> _fileManager;
 
     /**
      * @brief Отрисовать содержимое документа
-     * 
-     * @param[in] document 
+     *
+     * @param[in] document
      */
     void drawDocument(const uint64_t& documentHandler)
     {

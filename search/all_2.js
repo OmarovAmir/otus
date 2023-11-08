@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['data_5ftype_0',['data_type',['../structmatrix.html#aee476b08fd3238e1f7e9c511347547ea',1,'matrix']]]
+  ['draw_0',['draw',['../classCDocument.html#a5b750c4d31a301a906521f5f8ad38a22',1,'CDocument::draw()'],['../classIGraphicPrimitive.html#a6aed013e3ef00113c9125c1b08d5f9aa',1,'IGraphicPrimitive::draw()']]]
 ];

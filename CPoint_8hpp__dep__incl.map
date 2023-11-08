@@ -1,0 +1,15 @@
+<map id="libeditor/CPoint.hpp" name="libeditor/CPoint.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="76,5,209,31"/>
+<area shape="rect" id="Node000002" href="$IGraphicPrimitive_8hpp.html" title=" " alt="" coords="45,79,240,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,46,145,79,140,79,140,46"/>
+<area shape="rect" id="Node000003" href="$CDocument_8hpp.html" title=" " alt="" coords="5,226,168,252"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="127,119,109,154,97,193,91,226,85,225,92,192,104,152,123,117"/>
+<area shape="rect" id="Node000006" href="$CFileManager_8hpp.html" title=" " alt="" coords="118,153,292,178"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="165,115,197,150,193,154,161,118"/>
+<area shape="rect" id="Node000004" href="$CController_8hpp.html" title=" " alt="" coords="66,300,224,326"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="108,262,137,298,133,301,104,266"/>
+<area shape="rect" id="Node000005" href="$main_8cpp.html" title=" " alt="" coords="109,374,182,399"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="148,341,148,373,143,373,143,341"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="174,189,108,228,105,223,171,184"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="202,194,182,253,156,301,151,298,177,251,197,192"/>
+</map>

@@ -1,9 +1,9 @@
 name: 'C++ CI'
 
 on:
-  # push:
-  #   branches:
-  #     - hw4
+  push:
+    branches:
+      - hw4
   workflow_dispatch:
 
 jobs:

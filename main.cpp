@@ -3,9 +3,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <stdexcept>
 #include <tuple>
-#include <type_traits>
 
 template <typename T, T default_value, std::size_t dimension = 2>
 struct matrix
@@ -13,12 +11,6 @@ struct matrix
     using data_type = T;
     using key_type = std::array<std::size_t, dimension>;
     using storage_type = std::map<key_type, data_type>;
-
-    std::shared_ptr<key_type> _index;
-    std::shared_ptr<storage_type> _data;
-    data_type _default_value;
-    std::size_t _level;
-    static constexpr std::size_t _max_level = dimension - 1;
 
     explicit matrix()
         : _index{std::make_shared<key_type>()}
@@ -164,17 +156,17 @@ struct matrix
 
     bool operator==(const data_type& value) const
     {
+        return !(*this != value);
+    }
+
+    bool operator!=(const data_type& value) const
+    {
         data_type res = _default_value;
         if (_data->find((*_index)) != _data->end())
         {
             res = (*_data)[(*_index)];
         }
-        return (res == value);
-    }
-
-    bool operator!=(const data_type& value) const
-    {
-        return (*this != value);
+        return (res != value);
     }
 
     void info() const
@@ -188,45 +180,129 @@ struct matrix
         std::cout << "] } _data: { Address: " << _data.get() << "; size: " << _data->size() << " }" << std::endl;
     }
 
-    // std::map<int, int> m;
-    // auto im = m.begin();
-    // im++;
-    // im--;
-    // ++im;
-    // --im;
-    // *im;
-    // im->first;
+    template <typename iterator_type>
+    struct iterator
+    {
+        explicit iterator(const iterator_type& iterator)
+            : _current{iterator}
+        {}
 
-    // struct iterator
-    // {
-    //     storage_type::iterator
-    // }
+        auto& operator++()
+        {
+            _current++;
+            return *this;
+        }
+
+        auto& operator--()
+        {
+            _current--;
+            return *this;
+        }
+
+        auto& operator++(int)
+        {
+            ++_current;
+            return *this;
+        }
+
+        auto& operator--(int)
+        {
+            --_current;
+            return *this;
+        }
+
+        auto operator*()
+        {
+            auto& pair = *_current;
+            return std::tuple_cat(pair.first, std::tie(pair.second));
+        }
+
+        bool operator==(const iterator& iterator) const
+        {
+            return !(*this != iterator);
+        }
+
+        bool operator!=(const iterator& iterator) const
+        {
+            return (_current != iterator._current);
+        }
+
+      private:
+        iterator_type _current;
+    };
+
+    auto begin()
+    {
+        return iterator<typename storage_type::iterator>(_data->begin());
+    }
+
+    auto end()
+    {
+        return iterator<typename storage_type::iterator>(_data->end());
+    }
+
+    auto cbegin()
+    {
+        return iterator<typename storage_type::const_iterator>(_data->cbegin());
+    }
+
+    auto cend()
+    {
+        return iterator<typename storage_type::const_iterator>(_data->cend());
+    }
+
+    auto rbegin()
+    {
+        return iterator<typename storage_type::reverse_iterator>(_data->rbegin());
+    }
+
+    auto rend()
+    {
+        return iterator<typename storage_type::reverse_iterator>(_data->rend());
+    }
+
+    auto crbegin()
+    {
+        return iterator<typename storage_type::const_reverse_iterator>(_data->crbegin());
+    }
+
+    auto crend()
+    {
+        return iterator<typename storage_type::const_reverse_iterator>(_data->crend());
+    }
+
+  private:
+    static constexpr std::size_t _max_level = dimension - 1;
+    std::shared_ptr<key_type> _index;
+    std::shared_ptr<storage_type> _data;
+    data_type _default_value;
+    std::size_t _level;
 };
 
 int main()
 {
     {
-        // matrix<int, -1> matrix;
-        // assert(matrix.size() == 0); // все ячейки свободны
+        matrix<int, -1> matrix;
+        assert(matrix.size() == 0); // все ячейки свободны
 
-        // auto a = matrix[0][0];
-        // assert(a == -1);
-        // assert(matrix.size() == 0);
+        auto a = matrix[0][0];
+        assert(a == -1);
+        assert(matrix.size() == 0);
 
-        // matrix[100][100] = 314;
-        // assert(matrix[100][100] == 314);
-        // assert(matrix.size() == 1);
+        matrix[100][100] = 314;
+        assert(matrix[100][100] == 314);
+        assert(matrix.size() == 1);
 
-        // // выведется одна строка
-        // // 100100314
-        // for (auto c : matrix)
-        // {
-        //     int matrix2;
-        //     int y;
-        //     int v;
-        //     std::tie(matrix2, y, v) = c;
-        //     std::cout << matrix2 << y << v << std::endl;
-        // }
+        // выведется одна строка
+        // 100100314
+        for (const auto c : matrix)
+        {
+            int x;
+            int y;
+            int v;
+            std::tie(x, y, v) = c;
+            std::cout << x << y << v << std::endl;
+        }
     }
 
     {
@@ -341,20 +417,6 @@ int main()
                   << "Каноничная форма оператора присваивания" << std::endl;
         assert((((matrix1[9][9] = 99) = 88) = 77) == 77);
         matrix1.info();
-    }
-
-    {
-        std::map<std::array<std::size_t, 3>, int> m;
-        m[{1,2,3}] = 5;
-        auto p = *m.begin();
-        std::size_t _1, _2, _3;
-        int _4;
-        std::array<std::size_t, 3> _k;
-        int _v;
-        std::tie(_k, _v) = p;
-        auto x = std::tuple_cat(_k, std::tie(_v));
-        std::tie(_1, _2, _3, _4) = x;
-        std::cout << _1 << " " << _2 << " " << _3 << " " << _4 << std::endl;
     }
 
     return 0;

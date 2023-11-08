@@ -5,94 +5,164 @@
 #include <memory>
 #include <tuple>
 
-template <typename T, T default_value, std::size_t dimension = 2>
+/**
+ * @brief Контейнер представляющий из себя N-мерную матрицу
+ *
+ * @tparam T тип данных хранимый в матрице
+ * @tparam default_value значение по умолчанию
+ * @tparam dimension_number число измерений матрицы
+ */
+template <typename T, T default_value, std::size_t dimension_number = 2>
 struct matrix
 {
+    /**
+     * @brief Тип данных хранилища
+     *
+     */
     using data_type = T;
-    using key_type = std::array<std::size_t, dimension>;
+
+    /**
+     * @brief Тип ключа хранилища
+     *
+     */
+    using key_type = std::array<std::size_t, dimension_number>;
+
+    /**
+     * @brief Тип хранилища данных
+     *
+     */
     using storage_type = std::map<key_type, data_type>;
 
+    /**
+     * @brief Конструктор по умолчанию
+     *
+     */
     explicit matrix()
         : _index{std::make_shared<key_type>()}
         , _data{std::make_shared<storage_type>()}
-        , _default_value{default_value}
-        , _level{0}
+        , _dimension{0}
     {}
 
+    /**
+     * @brief Копирующий конструктор с параметрами
+     *
+     * @param index Указатель на индекс
+     * @param data Указатель на данные
+     * @param _default_value Значение по умолчанию
+     */
     explicit matrix(const std::shared_ptr<key_type>& index,
-                    const std::shared_ptr<storage_type>& data,
-                    data_type _default_value = default_value)
+                    const std::shared_ptr<storage_type>& data)
         : _index{index}
         , _data{data}
-        , _default_value{_default_value}
-        , _level{0}
+        , _dimension{0}
     {}
 
+    /**
+     * @brief Перемещающий конструктор с параметрами
+     *
+     * @param index Указатель на индекс
+     * @param data Указатель на данные
+     * @param _default_value Значение по умолчанию
+     */
     explicit matrix(std::shared_ptr<key_type>&& index,
-                    std::shared_ptr<storage_type>&& data,
-                    data_type _default_value = default_value)
+                    std::shared_ptr<storage_type>&& data)
         : _index{std::move(index)}
         , _data{std::move(data)}
-        , _default_value{_default_value}
-        , _level{0}
+        , _dimension{0}
     {}
 
+    /**
+     * @brief Копирующий конструктор с параметрами
+     *
+     * @param index Индекс
+     * @param data Данные
+     * @param _default_value Значение по умолчанию
+     */
     explicit matrix(const key_type& index,
-                    const storage_type& data,
-                    data_type _default_value = default_value)
+                    const storage_type& data)
         : matrix(std::make_shared<key_type>(index),
-                 std::make_shared<storage_type>(data),
-                 _default_value)
+                 std::make_shared<storage_type>(data))
     {}
 
+    /**
+     * @brief Перемещающий конструктор с параметрами
+     *
+     * @param index Индекс
+     * @param data Данные
+     * @param _default_value Значение по умолчанию
+     */
     explicit matrix(key_type&& index,
-                    storage_type&& data,
-                    data_type _default_value = default_value)
+                    storage_type&& data)
         : matrix(std::make_shared<key_type>(std::move(index)),
-                 std::make_shared<storage_type>(std::move(data)),
-                 _default_value)
+                 std::make_shared<storage_type>(std::move(data)))
     {}
 
-    matrix(const matrix<T, default_value, dimension>& other)
+    /**
+     * @brief Копирующий конструктор
+     *
+     * @param other Другой экземпляр матрицы
+     */
+    matrix(const matrix<T, default_value, dimension_number>& other)
         : matrix(*(other._index),
-                 *(other._data),
-                 other._default_value)
+                 *(other._data))
     {}
 
-    matrix(matrix<T, default_value, dimension>&& other)
+    /**
+     * @brief Перемещающий конструктор
+     *
+     * @param other Другой экземпляр матрицы
+     */
+    matrix(matrix<T, default_value, dimension_number>&& other)
         : matrix(std::move(*(other._index)),
-                 std::move(*(other._data)),
-                 other._default_value)
+                 std::move(*(other._data)))
     {}
 
-    auto& operator=(const matrix<T, default_value, dimension>& other)
+    /**
+     * @brief Копирующий оператор присванивания
+     *
+     * @param other Другой экземпляр матрицы
+     */
+    auto& operator=(const matrix<T, default_value, dimension_number>& other)
     {
         *(this->_index) = {*(other._index)};
         *(this->_data) = {*(other._data)};
-        this->_default_value = other._default_value;
-        this->_level = 0;
+        this->_dimension = 0;
         return *this;
     }
 
-    auto& operator=(matrix<T, default_value, dimension>&& other)
+    /**
+     * @brief Перемещающий оператор присванивания
+     *
+     * @param other Другой экземпляр матрицы
+     */
+    auto& operator=(matrix<T, default_value, dimension_number>&& other)
     {
         *(this->_index) = std::move(*(other._index));
         *(this->_data) = std::move(*(other._data));
-        this->_default_value = other._default_value;
-        this->_level = 0;
+        this->_dimension = 0;
         return *this;
     }
 
-    auto& operator()(const std::size_t level = 0)
+    /**
+     * @brief Оператор для установки текущего измерения
+     *
+     * @param dimension Измерения
+     */
+    auto& operator()(const std::size_t dimension = 0)
     {
-        _level = (level > _max_level) ? _max_level : level;
+        _dimension = (dimension > _max_dimension) ? _max_dimension : dimension;
         return *this;
     }
 
+    /**
+     * @brief Установка значения индекса для текущего измерения
+     *
+     * @param n Значение индекса для текущего измерения
+     */
     auto& operator[](const std::size_t n)
     {
-        (*_index)[_level] = n;
-        if (_level != _max_level)
+        (*_index)[_dimension] = n;
+        if (_dimension != _max_dimension)
         {
             ++(*this);
         }
@@ -103,46 +173,79 @@ struct matrix
         return *this;
     }
 
+    /**
+     * @brief Оператор для установки значения по индексу
+     *
+     * @param value Значение по индексу
+     */
     auto& operator=(const data_type& value)
     {
         if (value != _default_value)
         {
             (*_data)[(*_index)] = value;
         }
+        else
+        {
+            if (auto current_value = _data->find((*_index)); current_value != _data->end())
+            {
+                _data->erase(current_value);
+            }
+        }
         -(*this);
         return *this;
     }
 
+    /**
+     * @brief Переход к максимальному измерению
+     *
+     */
     auto& operator+()
     {
-        _level = _max_level;
+        _dimension = _max_dimension;
         return *this;
     }
 
+    /**
+     * @brief Переход к минимальному измерению
+     *
+     */
     auto& operator-()
     {
-        _level = 0;
+        _dimension = 0;
         return *this;
     }
 
+    /**
+     * @brief Переход к следующему измерению
+     *
+     */
     auto& operator++()
     {
-        if (_level != _max_level)
+        if (_dimension != _max_dimension)
         {
-            ++_level;
+            ++_dimension;
         }
         return *this;
     }
 
+    /**
+     * @brief Переход к предыдущему измерению
+     *
+     */
     auto& operator--()
     {
-        if (_level)
+        if (_dimension)
         {
-            --_level;
+            --_dimension;
         }
         return *this;
     }
 
+    /**
+     * @brief Получить значение по текущему индексу
+     *
+     * @return Значение по текущему индексу
+     */
     data_type operator*() const
     {
         if (_data->find((*_index)) != _data->end())
@@ -152,16 +255,35 @@ struct matrix
         return _default_value;
     }
 
+    /**
+     * @brief Получить количество хранимых значений
+     *
+     * @return Количество хранимых значений
+     */
     std::size_t size() const
     {
         return _data->size();
     }
 
+    /**
+     * @brief Оператор проверки равенства
+     *
+     * @param value Значение по текущему индексу
+     * @return true Значения равны
+     * @return false Значения не равны
+     */
     bool operator==(const data_type& value) const
     {
         return !(*this != value);
     }
 
+    /**
+     * @brief Оператор проверки неравенства
+     *
+     * @param value Значение по текущему индексу
+     * @return true Значения не равны
+     * @return false Значения равны
+     */
     bool operator!=(const data_type& value) const
     {
         data_type res = _default_value;
@@ -172,101 +294,195 @@ struct matrix
         return (res != value);
     }
 
+    /**
+     * @brief Итератор
+     *
+     * @tparam iterator_type тип базового итератора
+     */
     template <typename iterator_type>
     struct iterator
     {
+        /**
+         * @brief Копирующий конструктор с параметрами
+         *
+         * @param iterator Значение базового итератора
+         */
         explicit iterator(const iterator_type& iterator)
             : _current{iterator}
         {}
 
+        /**
+         * @brief Перемещающий конструктор с параметрами
+         *
+         * @param iterator Значение базового итератора
+         */
+        explicit iterator(iterator_type&& iterator)
+            : _current{std::move(iterator)}
+        {}
+
+        /**
+         * @brief Постфиксный инкремент итератора
+         *
+         */
         auto& operator++()
         {
             _current++;
             return *this;
         }
 
+        /**
+         * @brief Постфиксный декремент итератора
+         *
+         */
         auto& operator--()
         {
             _current--;
             return *this;
         }
 
-        auto& operator++(int)
-        {
-            ++_current;
-            return *this;
-        }
-
-        auto& operator--(int)
-        {
-            --_current;
-            return *this;
-        }
-
+        /**
+         * @brief Разыменовывание итератора
+         *
+         * @return std::tuple<index[0], ... , index[dimension_number - 1], T value>
+         */
         auto operator*()
         {
             auto& pair = *_current;
             return std::tuple_cat(pair.first, std::tie(pair.second));
         }
 
+        /**
+         * @brief Оператор проверки равенства итераторов
+         *
+         * @param iterator Итератор
+         * @return true Итераторы равны
+         * @return false Итераторы не равны
+         */
         bool operator==(const iterator& iterator) const
         {
             return !(*this != iterator);
         }
 
+        /**
+         * @brief Оператор проверки неравенства итераторов
+         *
+         * @param iterator Итератор
+         * @return true Итераторы не равны
+         * @return false Итераторы равны
+         */
         bool operator!=(const iterator& iterator) const
         {
             return (_current != iterator._current);
         }
 
       private:
+        /**
+         * @brief Базовый итератор
+         *
+         */
         iterator_type _current;
     };
 
+    /**
+     * @brief Получить итератор на начало
+     *
+     */
     auto begin()
     {
         return iterator<typename storage_type::iterator>(_data->begin());
     }
 
+    /**
+     * @brief Получить итератор на конец
+     *
+     */
     auto end()
     {
         return iterator<typename storage_type::iterator>(_data->end());
     }
 
+    /**
+     * @brief Получить константный итератор на начало
+     *
+     */
     auto cbegin()
     {
         return iterator<typename storage_type::const_iterator>(_data->cbegin());
     }
 
+    /**
+     * @brief Получить константный итератор на конец
+     *
+     */
     auto cend()
     {
         return iterator<typename storage_type::const_iterator>(_data->cend());
     }
 
+    /**
+     * @brief Получить обратный итератор на начало
+     *
+     */
     auto rbegin()
     {
         return iterator<typename storage_type::reverse_iterator>(_data->rbegin());
     }
 
+    /**
+     * @brief Получить обратный итератор на конец
+     *
+     */
     auto rend()
     {
         return iterator<typename storage_type::reverse_iterator>(_data->rend());
     }
 
+    /**
+     * @brief Получить константный обратный итератор на начало
+     *
+     */
     auto crbegin()
     {
         return iterator<typename storage_type::const_reverse_iterator>(_data->crbegin());
     }
 
+    /**
+     * @brief Получить константный обратный итератор на конец
+     *
+     */
     auto crend()
     {
         return iterator<typename storage_type::const_reverse_iterator>(_data->crend());
     }
 
   private:
-    static constexpr std::size_t _max_level = dimension - 1;
+    /**
+     * @brief Значение максимального измерения
+     *
+     */
+    static constexpr std::size_t _max_dimension = dimension_number - 1;
+
+    /**
+     * @brief Значение по умолчанию
+     *
+     */
+    static constexpr data_type _default_value = default_value;
+
+    /**
+     * @brief Индекс
+     *
+     */
     std::shared_ptr<key_type> _index;
+
+    /**
+     * @brief Хранилище
+     *
+     */
     std::shared_ptr<storage_type> _data;
-    data_type _default_value;
-    std::size_t _level;
+
+    /**
+     * @brief Текущее измерение
+     *
+     */
+    std::size_t _dimension;
 };

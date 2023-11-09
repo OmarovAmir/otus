@@ -244,38 +244,32 @@ int main()
     std::chrono::milliseconds elapsed_ms_matrix;
     std::chrono::milliseconds elapsed_ms_unordered_matrix;
     {
-        std::cout << "Создание диагональной матрицы из 1000000 элементов (matrix)" << std::endl;
+        std::cout << "Создание диагональной матрицы из 5000000 элементов (matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
         matrix<std::size_t, 0> matrix;
-        for (std::size_t i = 0; i < 1000000; ++i)
+        for (std::size_t i = 0; i < 5000000; ++i)
         {
             matrix[i][i] = i;
         }
-        for (const auto& c : matrix)
+        for (std::size_t i = 0; i < 5000000; ++i)
         {
-            std::size_t x;
-            std::size_t y;
-            std::size_t v;
-            std::tie(x, y, v) = c;
+            *matrix[i][i];
         }
         auto end = std::chrono::steady_clock::now();
         elapsed_ms_matrix = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
     }
 
     {
-        std::cout << "Создание диагональной матрицы из 1000000 элементов (unordered_matrix)" << std::endl;
+        std::cout << "Создание диагональной матрицы из 5000000 элементов (unordered_matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
         unordered_matrix<std::size_t, 0> matrix;
-        for (std::size_t i = 0; i < 1000000; ++i)
+        for (std::size_t i = 0; i < 5000000; ++i)
         {
             matrix[i][i] = i;
         }
-        for (const auto& c : matrix)
+        for (std::size_t i = 0; i < 5000000; ++i)
         {
-            std::size_t x;
-            std::size_t y;
-            std::size_t v;
-            std::tie(x, y, v) = c;
+            *matrix[i][i];
         }
         auto end = std::chrono::steady_clock::now();
         elapsed_ms_unordered_matrix = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);

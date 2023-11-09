@@ -321,23 +321,43 @@ struct matrix
         {}
 
         /**
-         * @brief Постфиксный инкремент итератора
+         * @brief Префиксный инкремент итератора
          *
          */
         auto& operator++()
         {
-            _current++;
+            ++_current;
             return *this;
+        }
+
+        /**
+         * @brief Префиксный декремент итератора
+         *
+         */
+        auto& operator--()
+        {
+            --_current;
+            return *this;
+        }
+
+        /**
+         * @brief Постфиксный инкремент итератора
+         *
+         */
+        auto operator++(int)
+        {
+            iterator result{_current++};
+            return result;
         }
 
         /**
          * @brief Постфиксный декремент итератора
          *
          */
-        auto& operator--()
+        auto operator--(int)
         {
-            _current--;
-            return *this;
+            iterator result{_current--};
+            return result;
         }
 
         /**
@@ -349,6 +369,15 @@ struct matrix
         {
             auto& pair = *_current;
             return std::tuple_cat(pair.first, std::tie(pair.second));
+        }
+
+        /**
+         * @brief Обращению к члену структуры хранилища
+         *
+         */
+        auto operator->()
+        {
+            return _current.operator->();
         }
 
         /**

@@ -1,13 +1,13 @@
-#ifndef D5965902_5DB8_4923_88F6_4C97C0D86555
-#define D5965902_5DB8_4923_88F6_4C97C0D86555
+#ifndef D1145E86_E882_4709_83CF_AD6010409484
+#define D1145E86_E882_4709_83CF_AD6010409484
 
 #include <array>
 #include <cassert>
 #include <iostream>
-#include <map>
+#include <bitset>
+#include <unordered_map>
 #include <memory>
 #include <tuple>
-
 
 /**
  * @brief Контейнер представляющий из себя N-мерную матрицу
@@ -17,7 +17,7 @@
  * @tparam dimension_number число измерений матрицы
  */
 template <typename T, T default_value, std::size_t dimension_number = 2>
-struct matrix
+struct unordered_matrix
 {
     /**
      * @brief Тип индекса
@@ -26,10 +26,22 @@ struct matrix
     using index_type = std::array<std::size_t, dimension_number>;
 
     /**
+     * @brief Хешируемый тип данных
+     * 
+     */
+    using hash_data_type = std::bitset<dimension_number * sizeof(std::size_t) * 8>;
+
+    /**
+     * @brief Тип хэш-функции хранилища
+     *
+     */
+    using hash_type = std::hash<hash_data_type>;
+
+    /**
      * @brief Тип ключа хранилища
      *
      */
-    using key_type = index_type;
+    using key_type = hash_data_type;
 
     /**
      * @brief Тип данных хранилища
@@ -41,13 +53,13 @@ struct matrix
      * @brief Тип хранилища данных
      *
      */
-    using storage_type = std::map<key_type, data_type>;
+    using storage_type = std::unordered_map<key_type, data_type, hash_type>;
 
     /**
      * @brief Конструктор по умолчанию
      *
      */
-    explicit matrix()
+    explicit unordered_matrix()
         : _index{std::make_shared<index_type>()}
         , _data{std::make_shared<storage_type>()}
         , _dimension{0}
@@ -60,7 +72,7 @@ struct matrix
      * @param data Указатель на данные
      * @param _default_value Значение по умолчанию
      */
-    explicit matrix(const std::shared_ptr<index_type>& index,
+    explicit unordered_matrix(const std::shared_ptr<index_type>& index,
                     const std::shared_ptr<storage_type>& data)
         : _index{index}
         , _data{data}
@@ -74,7 +86,7 @@ struct matrix
      * @param data Указатель на данные
      * @param _default_value Значение по умолчанию
      */
-    explicit matrix(std::shared_ptr<index_type>&& index,
+    explicit unordered_matrix(std::shared_ptr<index_type>&& index,
                     std::shared_ptr<storage_type>&& data)
         : _index{std::move(index)}
         , _data{std::move(data)}
@@ -88,9 +100,9 @@ struct matrix
      * @param data Данные
      * @param _default_value Значение по умолчанию
      */
-    explicit matrix(const index_type& index,
+    explicit unordered_matrix(const index_type& index,
                     const storage_type& data)
-        : matrix(std::make_shared<index_type>(index),
+        : unordered_matrix(std::make_shared<index_type>(index),
                  std::make_shared<storage_type>(data))
     {}
 
@@ -101,9 +113,9 @@ struct matrix
      * @param data Данные
      * @param _default_value Значение по умолчанию
      */
-    explicit matrix(index_type&& index,
+    explicit unordered_matrix(index_type&& index,
                     storage_type&& data)
-        : matrix(std::make_shared<index_type>(std::move(index)),
+        : unordered_matrix(std::make_shared<index_type>(std::move(index)),
                  std::make_shared<storage_type>(std::move(data)))
     {}
 
@@ -112,8 +124,8 @@ struct matrix
      *
      * @param other Другой экземпляр матрицы
      */
-    matrix(const matrix<T, default_value, dimension_number>& other)
-        : matrix(*(other._index),
+    unordered_matrix(const unordered_matrix<T, default_value, dimension_number>& other)
+        : unordered_matrix(*(other._index),
                  *(other._data))
     {}
 
@@ -122,17 +134,43 @@ struct matrix
      *
      * @param other Другой экземпляр матрицы
      */
-    matrix(matrix<T, default_value, dimension_number>&& other)
-        : matrix(std::move(*(other._index)),
+    unordered_matrix(unordered_matrix<T, default_value, dimension_number>&& other)
+        : unordered_matrix(std::move(*(other._index)),
                  std::move(*(other._data)))
     {}
+
+    static constexpr key_type index_to_key(const index_type& index)
+    {
+        key_type key{};
+        for (const auto& i: index)
+        {
+            key <<= bitset_base_data_type;
+            key |= i;
+        }
+        return key;
+    }
+
+    static constexpr index_type key_to_index(const key_type& key)
+    {
+        index_type index{};
+        for (std::size_t i = 0; i < dimension_number; ++i)
+        {
+            key_type indexPart = (key >> ((dimension_number - i - 1) * bitset_base_data_type));
+            for (std::size_t bn = 0; bn < bitset_base_data_type; ++bn)
+            {
+                index[i] <<= 1;
+                index[i] |= indexPart[bitset_base_data_type - bn - 1]; // indexPart.to_ulong();
+            }
+        }
+        return index;
+    }
 
     /**
      * @brief Копирующий оператор присванивания
      *
      * @param other Другой экземпляр матрицы
      */
-    auto& operator=(const matrix<T, default_value, dimension_number>& other)
+    auto& operator=(const unordered_matrix<T, default_value, dimension_number>& other)
     {
         *(this->_index) = {*(other._index)};
         *(this->_data) = {*(other._data)};
@@ -145,7 +183,7 @@ struct matrix
      *
      * @param other Другой экземпляр матрицы
      */
-    auto& operator=(matrix<T, default_value, dimension_number>&& other)
+    auto& operator=(unordered_matrix<T, default_value, dimension_number>&& other)
     {
         *(this->_index) = std::move(*(other._index));
         *(this->_data) = std::move(*(other._data));
@@ -190,13 +228,14 @@ struct matrix
      */
     auto& operator=(const data_type& value)
     {
+        key_type key = index_to_key(*_index);
         if (value != _default_value)
         {
-            (*_data)[(*_index)] = value;
+            (*_data)[key] = value;
         }
         else
         {
-            if (auto current_value = _data->find((*_index)); current_value != _data->end())
+            if (auto current_value = _data->find(key); current_value != _data->end())
             {
                 _data->erase(current_value);
             }
@@ -258,9 +297,11 @@ struct matrix
      */
     data_type operator*() const
     {
-        if (_data->find((*_index)) != _data->end())
+        key_type key = index_to_key(*_index);
+        auto finded = _data->find(key);
+        if (finded != _data->end())
         {
-            return (*_data)[(*_index)];
+            return finded->second;
         }
         return _default_value;
     }
@@ -297,9 +338,11 @@ struct matrix
     bool operator!=(const data_type& value) const
     {
         data_type res = _default_value;
-        if (_data->find((*_index)) != _data->end())
+        key_type key = index_to_key(*_index);
+        auto finded = _data->find(key);
+        if (finded != _data->end())
         {
-            res = (*_data)[(*_index)];
+            res = finded->second;
         }
         return (res != value);
     }
@@ -378,7 +421,8 @@ struct matrix
         auto operator*() const
         {
             auto& pair = *_current;
-            return std::tuple_cat(pair.first, std::tie(pair.second));
+            index_type index = key_to_index(pair.first);
+            return std::tuple_cat(index, std::tie(pair.second));
         }
 
         /**
@@ -508,6 +552,12 @@ struct matrix
     static constexpr data_type _default_value = default_value;
 
     /**
+     * @brief Количество бит базового типа данных битовой последовательности
+     * 
+     */
+    static constexpr std::size_t bitset_base_data_type = sizeof(std::size_t) * 8;
+
+    /**
      * @brief Индекс
      *
      */
@@ -526,4 +576,4 @@ struct matrix
     std::size_t _dimension;
 };
 
-#endif /* D5965902_5DB8_4923_88F6_4C97C0D86555 */
+#endif /* D1145E86_E882_4709_83CF_AD6010409484 */

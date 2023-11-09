@@ -8,7 +8,6 @@
 #include <memory>
 #include <tuple>
 
-
 /**
  * @brief Контейнер представляющий из себя N-мерную матрицу
  *

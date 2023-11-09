@@ -2,12 +2,12 @@
 #define D1145E86_E882_4709_83CF_AD6010409484
 
 #include <array>
+#include <bitset>
 #include <cassert>
 #include <iostream>
-#include <bitset>
-#include <unordered_map>
 #include <memory>
 #include <tuple>
+#include <unordered_map>
 
 /**
  * @brief Контейнер представляющий из себя N-мерную матрицу
@@ -27,7 +27,7 @@ struct unordered_matrix
 
     /**
      * @brief Хешируемый тип данных
-     * 
+     *
      */
     using hash_data_type = std::bitset<dimension_number * sizeof(std::size_t) * 8>;
 
@@ -73,7 +73,7 @@ struct unordered_matrix
      * @param _default_value Значение по умолчанию
      */
     explicit unordered_matrix(const std::shared_ptr<index_type>& index,
-                    const std::shared_ptr<storage_type>& data)
+                              const std::shared_ptr<storage_type>& data)
         : _index{index}
         , _data{data}
         , _dimension{0}
@@ -87,7 +87,7 @@ struct unordered_matrix
      * @param _default_value Значение по умолчанию
      */
     explicit unordered_matrix(std::shared_ptr<index_type>&& index,
-                    std::shared_ptr<storage_type>&& data)
+                              std::shared_ptr<storage_type>&& data)
         : _index{std::move(index)}
         , _data{std::move(data)}
         , _dimension{0}
@@ -101,9 +101,9 @@ struct unordered_matrix
      * @param _default_value Значение по умолчанию
      */
     explicit unordered_matrix(const index_type& index,
-                    const storage_type& data)
+                              const storage_type& data)
         : unordered_matrix(std::make_shared<index_type>(index),
-                 std::make_shared<storage_type>(data))
+                           std::make_shared<storage_type>(data))
     {}
 
     /**
@@ -114,9 +114,9 @@ struct unordered_matrix
      * @param _default_value Значение по умолчанию
      */
     explicit unordered_matrix(index_type&& index,
-                    storage_type&& data)
+                              storage_type&& data)
         : unordered_matrix(std::make_shared<index_type>(std::move(index)),
-                 std::make_shared<storage_type>(std::move(data)))
+                           std::make_shared<storage_type>(std::move(data)))
     {}
 
     /**
@@ -126,7 +126,7 @@ struct unordered_matrix
      */
     unordered_matrix(const unordered_matrix<T, default_value, dimension_number>& other)
         : unordered_matrix(*(other._index),
-                 *(other._data))
+                           *(other._data))
     {}
 
     /**
@@ -136,13 +136,13 @@ struct unordered_matrix
      */
     unordered_matrix(unordered_matrix<T, default_value, dimension_number>&& other)
         : unordered_matrix(std::move(*(other._index)),
-                 std::move(*(other._data)))
+                           std::move(*(other._data)))
     {}
 
     static constexpr key_type index_to_key(const index_type& index)
     {
         key_type key{};
-        for (const auto& i: index)
+        for (const auto& i : index)
         {
             key <<= bitset_base_data_type;
             key |= i;
@@ -155,12 +155,7 @@ struct unordered_matrix
         index_type index{};
         for (std::size_t i = 0; i < dimension_number; ++i)
         {
-            key_type indexPart = (key >> ((dimension_number - i - 1) * bitset_base_data_type));
-            for (std::size_t bn = 0; bn < bitset_base_data_type; ++bn)
-            {
-                index[i] <<= 1;
-                index[i] |= indexPart[bitset_base_data_type - bn - 1]; // indexPart.to_ulong();
-            }
+            index[i] = ((key >> ((dimension_number - i - 1) * bitset_base_data_type)) & mask).to_ulong();
         }
         return index;
     }
@@ -553,9 +548,15 @@ struct unordered_matrix
 
     /**
      * @brief Количество бит базового типа данных битовой последовательности
-     * 
+     *
      */
     static constexpr std::size_t bitset_base_data_type = sizeof(std::size_t) * 8;
+
+    /**
+     * @brief Битовая маска размера std::size_t
+     * 
+     */
+    static constexpr key_type mask{SIZE_MAX};
 
     /**
      * @brief Индекс

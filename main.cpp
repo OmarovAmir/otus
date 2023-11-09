@@ -1,80 +1,11 @@
+#include <chrono>
 #include <iostream>
 #include <matrix.hpp>
 #include <unordered_matrix.hpp>
-#include <bitset>
 
 int main()
 {
     {
-        std::bitset<sizeof(std::size_t) * 8 * 5> x;
-        std::array<std::size_t, 5> a;
-        std::size_t k = 10;
-        for (auto& i: a)
-        {
-            i = k;
-            k *= 10;
-        }
-        for (const auto& i: a)
-        {
-            x <<= sizeof(i) * 8;
-            x |= i;
-        }
-        std::hash<decltype(x)> hashBits;
-        [[maybe_unused]]auto h = hashBits(x);
-    }
-
-    {
-        std::cout << "Пример из задания" << std::endl;
-        matrix<int, -1> matrix;
-        assert(matrix.size() == 0); // все ячейки свободны
-
-        auto a = matrix[0][0];
-        assert(a == -1);
-        assert(matrix.size() == 0);
-
-        matrix[100][100] = 314;
-        assert(matrix[100][100] == 314);
-        assert(matrix.size() == 1);
-
-        // выведется одна строка
-        // 100100314
-        for (const auto c : matrix)
-        {
-            int x;
-            int y;
-            int v;
-            std::tie(x, y, v) = c;
-            std::cout << x << y << v << std::endl;
-        }
-    }
-
-    {
-        std::cout << "Пример из задания" << std::endl;
-        unordered_matrix<int, -1> matrix;
-        assert(matrix.size() == 0); // все ячейки свободны
-
-        auto a = matrix[0][0];
-        assert(a == -1);
-        assert(matrix.size() == 0);
-
-        matrix[100][100] = 314;
-        assert(matrix[100][100] == 314);
-        assert(matrix.size() == 1);
-
-        // выведется одна строка
-        // 100100314
-        for (const auto c : matrix)
-        {
-            int x;
-            int y;
-            int v;
-            std::tie(x, y, v) = c;
-            std::cout << x << y << v << std::endl;
-        }
-    }
-
-    {
-        std::cout << std::endl;
         // Конструктор по умолчанию
         matrix<int, -1> matrix1;
         assert(matrix1.size() == 0);
@@ -139,7 +70,123 @@ int main()
     }
 
     {
-        std::cout << "Задание" << std::endl;
+        // Конструктор по умолчанию
+        unordered_matrix<int, -1> matrix1;
+        assert(matrix1.size() == 0);
+        matrix1[0][0] = 0;
+        assert(matrix1.size() == 1);
+
+        // Конструктор копирования
+        auto matrix2 = matrix1;
+        assert(matrix1.size() == 1);
+        assert(matrix2.size() == 1);
+        matrix1[1][1] = 11;
+        assert(matrix1.size() == 2);
+        assert(matrix2.size() == 1);
+
+        // Конструктор перемещения
+        auto matrix3 = std::move(matrix2);
+        assert(matrix2.size() == 0);
+        assert(matrix3.size() == 1);
+        matrix2[1][1] = 11;
+        assert(matrix2.size() == 1);
+        assert(matrix3.size() == 1);
+
+        // Конструктор копирования
+        auto matrix4{matrix3};
+        assert(matrix3.size() == 1);
+        assert(matrix4.size() == 1);
+        matrix3[1][1] = 11;
+        assert(matrix3.size() == 2);
+        assert(matrix4.size() == 1);
+
+        // Конструктор перемещения
+        auto matrix5{std::move(matrix4)};
+        assert(matrix4.size() == 0);
+        assert(matrix5.size() == 1);
+        matrix4[1][1] = 11;
+        assert(matrix4.size() == 1);
+        assert(matrix5.size() == 1);
+
+        // Копирующий оператор присваивания
+        matrix1[2][2] = 11;
+        assert(matrix1.size() == 3);
+        assert(matrix5.size() == 1);
+        matrix5 = matrix1;
+        assert(matrix1.size() == 3);
+        assert(matrix5.size() == 3);
+
+        // Перемещающий оператор присваивания
+        matrix1[3][3] = 11;
+        assert(matrix1.size() == 4);
+        assert(matrix5.size() == 3);
+        matrix5 = std::move(matrix1);
+        assert(matrix1.size() == 0);
+        assert(matrix5.size() == 4);
+
+        // Каноничная форма оператора присваивания
+        assert((((matrix1[9][9] = 99) = 88) = 77) == 77);
+        (((matrix1[0][0] = 0)[1][1] = 11)[2][2] = 22)[3][3] = 33;
+        assert(matrix1[0][0] == 0);
+        assert(matrix1[1][1] == 11);
+        assert(matrix1[2][2] == 22);
+        assert(matrix1[3][3] == 33);
+    }
+
+    {
+        std::cout << "Пример из задания (matrix)" << std::endl;
+        matrix<int, -1> matrix;
+        assert(matrix.size() == 0); // все ячейки свободны
+
+        auto a = matrix[0][0];
+        assert(a == -1);
+        assert(matrix.size() == 0);
+
+        matrix[100][100] = 314;
+        assert(matrix[100][100] == 314);
+        assert(matrix.size() == 1);
+
+        // выведется одна строка
+        // 100100314
+        for (const auto c : matrix)
+        {
+            int x;
+            int y;
+            int v;
+            std::tie(x, y, v) = c;
+            std::cout << x << y << v << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    {
+        std::cout << "Пример из задания (unordered_matrix)" << std::endl;
+        unordered_matrix<int, -1> matrix;
+        assert(matrix.size() == 0); // все ячейки свободны
+
+        auto a = matrix[0][0];
+        assert(a == -1);
+        assert(matrix.size() == 0);
+
+        matrix[100][100] = 314;
+        assert(matrix[100][100] == 314);
+        assert(matrix.size() == 1);
+
+        // выведется одна строка
+        // 100100314
+        for (const auto c : matrix)
+        {
+            int x;
+            int y;
+            int v;
+            std::tie(x, y, v) = c;
+            std::cout << x << y << v << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    {
+        std::cout << "Задание (matrix)" << std::endl;
         matrix<int, 0> matrix;
         for (int i = 0; i < 10; ++i)
         {
@@ -154,7 +201,7 @@ int main()
             }
             std::cout << std::endl;
         }
-        std::cout << "" << matrix.size() << std::endl;
+        std::cout << matrix.size() << std::endl;
         for (const auto& c : matrix)
         {
             int x;
@@ -163,7 +210,78 @@ int main()
             std::tie(x, y, v) = c;
             std::cout << "[" << x << "][" << y << "] = " << v << std::endl;
         }
+        std::cout << std::endl;
     }
+
+    {
+        std::cout << "Задание (unordered_matrix)" << std::endl;
+        unordered_matrix<int, 0> matrix;
+        for (int i = 0; i < 10; ++i)
+        {
+            matrix[i][i] = i;
+            matrix[i][9 - i] = 9 - i;
+        }
+        for (int i = 1; i < 9; ++i)
+        {
+            for (int j = 1; j < 9; ++j)
+            {
+                std::cout << *matrix[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << matrix.size() << std::endl;
+        for (const auto& c : matrix)
+        {
+            int x;
+            int y;
+            int v;
+            std::tie(x, y, v) = c;
+            std::cout << "[" << x << "][" << y << "] = " << v << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    std::chrono::milliseconds elapsed_ms_matrix;
+    std::chrono::milliseconds elapsed_ms_unordered_matrix;
+    {
+        std::cout << "Создание диагональной матрицы из 1000000 элементов (matrix)" << std::endl;
+        auto begin = std::chrono::steady_clock::now();
+        matrix<std::size_t, 0> matrix;
+        for (std::size_t i = 0; i < 1000000; ++i)
+        {
+            matrix[i][i] = i;
+        }
+        for (const auto& c : matrix)
+        {
+            std::size_t x;
+            std::size_t y;
+            std::size_t v;
+            std::tie(x, y, v) = c;
+        }
+        auto end = std::chrono::steady_clock::now();
+        elapsed_ms_matrix = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+    }
+
+    {
+        std::cout << "Создание диагональной матрицы из 1000000 элементов (unordered_matrix)" << std::endl;
+        auto begin = std::chrono::steady_clock::now();
+        unordered_matrix<std::size_t, 0> matrix;
+        for (std::size_t i = 0; i < 1000000; ++i)
+        {
+            matrix[i][i] = i;
+        }
+        for (const auto& c : matrix)
+        {
+            std::size_t x;
+            std::size_t y;
+            std::size_t v;
+            std::tie(x, y, v) = c;
+        }
+        auto end = std::chrono::steady_clock::now();
+        elapsed_ms_unordered_matrix = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+    }
+    std::cout << "Время создания (matrix): " << elapsed_ms_matrix.count() << " ms\n";
+    std::cout << "Время создания (unordered_matrix): " << elapsed_ms_unordered_matrix.count() << " ms\n";
 
     return 0;
 }

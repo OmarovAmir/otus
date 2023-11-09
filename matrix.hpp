@@ -365,7 +365,7 @@ struct matrix
          *
          * @return std::tuple<index[0], ... , index[dimension_number - 1], T value>
          */
-        auto operator*()
+        auto operator*() const
         {
             auto& pair = *_current;
             return std::tuple_cat(pair.first, std::tie(pair.second));
@@ -375,7 +375,7 @@ struct matrix
          * @brief Обращению к члену структуры хранилища
          *
          */
-        auto operator->()
+        auto operator->() const
         {
             return _current.operator->();
         }
@@ -416,7 +416,7 @@ struct matrix
      * @brief Получить итератор на начало
      *
      */
-    auto begin()
+    auto begin() const
     {
         return iterator<typename storage_type::iterator>(_data->begin());
     }
@@ -425,7 +425,7 @@ struct matrix
      * @brief Получить итератор на конец
      *
      */
-    auto end()
+    auto end() const
     {
         return iterator<typename storage_type::iterator>(_data->end());
     }
@@ -434,7 +434,7 @@ struct matrix
      * @brief Получить константный итератор на начало
      *
      */
-    auto cbegin()
+    auto cbegin() const
     {
         return iterator<typename storage_type::const_iterator>(_data->cbegin());
     }
@@ -443,7 +443,7 @@ struct matrix
      * @brief Получить константный итератор на конец
      *
      */
-    auto cend()
+    auto cend() const
     {
         return iterator<typename storage_type::const_iterator>(_data->cend());
     }
@@ -452,7 +452,7 @@ struct matrix
      * @brief Получить обратный итератор на начало
      *
      */
-    auto rbegin()
+    auto rbegin() const
     {
         return iterator<typename storage_type::reverse_iterator>(_data->rbegin());
     }
@@ -461,7 +461,7 @@ struct matrix
      * @brief Получить обратный итератор на конец
      *
      */
-    auto rend()
+    auto rend() const
     {
         return iterator<typename storage_type::reverse_iterator>(_data->rend());
     }
@@ -470,7 +470,7 @@ struct matrix
      * @brief Получить константный обратный итератор на начало
      *
      */
-    auto crbegin()
+    auto crbegin() const
     {
         return iterator<typename storage_type::const_reverse_iterator>(_data->crbegin());
     }
@@ -479,7 +479,7 @@ struct matrix
      * @brief Получить константный обратный итератор на конец
      *
      */
-    auto crend()
+    auto crend() const
     {
         return iterator<typename storage_type::const_reverse_iterator>(_data->crend());
     }

@@ -343,6 +343,15 @@ struct unordered_matrix
     }
 
     /**
+     * @brief Очистить матрицу
+     * 
+     */
+    void clear()
+    {
+        _data->clear();
+    }
+
+    /**
      * @brief Итератор
      *
      * @tparam iterator_type тип базового итератора

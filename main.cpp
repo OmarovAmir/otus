@@ -245,6 +245,8 @@ int main()
     std::chrono::milliseconds elapsed_ms_unordered_matrix_add;
     std::chrono::milliseconds elapsed_ms_matrix_get;
     std::chrono::milliseconds elapsed_ms_unordered_matrix_get;
+    std::chrono::milliseconds elapsed_ms_matrix_clear;
+    std::chrono::milliseconds elapsed_ms_unordered_matrix_clear;
     {
         std::cout << "Создание диагональной матрицы из 5000000 элементов (matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
@@ -262,6 +264,10 @@ int main()
         }
         end = std::chrono::steady_clock::now();
         elapsed_ms_matrix_get = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+        begin = std::chrono::steady_clock::now();
+        matrix.clear();
+        end = std::chrono::steady_clock::now();
+        elapsed_ms_matrix_clear = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
     }
 
     {
@@ -281,11 +287,17 @@ int main()
         }
         end = std::chrono::steady_clock::now();
         elapsed_ms_unordered_matrix_get = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+        begin = std::chrono::steady_clock::now();
+        matrix.clear();
+        end = std::chrono::steady_clock::now();
+        elapsed_ms_unordered_matrix_clear = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
     }
     std::cout << "Время создания (matrix): " << elapsed_ms_matrix_add.count() << " ms\n";
     std::cout << "Время создания (unordered_matrix): " << elapsed_ms_unordered_matrix_add.count() << " ms\n";
     std::cout << "Время обращения (matrix): " << elapsed_ms_matrix_get.count() << " ms\n";
     std::cout << "Время обращения (unordered_matrix): " << elapsed_ms_unordered_matrix_get.count() << " ms\n";
+    std::cout << "Время удаления (matrix): " << elapsed_ms_matrix_clear.count() << " ms\n";
+    std::cout << "Время удаления (unordered_matrix): " << elapsed_ms_unordered_matrix_clear.count() << " ms\n";
 
     return 0;
 }

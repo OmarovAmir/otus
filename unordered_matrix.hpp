@@ -139,6 +139,12 @@ struct unordered_matrix
                            std::move(*(other._data)))
     {}
 
+    /**
+     * @brief Преобразовать индекс в ключ хранилища
+     * 
+     * @param index Индекс
+     * @return Ключ хранилища
+     */
     static constexpr key_type index_to_key(const index_type& index)
     {
         key_type key{};
@@ -150,6 +156,12 @@ struct unordered_matrix
         return key;
     }
 
+    /**
+     * @brief Преобразовать ключь хранилища в индекс
+     * 
+     * @param key Ключ хранилища
+     * @return Индекс
+     */
     static constexpr index_type key_to_index(const key_type& key)
     {
         index_type index{};

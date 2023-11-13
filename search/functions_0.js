@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['add_0',['add',['../classCDocument.html#a3fb75bffd63026ad84fc7f0263426acc',1,'CDocument']]],
-  ['addgraphicprimitive_1',['addGraphicPrimitive',['../classCController.html#a75a2e1f00520bea283c324c2fcfe6b5b',1,'CController']]]
+  ['begin_0',['begin',['../structmatrix.html#a438a589f6ac05c0c8b2ed4d01dded970',1,'matrix::begin()'],['../structunordered__matrix.html#a2f4499d39ba53735f3abf13537af77a2',1,'unordered_matrix::begin()']]]
 ];

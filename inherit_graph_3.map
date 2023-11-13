@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,23,135,64"/>
-<area shape="rect" id="Node000001" href="$classCDocument.html" title="Класс представляющий абстракцию для работы с документами" alt="" coords="189,5,278,31"/>
-<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="150,28,188,22,188,28,151,34"/>
-<area shape="rect" id="Node000002" href="$classCFileManager.html" title="Класс для импорта/экспорта данных" alt="" coords="183,55,284,80"/>
-<area shape="poly" id="edge2_Node000000_Node000002" title=" " alt="" coords="151,53,183,57,182,63,150,58"/>
-</map>

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['main_0',['main',['../main_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4',1,'main.cpp']]],
-  ['main_2ecpp_1',['main.cpp',['../main_8cpp.html',1,'']]]
+  ['index_5fto_5fkey_0',['index_to_key',['../structunordered__matrix.html#acbea24d33492d1a0d8beef5f51d017dd',1,'unordered_matrix']]],
+  ['index_5ftype_1',['index_type',['../structmatrix.html#aba3d6257fa291b4e4459640a01ce2153',1,'matrix::index_type'],['../structunordered__matrix.html#a39a755fc9679fa1d1c7b9591cf5f29d5',1,'unordered_matrix::index_type']]],
+  ['iterator_2',['iterator',['../structmatrix_1_1iterator.html',1,'matrix&lt; T, default_value, dimension_number &gt;::iterator&lt; iterator_type &gt;'],['../structunordered__matrix_1_1iterator.html',1,'unordered_matrix&lt; T, default_value, dimension_number &gt;::iterator&lt; iterator_type &gt;'],['../structmatrix_1_1iterator.html#ac8d5b5a4f6dcf332a0f5b25042b5ae57',1,'matrix::iterator::iterator(const iterator_type &amp;iterator)'],['../structmatrix_1_1iterator.html#a77b26f62767f6a894c6bf0d662479418',1,'matrix::iterator::iterator(iterator_type &amp;&amp;iterator)'],['../structunordered__matrix_1_1iterator.html#a655b8722e37287ec1e0baf6d4ed960c5',1,'unordered_matrix::iterator::iterator(const iterator_type &amp;iterator)'],['../structunordered__matrix_1_1iterator.html#afa59a6ca34baef9965a26ea95c55ef99',1,'unordered_matrix::iterator::iterator(iterator_type &amp;&amp;iterator)']]]
 ];

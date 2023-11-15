@@ -263,8 +263,7 @@ int main()
 
     std::mt19937 gen(seed);
     std::uniform_int_distribution<std::size_t> distrib(0, SIZE_MAX);
-    std::uniform_int_distribution<std::size_t> distribCount(5000000, 10000000);
-    std::size_t count = distribCount(gen);
+    std::size_t count = 10000000;
 
     {
         std::cout << "Создание диагональной матрицы из " << count << " элементов (matrix)" << std::endl;

@@ -298,6 +298,7 @@ int main()
         std::cout << "Создание матрицы из " << count << " элементов (unordered_matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
         unordered_matrix<std::size_t, 0> matrix;
+        matrix.reserve(count);
         for (std::size_t i = 1; i <= count; ++i)
         {
             matrix[distrib(gen)][distrib(gen)] = i;

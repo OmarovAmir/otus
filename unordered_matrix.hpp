@@ -324,6 +324,15 @@ struct unordered_matrix
     }
 
     /**
+     * @brief Зарезервировать ресурсы под количество значений
+     *
+     */
+    void reserve(std::size_t count)
+    {
+        _data->reserve(count);
+    }
+
+    /**
      * @brief Оператор проверки равенства
      *
      * @param value Значение по текущему индексу

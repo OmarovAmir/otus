@@ -1,9 +1,9 @@
 name: 'C++ CI'
 
 on:
-  push:
-    branches:
-      - hw6
+  # push:
+  #   branches:
+  #     - hw6
   workflow_dispatch:
 
 jobs:
@@ -28,16 +28,6 @@ jobs:
           release_name: Release ${{ github.run_number }}
           draft: false
           prerelease: false
-      - name: Doxygen Action
-        uses: mattnotmitt/doxygen-action@v1.1.0
-        with:
-            doxyfile-path: ./Doxyfile
-            working-directory: .
-      - name: GH Pages Deployment
-        uses: JamesIves/github-pages-deploy-action@v4.4.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          folder: ./html/
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
@@ -45,6 +35,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./matrix-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: matrix-0.0.${{ github.run_number }}-Linux.deb
+          asset_path: ./bulk-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: bulk-0.0.${{ github.run_number }}-Linux.deb
           asset_content_type: application/vnd.debian.binary-package

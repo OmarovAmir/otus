@@ -3,31 +3,31 @@ cmake_minimum_required(VERSION 3.10)
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
-project(matrix VERSION ${PROJECT_VESRION})
+project(bulk VERSION ${PROJECT_VESRION})
 
 configure_file(version.h.in version.h)
 
 include_directories(.)
-add_executable(matrix main.cpp)
+add_executable(bulk main.cpp)
 
-set_target_properties(matrix PROPERTIES
+set_target_properties(bulk PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
 
 if (MSVC)
-    target_compile_options(matrix PRIVATE
+    target_compile_options(bulk PRIVATE
         /W4
     )
 else ()
-    target_compile_options(matrix PRIVATE
+    target_compile_options(bulk PRIVATE
         -Wall -Wextra -pedantic -Werror -O3
     )
 endif()
 
 
 
-install(TARGETS matrix RUNTIME DESTINATION bin)
+install(TARGETS bulk RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 

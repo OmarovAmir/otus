@@ -270,7 +270,7 @@ int main()
         std::cout << "Создание диагональной матрицы из " << count << " элементов (matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
         matrix<std::size_t, 0> matrix;
-        for (std::size_t i = 0; i < count; ++i)
+        for (std::size_t i = 1; i <= count; ++i)
         {
             matrix[distrib(gen)][distrib(gen)] = i;
         }
@@ -287,7 +287,6 @@ int main()
             std::tie(x, y, v) = c;
             s.emplace_back(v);
         }
-        std::cout << s.size() << std::endl;
         end = std::chrono::steady_clock::now();
         elapsed_ms_matrix_get = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
         begin = std::chrono::steady_clock::now();
@@ -300,7 +299,7 @@ int main()
         std::cout << "Создание диагональной матрицы из " << count << " элементов (unordered_matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
         unordered_matrix<std::size_t, 0> matrix;
-        for (std::size_t i = 0; i < count; ++i)
+        for (std::size_t i = 1; i <= count; ++i)
         {
             matrix[distrib(gen)][distrib(gen)] = i;
         }
@@ -317,7 +316,6 @@ int main()
             std::tie(x, y, v) = c;
             s.emplace_back(v);
         }
-        std::cout << s.size() << std::endl;
         end = std::chrono::steady_clock::now();
         elapsed_ms_unordered_matrix_get = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
         begin = std::chrono::steady_clock::now();

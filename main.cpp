@@ -266,7 +266,7 @@ int main()
     std::size_t count = 10000000;
 
     {
-        std::cout << "Создание диагональной матрицы из " << count << " элементов (matrix)" << std::endl;
+        std::cout << "Создание матрицы из " << count << " элементов (matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
         matrix<std::size_t, 0> matrix;
         for (std::size_t i = 1; i <= count; ++i)
@@ -295,7 +295,7 @@ int main()
     }
 
     {
-        std::cout << "Создание диагональной матрицы из " << count << " элементов (unordered_matrix)" << std::endl;
+        std::cout << "Создание матрицы из " << count << " элементов (unordered_matrix)" << std::endl;
         auto begin = std::chrono::steady_clock::now();
         unordered_matrix<std::size_t, 0> matrix;
         for (std::size_t i = 1; i <= count; ++i)

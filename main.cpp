@@ -120,10 +120,15 @@ class CommandBatch
 
 class DataExtractor
 {
+    std::size_t _batchSize;
   public:
+    explicit DataExtractor(std::size_t batchSize)
+    : _batchSize{batchSize}
+    {}
+
     void run()
     {
-        CommandBatch cmdBatch{3};
+        CommandBatch cmdBatch{_batchSize};
         std::string input;
         while (std::getline(std::cin, input))
         {
@@ -138,7 +143,7 @@ class DataExtractor
 
 int main()
 {
-    DataExtractor dxtr;
+    DataExtractor dxtr{3};
     dxtr.run();
     return 0;
 }

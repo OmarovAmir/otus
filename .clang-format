@@ -25,6 +25,6 @@ BreakConstructorInitializers: BeforeComma
 AllowAllArgumentsOnNextLine: false
 AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
-ColumnLimit: 0
+ColumnLimit: 120
 PointerAlignment: Left
 ReferenceAlignment: Left

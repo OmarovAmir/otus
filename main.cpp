@@ -2,7 +2,12 @@
 
 int main(int argc, char** argv)
 {
-    DataExtractor dxtr;
-    dxtr.run(argc, argv);
+    if (argc != 2)
+    {
+        std::cout << "Usage: bulk batchSize" << std::endl;
+        return 0;
+    }
+    DataExtractor dxtr{static_cast<std::size_t>(std::atol(argv[1]))};
+    dxtr.run();
     return 0;
 }

@@ -1,18 +1,63 @@
 #ifndef D462B73C_978B_4C2C_B334_054CF9BB74F3
 #define D462B73C_978B_4C2C_B334_054CF9BB74F3
 
-#include <string>
+#include <ICommand.hpp>
 
-class Command
+class WorkCommand final : public ICommand
 {
     std::string _cmd;
 
   public:
-    explicit Command(std::string cmd)
-        : _cmd{cmd}
+    explicit WorkCommand(std::string cmd)
+        : ICommand(CommandType::Work)
+        , _cmd{cmd}
     {}
 
-    std::string execute() const { return _cmd; }
+    virtual std::string execute() const override { return _cmd; }
 };
+
+class EmptyCommand final : public ICommand
+{
+  public:
+    explicit EmptyCommand()
+        : ICommand(CommandType::Empty)
+    {}
+};
+
+class LevelUpCommand final : public ICommand
+{
+  public:
+    explicit LevelUpCommand()
+        : ICommand(CommandType::LevelUp)
+    {}
+};
+
+class LevelDownCommand final : public ICommand
+{
+  public:
+    explicit LevelDownCommand()
+        : ICommand(CommandType::LevelDown)
+    {}
+};
+
+CommandPtr make_command(const std::string& cmd)
+{
+    static const std::string _levelUp{"{"};
+    static const std::string _levelDown{"}"};
+
+    if (cmd.empty())
+    {
+        return std::make_shared<EmptyCommand>();
+    }
+    if (_levelUp == cmd)
+    {
+        return std::make_shared<LevelUpCommand>();
+    }
+    if (_levelDown == cmd)
+    {
+        return std::make_shared<LevelDownCommand>();
+    }
+    return std::make_shared<WorkCommand>(cmd);
+}
 
 #endif /* D462B73C_978B_4C2C_B334_054CF9BB74F3 */

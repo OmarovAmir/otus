@@ -3,17 +3,16 @@
 
 #include <filesystem>
 #include <fstream>
-#include <string>
 #include <iostream>
+#include <string>
 
 class FileManager
 {
   public:
-
-    void save(const std::filesystem::path& path, const std::string& data) const
+    static void save(const std::filesystem::path& path, const std::string& data)
     {
         std::ofstream logfile(path);
-        if(logfile.is_open())
+        if (logfile.is_open())
         {
             logfile << data;
             logfile.close();

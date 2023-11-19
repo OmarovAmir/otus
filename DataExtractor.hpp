@@ -1,26 +1,38 @@
 #ifndef BC6E047B_B766_46E5_9261_E4634670DFDE
 #define BC6E047B_B766_46E5_9261_E4634670DFDE
 
-#include <string>
-#include <iostream>
-
 #include <CommandBatch.hpp>
 
 class DataExtractor
 {
+    std::unique_ptr<CommandBatch> _cmdBatch;
+
   public:
-    void run(int argc, char** argv)
+    explicit DataExtractor(std::size_t batchSize)
+        : _cmdBatch{std::make_unique<CommandBatch>(batchSize)}
+    {}
+
+    void run()
     {
-        if (argc != 2)
-        {
-            std::cout << "Usage: bulk batchSize" << std::endl;
-            return;
-        }
-        CommandBatch cmdBatch{static_cast<std::size_t>(std::atol(argv[1]))};
         std::string input;
         while (std::getline(std::cin, input))
         {
-            cmdBatch.add(input);
+            auto cmd = make_command(input);
+            if (CommandType::Empty == cmd->getType())
+            {
+                continue;
+            }
+            if (CommandType::LevelUp == cmd->getType())
+            {
+                _cmdBatch->levelUp();
+                continue;
+            }
+            if (CommandType::LevelDown == cmd->getType())
+            {
+                _cmdBatch->levelDown();
+                continue;
+            }
+            _cmdBatch->add(cmd);
         }
     }
 };

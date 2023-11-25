@@ -17,8 +17,9 @@ FetchContent_Declare(fmt
 FetchContent_MakeAvailable(fmt)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
 
+include_directories(${Boost_INCLUDE_DIR})
+include_directories(./lib)
 include_directories(.)
 
 add_executable(bayan main.cpp)

@@ -9,6 +9,13 @@ project(bayan VERSION ${PROJECT_VESRION})
 
 configure_file(version.h.in version.h)
 
+include(FetchContent)
+FetchContent_Declare(fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(fmt)
+
 find_package(Boost COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
@@ -23,6 +30,7 @@ set_target_properties(bayan PROPERTIES
 
 target_link_libraries(bayan
     ${Boost_LIBRARIES}
+    fmt::fmt-header-only
 )
 
 if (MSVC)

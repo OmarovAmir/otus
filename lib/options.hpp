@@ -1,5 +1,4 @@
-#ifndef F97EE1B9_0BC7_45BB_98DA_85BC92CD477F
-#define F97EE1B9_0BC7_45BB_98DA_85BC92CD477F
+#pragma once
 
 #include <boost/bimap.hpp>
 #include <boost/program_options.hpp>
@@ -119,5 +118,3 @@ po::variables_map parse_options(int argc, char** argv, const po::options_descrip
 }
 
 }; // namespace options
-
-#endif /* F97EE1B9_0BC7_45BB_98DA_85BC92CD477F */

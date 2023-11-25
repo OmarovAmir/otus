@@ -1,2 +1,2 @@
 # otus
-bulk
+bayan

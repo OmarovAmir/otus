@@ -31,7 +31,7 @@ int main(int argc, char** argv)
                 {
                     if(ri.depth() > static_cast<int>(depth))
                     {
-                        continue;
+                        ri.pop();
                     }
                     std::cout << "    " << ri->path() << '\n';
                 }

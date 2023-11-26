@@ -16,7 +16,7 @@ FetchContent_Declare(fmt
 )
 FetchContent_MakeAvailable(fmt)
 
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(./lib)

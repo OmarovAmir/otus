@@ -84,28 +84,39 @@ std::ostream& operator<<(std::ostream& out, const HashAlgorithm& hashAlgorithmOp
 po::options_description opts_init()
 {
     po::options_description opts{"Options"};
-    opts.add_options()("help,h", "this screen")("include-paths,i",
-                                                po::value<paths>()->required()->multitoken()->composing()->notifier(
-                                                    make_paths_notifier<paths>("Include paths")),
-                                                "include paths")(
-        "exclude-paths,e",
-        po::value<paths>()->multitoken()->composing()->notifier(make_paths_notifier<paths>("Exclude paths")),
-        "exclude paths")(
-        "depth,d", po::value<std::size_t>()->default_value(0)->notifier(make_paths_notifier<std::size_t>("Depth")),
-        "scan depth")(
+    auto optsInit = opts.add_options();
+    // Help
+    optsInit("help,h", "this screen");
+    // Include paths
+    optsInit("include-paths,i",
+             po::value<paths>()->required()->multitoken()->composing()->notifier(
+                 make_paths_notifier<paths>("Include paths")),
+             "include paths");
+    // Exclude paths
+    optsInit("exclude-paths,e",
+             po::value<paths>()->multitoken()->composing()->notifier(make_paths_notifier<paths>("Exclude paths")),
+             "exclude paths");
+    // Depth
+    optsInit("depth,d", po::value<std::size_t>()->default_value(0)->notifier(make_paths_notifier<std::size_t>("Depth")),
+             "scan depth");
+    // Minimum file size
+    optsInit(
         "min-file-size,s",
         po::value<std::size_t>()->default_value(1)->notifier(make_paths_notifier<std::size_t>("Minimum file size")),
-        "minimum file size")(
-        "pattern,p",
-        po::value<std::string>()->default_value("*")->notifier(make_paths_notifier<std::string>("File name pattern")),
-        "file name pattern")(
-        "block-size,b",
-        po::value<std::size_t>()->default_value(5)->notifier(make_paths_notifier<std::size_t>("Block size")),
-        "block size")("hash-algorithm,a",
-                      po::value<HashAlgorithm>()
-                          ->default_value(HashAlgorithm::CRC16)
-                          ->notifier(make_paths_notifier<HashAlgorithm>("Hash algorithm")),
-                      "hash algorithm");
+        "minimum file size");
+    // File name pattern
+    optsInit("pattern,p", po::value<std::string>()->notifier(make_paths_notifier<std::string>("File name pattern")),
+             "file name pattern");
+    // Block size
+    optsInit("block-size,b",
+             po::value<std::size_t>()->default_value(5)->notifier(make_paths_notifier<std::size_t>("Block size")),
+             "block size");
+    // Hash algorithm
+    optsInit("hash-algorithm,a",
+             po::value<HashAlgorithm>()
+                 ->default_value(HashAlgorithm::CRC16)
+                 ->notifier(make_paths_notifier<HashAlgorithm>("Hash algorithm")),
+             "hash algorithm");
     return opts;
 }
 

@@ -128,4 +128,4 @@ po::variables_map parse_options(int argc, char** argv, const po::options_descrip
     return vm;
 }
 
-}; // namespace options
+} // namespace options

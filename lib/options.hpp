@@ -18,7 +18,8 @@ enum class HashAlgorithm
 {
     CRC16,
     CRC32,
-    MD5
+    MD5,
+    SHA1
 };
 
 template <typename L, typename R>
@@ -33,6 +34,7 @@ const boost::bimap<boost::bimaps::set_of<HashAlgorithm>, boost::bimaps::set_of<s
         {HashAlgorithm::CRC16, std::string("crc16")},
         {HashAlgorithm::CRC32, std::string("crc32")},
         {HashAlgorithm::MD5, std::string("md5")},
+        {HashAlgorithm::SHA1, std::string("sha1")}
     });
 
 const std::string& typeToString(const HashAlgorithm type)

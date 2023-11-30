@@ -6,6 +6,7 @@
 
 namespace po = boost::program_options;
 using paths = std::vector<std::string>;
+using patterns = std::vector<std::string>;
 
 namespace options {
 
@@ -107,7 +108,7 @@ po::options_description opts_init()
         po::value<std::size_t>()->default_value(1)->notifier(make_paths_notifier<std::size_t>("Minimum file size")),
         "minimum file size");
     // File name pattern
-    optsInit("pattern,p", po::value<std::string>()->notifier(make_paths_notifier<std::string>("File name pattern")),
+    optsInit("patterns,p", po::value<patterns>()->multitoken()->composing()->notifier(make_paths_notifier<patterns>("File name patterns")),
              "file name pattern");
     // Block size
     optsInit("block-size,b",

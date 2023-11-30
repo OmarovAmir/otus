@@ -1,11 +1,12 @@
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <boost/crc.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/uuid/detail/md5.hpp>
+#include <boost/uuid/detail/sha1.hpp>
 #include <iostream>
 #include <list>
 #include <options.hpp>
-#include <boost/uuid/detail/md5.hpp>
-#include <boost/uuid/detail/sha1.hpp>
-#include <boost/crc.hpp>
-#include <algorithm>
 namespace fs = boost::filesystem;
 namespace ud = boost::uuids::detail;
 
@@ -20,22 +21,51 @@ int main(int argc, char** argv)
             opts.print(std::cout);
             return 0;
         }
+
         std::list<fs::path> files;
         std::size_t depth = vm["depth"].as<std::size_t>();
-        std::size_t block_size = vm["block-size"].as<std::size_t>();
-        for (const auto& path_str : vm["include-paths"].as<paths>())
+        paths include = vm["include-paths"].as<paths>();
+        paths exclude;
+        patterns ptns;
+        if (vm.count("exclude-paths"))
         {
+            exclude = vm["exclude-paths"].as<paths>();
+        }
+        if (vm.count("patterns"))
+        {
+            ptns = vm["patterns"].as<patterns>();
+        }
+        for (const auto& path_str : include)
+        {
+            if (std::any_of(exclude.begin(), exclude.end(),
+                            [&path_str](std::string ex) { return (path_str.find(ex) != std::string::npos); }))
+            {
+                continue;
+            }
             fs::path path{path_str};
             if (fs::exists(path))
             {
                 if (fs::is_regular_file(path))
                 {
-                    files.push_back(path);
+                    if (ptns.empty() || std::any_of(ptns.begin(), ptns.end(),
+                                                    [path_str = path.filename().string()](std::string pt) {
+                                                        return (boost::to_lower_copy(path_str).find(
+                                                                    boost::to_lower_copy(pt)) != std::string::npos);
+                                                    }))
+                    {
+                        files.push_back(path);
+                    }
                 }
                 else if (fs::is_directory(path))
                 {
                     for (auto ri = fs::recursive_directory_iterator(path); ri != fs::end(ri); ++ri)
                     {
+                        if (std::any_of(exclude.begin(), exclude.end(),
+                                        [&ri](std::string ex)
+                                        { return (ri->path().string().find(ex) != std::string::npos); }))
+                        {
+                            continue;
+                        }
                         if (ri.depth() > static_cast<int>(depth))
                         {
                             ri.pop();
@@ -46,7 +76,15 @@ int main(int argc, char** argv)
                         }
                         if (fs::is_regular_file(ri->path()))
                         {
-                            files.push_back(ri->path());
+                            if (ptns.empty() ||
+                                std::any_of(ptns.begin(), ptns.end(),
+                                            [path_str = ri->path().filename().string()](std::string pt) {
+                                                return (boost::to_lower_copy(path_str).find(boost::to_lower_copy(pt)) !=
+                                                        std::string::npos);
+                                            }))
+                            {
+                                files.push_back(ri->path());
+                            }
                         }
                     }
                 }
@@ -60,114 +98,120 @@ int main(int argc, char** argv)
                 fmt::println("{} does not exist", path.string());
             }
         }
-        
-        std::vector<char> block(block_size);
+
         for (const auto& file : files)
         {
             fmt::println("{}", file.string());
-            {
-                std::ifstream file_stream(file, std::ios::binary);
-                if (file_stream.is_open())
-                {
-                    /////MD5/////
-                    auto _md5 = ud::md5();
-                    while (!file_stream.eof())
-                    {
-                        std::fill(block.begin(), block.end(), '\0');
-                        file_stream.read(block.data(), block_size);
-                        fmt::println("{}", block);
-                        _md5.process_bytes(block.data(), block_size);
-                    }
-                    file_stream.close();
-                    ud::md5::digest_type digest;
-                    _md5.get_digest(digest);
-                    std::array<uint,4> da;
-                    std::memcpy(da.data(), digest, sizeof(digest));
-                    fmt::print("MD5: ");
-                    for(auto i: da)
-                    {
-                        fmt::print("{0:x}", i);
-                    }
-                    fmt::println("");
-                }
-                else
-                {
-                    fmt::println("Не удалось прочитать файл");
-                }
-            }
-            {
-                std::ifstream file_stream(file, std::ios::binary);
-                if (file_stream.is_open())
-                {
-                    /////SHA1/////
-                    auto _sha1 = ud::sha1();
-                    while (!file_stream.eof())
-                    {
-                        std::fill(block.begin(), block.end(), '\0');
-                        file_stream.read(block.data(), block_size);
-                        fmt::println("{}", block);
-                        _sha1.process_bytes(block.data(), block_size);
-                    }
-                    file_stream.close();
-                    ud::sha1::digest_type digest;
-                    _sha1.get_digest(digest);
-                    std::array<uint, 5> da;
-                    std::memcpy(da.data(), digest, sizeof(digest));
-                    fmt::print("SHA1: ");
-                    for(auto i: da)
-                    {
-                        fmt::print("{0:x}", i);
-                    }
-                    fmt::println("");
-                }
-                else
-                {
-                    fmt::println("Не удалось прочитать файл");
-                }
-            }
-            {
-                std::ifstream file_stream(file, std::ios::binary);
-                if (file_stream.is_open())
-                {
-                    /////CRC32/////
-                    boost::crc_32_type crc32;
-                    while (!file_stream.eof())
-                    {
-                        std::fill(block.begin(), block.end(), '\0');
-                        file_stream.read(block.data(), block_size);
-                        fmt::println("{}", block);
-                        crc32.process_bytes(block.data(), block_size);
-                    }
-                    file_stream.close();
-                    fmt::println("CRC32: {0:x}", crc32.checksum());
-                }
-                else
-                {
-                    fmt::println("Не удалось прочитать файл");
-                }
-            }
-            {
-                std::ifstream file_stream(file, std::ios::binary);
-                if (file_stream.is_open())
-                {
-                    /////CRC16/////
-                    boost::crc_16_type crc16;
-                    while (!file_stream.eof())
-                    {
-                        std::fill(block.begin(), block.end(), '\0');
-                        file_stream.read(block.data(), block_size);
-                        fmt::println("{}", block);
-                        crc16.process_bytes(block.data(), block_size);
-                    }
-                    file_stream.close();
-                    fmt::println("CRC16: {0:x}", crc16.checksum());
-                }
-                else
-                {
-                    fmt::println("Не удалось прочитать файл");
-                }
-            }
         }
+
+        // std::size_t block_size = vm["block-size"].as<std::size_t>();
+        // std::vector<char> block(block_size);
+        // for (const auto& file : files)
+        // {
+        //     fmt::println("{}", file.string());
+        //     {
+        //         std::ifstream file_stream(file, std::ios::binary);
+        //         if (file_stream.is_open())
+        //         {
+        //             /////MD5/////
+        //             auto _md5 = ud::md5();
+        //             while (!file_stream.eof())
+        //             {
+        //                 std::fill(block.begin(), block.end(), '\0');
+        //                 file_stream.read(block.data(), block_size);
+        //                 fmt::println("{}", block);
+        //                 _md5.process_bytes(block.data(), block_size);
+        //             }
+        //             file_stream.close();
+        //             ud::md5::digest_type digest;
+        //             _md5.get_digest(digest);
+        //             std::array<uint, 4> da;
+        //             std::memcpy(da.data(), digest, sizeof(digest));
+        //             fmt::print("MD5: ");
+        //             for (auto i : da)
+        //             {
+        //                 fmt::print("{0:x}", i);
+        //             }
+        //             fmt::println("");
+        //         }
+        //         else
+        //         {
+        //             fmt::println("Не удалось прочитать файл");
+        //         }
+        //     }
+        //     {
+        //         std::ifstream file_stream(file, std::ios::binary);
+        //         if (file_stream.is_open())
+        //         {
+        //             /////SHA1/////
+        //             auto _sha1 = ud::sha1();
+        //             while (!file_stream.eof())
+        //             {
+        //                 std::fill(block.begin(), block.end(), '\0');
+        //                 file_stream.read(block.data(), block_size);
+        //                 fmt::println("{}", block);
+        //                 _sha1.process_bytes(block.data(), block_size);
+        //             }
+        //             file_stream.close();
+        //             ud::sha1::digest_type digest;
+        //             _sha1.get_digest(digest);
+        //             std::array<uint, 5> da;
+        //             std::memcpy(da.data(), digest, sizeof(digest));
+        //             fmt::print("SHA1: ");
+        //             for (auto i : da)
+        //             {
+        //                 fmt::print("{0:x}", i);
+        //             }
+        //             fmt::println("");
+        //         }
+        //         else
+        //         {
+        //             fmt::println("Не удалось прочитать файл");
+        //         }
+        //     }
+        //     {
+        //         std::ifstream file_stream(file, std::ios::binary);
+        //         if (file_stream.is_open())
+        //         {
+        //             /////CRC32/////
+        //             boost::crc_32_type crc32;
+        //             while (!file_stream.eof())
+        //             {
+        //                 std::fill(block.begin(), block.end(), '\0');
+        //                 file_stream.read(block.data(), block_size);
+        //                 fmt::println("{}", block);
+        //                 crc32.process_bytes(block.data(), block_size);
+        //             }
+        //             file_stream.close();
+        //             fmt::println("CRC32: {0:x}", crc32.checksum());
+        //         }
+        //         else
+        //         {
+        //             fmt::println("Не удалось прочитать файл");
+        //         }
+        //     }
+        //     {
+        //         std::ifstream file_stream(file, std::ios::binary);
+        //         if (file_stream.is_open())
+        //         {
+        //             /////CRC16/////
+        //             boost::crc_16_type crc16;
+        //             while (!file_stream.eof())
+        //             {
+        //                 std::fill(block.begin(), block.end(), '\0');
+        //                 file_stream.read(block.data(), block_size);
+        //                 fmt::println("{}", block);
+        //                 crc16.process_bytes(block.data(), block_size);
+        //             }
+        //             file_stream.close();
+        //             fmt::println("CRC16: {0:x}", crc16.checksum());
+        //         }
+        //         else
+        //         {
+        //             fmt::println("Не удалось прочитать файл");
+        //         }
+        //     }
+        // }
     }
     catch (std::exception& e)
     {

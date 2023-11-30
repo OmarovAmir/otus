@@ -5,6 +5,7 @@
 #include <boost/uuid/detail/md5.hpp>
 #include <boost/uuid/detail/sha1.hpp>
 #include <boost/crc.hpp>
+#include <algorithm>
 namespace fs = boost::filesystem;
 namespace ud = boost::uuids::detail;
 
@@ -21,6 +22,7 @@ int main(int argc, char** argv)
         }
         std::list<fs::path> files;
         std::size_t depth = vm["depth"].as<std::size_t>();
+        std::size_t block_size = vm["block-size"].as<std::size_t>();
         for (const auto& path_str : vm["include-paths"].as<paths>())
         {
             fs::path path{path_str};
@@ -59,6 +61,7 @@ int main(int argc, char** argv)
             }
         }
         
+        std::vector<char> block(block_size);
         for (const auto& file : files)
         {
             fmt::println("{}", file.string());
@@ -68,9 +71,12 @@ int main(int argc, char** argv)
                 {
                     /////MD5/////
                     auto _md5 = ud::md5();
-                    for (auto i = std::istreambuf_iterator<char>(file_stream); i != std::istreambuf_iterator<char>(); ++i)
+                    while (!file_stream.eof())
                     {
-                        _md5.process_byte(*i);
+                        std::fill(block.begin(), block.end(), '\0');
+                        file_stream.read(block.data(), block_size);
+                        fmt::println("{}", block);
+                        _md5.process_bytes(block.data(), block_size);
                     }
                     file_stream.close();
                     ud::md5::digest_type digest;
@@ -95,9 +101,12 @@ int main(int argc, char** argv)
                 {
                     /////SHA1/////
                     auto _sha1 = ud::sha1();
-                    for (auto i = std::istreambuf_iterator<char>(file_stream); i != std::istreambuf_iterator<char>(); ++i)
+                    while (!file_stream.eof())
                     {
-                        _sha1.process_byte(*i);
+                        std::fill(block.begin(), block.end(), '\0');
+                        file_stream.read(block.data(), block_size);
+                        fmt::println("{}", block);
+                        _sha1.process_bytes(block.data(), block_size);
                     }
                     file_stream.close();
                     ud::sha1::digest_type digest;
@@ -122,9 +131,12 @@ int main(int argc, char** argv)
                 {
                     /////CRC32/////
                     boost::crc_32_type crc32;
-                    for (auto i = std::istreambuf_iterator<char>(file_stream); i != std::istreambuf_iterator<char>(); ++i)
+                    while (!file_stream.eof())
                     {
-                        crc32.process_byte(*i);
+                        std::fill(block.begin(), block.end(), '\0');
+                        file_stream.read(block.data(), block_size);
+                        fmt::println("{}", block);
+                        crc32.process_bytes(block.data(), block_size);
                     }
                     file_stream.close();
                     fmt::println("CRC32: {0:x}", crc32.checksum());
@@ -140,9 +152,12 @@ int main(int argc, char** argv)
                 {
                     /////CRC16/////
                     boost::crc_16_type crc16;
-                    for (auto i = std::istreambuf_iterator<char>(file_stream); i != std::istreambuf_iterator<char>(); ++i)
+                    while (!file_stream.eof())
                     {
-                        crc16.process_byte(*i);
+                        std::fill(block.begin(), block.end(), '\0');
+                        file_stream.read(block.data(), block_size);
+                        fmt::println("{}", block);
+                        crc16.process_bytes(block.data(), block_size);
                     }
                     file_stream.close();
                     fmt::println("CRC16: {0:x}", crc16.checksum());

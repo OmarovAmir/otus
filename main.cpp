@@ -1,11 +1,9 @@
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <boost/crc.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/uuid/detail/md5.hpp>
 #include <boost/uuid/detail/sha1.hpp>
+#include <filter.hpp>
 #include <iostream>
-#include <list>
 #include <options.hpp>
 namespace fs = boost::filesystem;
 namespace ud = boost::uuids::detail;
@@ -22,87 +20,21 @@ int main(int argc, char** argv)
             return 0;
         }
 
-        std::list<fs::path> files;
-        std::size_t depth = vm["depth"].as<std::size_t>();
         paths include = vm["include-paths"].as<paths>();
         paths exclude;
-        patterns ptns;
+        patterns ptrns;
         if (vm.count("exclude-paths"))
         {
             exclude = vm["exclude-paths"].as<paths>();
         }
         if (vm.count("patterns"))
         {
-            ptns = vm["patterns"].as<patterns>();
+            ptrns = vm["patterns"].as<patterns>();
         }
-        for (const auto& path_str : include)
-        {
-            if (std::any_of(exclude.begin(), exclude.end(),
-                            [&path_str](std::string ex) { return (path_str.find(ex) != std::string::npos); }))
-            {
-                continue;
-            }
-            fs::path path{path_str};
-            if (fs::exists(path))
-            {
-                if (fs::is_regular_file(path))
-                {
-                    if (ptns.empty() || std::any_of(ptns.begin(), ptns.end(),
-                                                    [path_str = path.filename().string()](std::string pt) {
-                                                        return (boost::to_lower_copy(path_str).find(
-                                                                    boost::to_lower_copy(pt)) != std::string::npos);
-                                                    }))
-                    {
-                        files.push_back(path);
-                    }
-                }
-                else if (fs::is_directory(path))
-                {
-                    for (auto ri = fs::recursive_directory_iterator(path); ri != fs::end(ri); ++ri)
-                    {
-                        if (std::any_of(exclude.begin(), exclude.end(),
-                                        [&ri](std::string ex)
-                                        { return (ri->path().string().find(ex) != std::string::npos); }))
-                        {
-                            continue;
-                        }
-                        if (ri.depth() > static_cast<int>(depth))
-                        {
-                            ri.pop();
-                            if (ri == fs::end(ri))
-                            {
-                                break;
-                            }
-                        }
-                        if (fs::is_regular_file(ri->path()))
-                        {
-                            if (ptns.empty() ||
-                                std::any_of(ptns.begin(), ptns.end(),
-                                            [path_str = ri->path().filename().string()](std::string pt) {
-                                                return (boost::to_lower_copy(path_str).find(boost::to_lower_copy(pt)) !=
-                                                        std::string::npos);
-                                            }))
-                            {
-                                files.push_back(ri->path());
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    fmt::println("{} does not file or directory", path.string());
-                }
-            }
-            else
-            {
-                fmt::println("{} does not exist", path.string());
-            }
-        }
+        std::size_t depth = vm["depth"].as<std::size_t>();
+        std::size_t mfs = vm["min-file-size"].as<std::size_t>();
 
-        for (const auto& file : files)
-        {
-            fmt::println("{}", file.string());
-        }
+        auto x = filter::filter(include, exclude, ptrns, depth, mfs);
 
         // std::size_t block_size = vm["block-size"].as<std::size_t>();
         // std::vector<char> block(block_size);

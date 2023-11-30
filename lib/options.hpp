@@ -31,12 +31,10 @@ makeBimap(const std::initializer_list<typename boost::bimap<L, R>::value_type>& 
 }
 
 const boost::bimap<boost::bimaps::set_of<HashAlgorithm>, boost::bimaps::set_of<std::string>> hashAlgorithmStringBimap =
-    makeBimap<HashAlgorithm, std::string>({
-        {HashAlgorithm::CRC16, std::string("crc16")},
-        {HashAlgorithm::CRC32, std::string("crc32")},
-        {HashAlgorithm::MD5, std::string("md5")},
-        {HashAlgorithm::SHA1, std::string("sha1")}
-    });
+    makeBimap<HashAlgorithm, std::string>({{HashAlgorithm::CRC16, std::string("crc16")},
+                                           {HashAlgorithm::CRC32, std::string("crc32")},
+                                           {HashAlgorithm::MD5, std::string("md5")},
+                                           {HashAlgorithm::SHA1, std::string("sha1")}});
 
 const std::string& typeToString(const HashAlgorithm type)
 {
@@ -108,8 +106,10 @@ po::options_description opts_init()
         po::value<std::size_t>()->default_value(1)->notifier(make_paths_notifier<std::size_t>("Minimum file size")),
         "minimum file size");
     // File name pattern
-    optsInit("patterns,p", po::value<patterns>()->multitoken()->composing()->notifier(make_paths_notifier<patterns>("File name patterns")),
-             "file name pattern");
+    optsInit(
+        "patterns,p",
+        po::value<patterns>()->multitoken()->composing()->notifier(make_paths_notifier<patterns>("File name patterns")),
+        "file name pattern");
     // Block size
     optsInit("block-size,b",
              po::value<std::size_t>()->default_value(5)->notifier(make_paths_notifier<std::size_t>("Block size")),

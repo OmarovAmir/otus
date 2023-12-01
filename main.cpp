@@ -1,6 +1,9 @@
 #include <algorithm>
 #include <boost/crc.hpp>
-#include <boost/uuid/detail/md5.hpp>
+#include <MD5Hasher.hpp>
+#include <SHA1Hasher.hpp>
+#include <CRC16Hasher.hpp>
+#include <CRC32Hasher.hpp>
 #include <boost/uuid/detail/sha1.hpp>
 #include <filter.hpp>
 #include <iostream>
@@ -45,46 +48,31 @@ int main(int argc, char** argv)
             if (file.is_open())
             {
                 /////MD5/////
-                auto _md5 = ud::md5();
+                MD5Hasher md5;
                 /////SHA1/////
-                auto _sha1 = ud::sha1();
+                SHA1Hasher sha1;
                 /////CRC32/////
-                boost::crc_32_type crc32;
+                CRC32Hasher crc32;
                 /////CRC16/////
-                boost::crc_16_type crc16;
+                CRC16Hasher crc16;
                 while (!file.eof())
                 {
                     std::fill(block.begin(), block.end(), '\0');
                     file.read(block.data(), block_size);
-                    fmt::println("{}", block);
-                    _md5.process_bytes(block.data(), block_size);
-                    _sha1.process_bytes(block.data(), block_size);
-                    crc32.process_bytes(block.data(), block_size);
-                    crc16.process_bytes(block.data(), block_size);
+                    md5.hash_bytes(block.data(), block_size);
+                    sha1.hash_bytes(block.data(), block_size);
+                    crc32.hash_bytes(block.data(), block_size);
+                    crc16.hash_bytes(block.data(), block_size);
                 }
                 file.close();
-                ud::md5::digest_type md5digest;
-                _md5.get_digest(md5digest);
-                std::array<uint, 4> md5da;
-                std::memcpy(md5da.data(), md5digest, sizeof(md5digest));
-                fmt::print("MD5: ");
-                for (auto i : md5da)
-                {
-                    fmt::print("{0:x}", i);
-                }
-                fmt::println("");
-                ud::sha1::digest_type sha1digest;
-                _sha1.get_digest(sha1digest);
-                std::array<uint, 5> sha1da;
-                std::memcpy(sha1da.data(), sha1digest, sizeof(sha1digest));
-                fmt::print("SHA1: ");
-                for (auto i : sha1da)
-                {
-                    fmt::print("{0:x}", i);
-                }
-                fmt::println("");
-                fmt::println("CRC32: {0:x}", crc32.checksum());
-                fmt::println("CRC16: {0:x}", crc16.checksum());
+                fmt::println("MD5: {0:x}", fmt::join(md5.getHash(), ""));
+                fmt::println("SHA1: {0:x}", fmt::join(sha1.getHash(), ""));
+                fmt::println("CRC32: {0:x}", fmt::join(crc32.getHash(), ""));
+                fmt::println("CRC16: {0:x}", fmt::join(crc16.getHash(), ""));
+                fmt::println("MD5: {0:x}", fmt::join(md5.getHash(), ""));
+                fmt::println("SHA1: {0:x}", fmt::join(sha1.getHash(), ""));
+                fmt::println("CRC32: {0:x}", fmt::join(crc32.getHash(), ""));
+                fmt::println("CRC16: {0:x}", fmt::join(crc16.getHash(), ""));
             }
             else
             {

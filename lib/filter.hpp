@@ -3,13 +3,15 @@
 #include <boost/filesystem.hpp>
 #include <list>
 #include <options.hpp>
+#include <iostream>
+#include <file_reader.hpp>
 namespace fs = boost::filesystem;
 
 namespace filter {
-std::list<fs::path> filter(const paths& include, const paths& exclude, const patterns& ptrns, const std::size_t& depth,
+std::list<file_reader> filter(const paths& include, const paths& exclude, const patterns& ptrns, const std::size_t& depth,
                            const std::size_t& mfs)
 {
-    std::list<fs::path> files;
+    std::list<file_reader> files;
     for (const auto& path_str : include)
     {
         if (std::any_of(exclude.begin(), exclude.end(),
@@ -29,7 +31,7 @@ std::list<fs::path> filter(const paths& include, const paths& exclude, const pat
                                                   })) &&
                     (fs::file_size(path) > mfs))
                 {
-                    files.push_back(path);
+                    files.emplace_back(path, std::ios::binary);
                 }
             }
             else if (fs::is_directory(path))
@@ -60,7 +62,7 @@ std::list<fs::path> filter(const paths& include, const paths& exclude, const pat
                                          })) &&
                             (fs::file_size(ri->path()) > mfs))
                         {
-                            files.push_back(ri->path());
+                            files.emplace_back(ri->path(), std::ios::binary);
                         }
                     }
                 }
@@ -78,7 +80,7 @@ std::list<fs::path> filter(const paths& include, const paths& exclude, const pat
 
     for (const auto& file : files)
     {
-        fmt::println("{}", file.string());
+        fmt::println("{}", file.path());
     }
     return files;
 }

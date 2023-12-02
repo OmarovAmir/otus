@@ -1,5 +1,9 @@
 #pragma once
 
+#include <CRC16Hasher.hpp>
+#include <CRC32Hasher.hpp>
+#include <MD5Hasher.hpp>
+#include <SHA1Hasher.hpp>
 #include <boost/bimap.hpp>
 #include <boost/program_options.hpp>
 #include <fmt/ranges.h>
@@ -119,7 +123,7 @@ po::options_description opts_init()
              po::value<HashAlgorithm>()
                  ->default_value(HashAlgorithm::CRC16)
                  ->notifier(make_paths_notifier<HashAlgorithm>("Hash algorithm")),
-             "hash algorithm");
+             "hash algorithm {crc16, crc32, md5, sha1}");
     return opts;
 }
 
@@ -129,6 +133,22 @@ po::variables_map parse_options(int argc, char** argv, const po::options_descrip
     po::store(po::parse_command_line(argc, argv, opts), vm);
     po::notify(vm);
     return vm;
+}
+
+std::shared_ptr<IHasher> get_hasher(const HashAlgorithm& hashAlgorithm)
+{
+    switch (hashAlgorithm)
+    {
+    case HashAlgorithm::CRC16:
+        return std::make_shared<CRC16Hasher>();
+    case HashAlgorithm::CRC32:
+        return std::make_shared<CRC32Hasher>();
+    case HashAlgorithm::MD5:
+        return std::make_shared<MD5Hasher>();
+    case HashAlgorithm::SHA1:
+        return std::make_shared<SHA1Hasher>();
+    }
+    return std::make_shared<CRC16Hasher>();
 }
 
 } // namespace options

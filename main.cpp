@@ -1,10 +1,3 @@
-#include <algorithm>
-#include <boost/crc.hpp>
-#include <MD5Hasher.hpp>
-#include <SHA1Hasher.hpp>
-#include <CRC16Hasher.hpp>
-#include <CRC32Hasher.hpp>
-#include <boost/uuid/detail/sha1.hpp>
 #include <filter.hpp>
 #include <iostream>
 #include <options.hpp>
@@ -38,41 +31,25 @@ int main(int argc, char** argv)
         std::size_t mfs = vm["min-file-size"].as<std::size_t>();
 
         auto files = filter::filter(include, exclude, ptrns, depth, mfs);
+        auto hasher = options::get_hasher(vm["hash-algorithm"].as<options::HashAlgorithm>());
 
         std::size_t block_size = vm["block-size"].as<std::size_t>();
         std::vector<char> block(block_size);
         for (auto& file : files)
         {
             fmt::println("{}", file.path());
-            
+
             if (file.is_open())
             {
-                /////MD5/////
-                MD5Hasher md5;
-                /////SHA1/////
-                SHA1Hasher sha1;
-                /////CRC32/////
-                CRC32Hasher crc32;
-                /////CRC16/////
-                CRC16Hasher crc16;
                 while (!file.eof())
                 {
                     std::fill(block.begin(), block.end(), '\0');
                     file.read(block.data(), block_size);
-                    md5.hash_bytes(block.data(), block_size);
-                    sha1.hash_bytes(block.data(), block_size);
-                    crc32.hash_bytes(block.data(), block_size);
-                    crc16.hash_bytes(block.data(), block_size);
+                    hasher->hash_bytes(block.data(), block_size);
                 }
                 file.close();
-                fmt::println("MD5: {0:x}", fmt::join(md5.getHash(), ""));
-                fmt::println("SHA1: {0:x}", fmt::join(sha1.getHash(), ""));
-                fmt::println("CRC32: {0:x}", fmt::join(crc32.getHash(), ""));
-                fmt::println("CRC16: {0:x}", fmt::join(crc16.getHash(), ""));
-                fmt::println("MD5: {0:x}", fmt::join(md5.getHash(), ""));
-                fmt::println("SHA1: {0:x}", fmt::join(sha1.getHash(), ""));
-                fmt::println("CRC32: {0:x}", fmt::join(crc32.getHash(), ""));
-                fmt::println("CRC16: {0:x}", fmt::join(crc16.getHash(), ""));
+                fmt::println("HASH: {0:x}", fmt::join(hasher->getHash(), ""));
+                hasher->reset();
             }
             else
             {

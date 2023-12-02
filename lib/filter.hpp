@@ -1,9 +1,9 @@
 #pragma once
 
+#include <FileReader.hpp>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <FileReader.hpp>
 #include <iostream>
 #include <list>
 #include <options.hpp>
@@ -11,7 +11,7 @@ namespace fs = boost::filesystem;
 
 namespace filter {
 std::list<FileReader> filter(const paths& include, const paths& exclude, const patterns& ptrns,
-                              const std::size_t& depth, const std::size_t& mfs)
+                             const std::size_t& depth, const std::size_t& mfs)
 {
     std::list<FileReader> files;
     for (const auto& path_str : include)

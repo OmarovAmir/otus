@@ -2,6 +2,7 @@
 
 #include <IHasher.hpp>
 #include <boost/uuid/detail/sha1.hpp>
+#include <cstring>
 #include <memory>
 namespace ud = boost::uuids::detail;
 
@@ -21,13 +22,14 @@ class SHA1Hasher : public IHasher
         std::vector<uint> result;
         if (sha1)
         {
+            ud::sha1 sha1Copy;
+            std::memcpy(&sha1Copy, sha1.get(), sizeof(sha1Copy));
             ud::sha1::digest_type digest = {0};
-            sha1->get_digest(digest);
+            sha1Copy.get_digest(digest);
             for (const auto& i : digest)
             {
                 result.push_back(i);
             }
-            reset();
         }
         return result;
     }

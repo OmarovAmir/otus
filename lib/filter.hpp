@@ -10,14 +10,30 @@
 namespace fs = boost::filesystem;
 
 namespace filter {
+
+bool checkDirectory(const paths& exclude, const std::string path_str)
+{
+    return std::any_of(exclude.begin(), exclude.end(),
+                       [&path_str](std::string ex) { return (path_str.find(ex) != std::string::npos); });
+}
+
+bool checkFile(const patterns& ptrns, const std::size_t& mfs, const fs::path path)
+{
+    return ((ptrns.empty() || std::any_of(ptrns.begin(), ptrns.end(),
+                                          [path_str = path.filename().string()](std::string pt) {
+                                              return (boost::to_lower_copy(path_str).find(boost::to_lower_copy(pt)) !=
+                                                      std::string::npos);
+                                          })) &&
+            (fs::file_size(path) > mfs));
+}
+
 std::list<FileReader> filter(const paths& include, const paths& exclude, const patterns& ptrns,
                              const std::size_t& depth, const std::size_t& mfs)
 {
     std::list<FileReader> files;
     for (const auto& path_str : include)
     {
-        if (std::any_of(exclude.begin(), exclude.end(),
-                        [&path_str](std::string ex) { return (path_str.find(ex) != std::string::npos); }))
+        if (checkDirectory(exclude, path_str))
         {
             continue;
         }
@@ -26,12 +42,7 @@ std::list<FileReader> filter(const paths& include, const paths& exclude, const p
         {
             if (fs::is_regular_file(path))
             {
-                if ((ptrns.empty() || std::any_of(ptrns.begin(), ptrns.end(),
-                                                  [path_str = path.filename().string()](std::string pt) {
-                                                      return (boost::to_lower_copy(path_str).find(
-                                                                  boost::to_lower_copy(pt)) != std::string::npos);
-                                                  })) &&
-                    (fs::file_size(path) > mfs))
+                if (checkFile(ptrns, mfs, path))
                 {
                     files.emplace_back(path, std::ios::binary);
                 }
@@ -40,9 +51,7 @@ std::list<FileReader> filter(const paths& include, const paths& exclude, const p
             {
                 for (auto ri = fs::recursive_directory_iterator(path); ri != fs::end(ri); ++ri)
                 {
-                    if (std::any_of(exclude.begin(), exclude.end(),
-                                    [&ri](std::string ex)
-                                    { return (ri->path().string().find(ex) != std::string::npos); }))
+                    if (checkDirectory(exclude, ri->path().string()))
                     {
                         continue;
                     }
@@ -56,13 +65,7 @@ std::list<FileReader> filter(const paths& include, const paths& exclude, const p
                     }
                     if (fs::is_regular_file(ri->path()))
                     {
-                        if ((ptrns.empty() ||
-                             std::any_of(ptrns.begin(), ptrns.end(),
-                                         [path_str = ri->path().filename().string()](std::string pt) {
-                                             return (boost::to_lower_copy(path_str).find(boost::to_lower_copy(pt)) !=
-                                                     std::string::npos);
-                                         })) &&
-                            (fs::file_size(ri->path()) > mfs))
+                        if (checkFile(ptrns, mfs, ri->path()))
                         {
                             files.emplace_back(ri->path(), std::ios::binary);
                         }
@@ -78,11 +81,6 @@ std::list<FileReader> filter(const paths& include, const paths& exclude, const p
         {
             fmt::println("{} does not exist", path.string());
         }
-    }
-
-    for (const auto& file : files)
-    {
-        fmt::println("{}", file.path());
     }
     return files;
 }

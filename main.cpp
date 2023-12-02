@@ -17,9 +17,13 @@ int main(int argc, char** argv)
             return 0;
         }
 
-        paths include = vm["include-paths"].as<paths>();
+        paths include;
         paths exclude;
         patterns ptrns;
+        if (vm.count("include-paths"))
+        {
+            include = vm["include-paths"].as<paths>();
+        }
         if (vm.count("exclude-paths"))
         {
             exclude = vm["exclude-paths"].as<paths>();

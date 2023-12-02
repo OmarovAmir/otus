@@ -94,8 +94,7 @@ po::options_description opts_init()
     optsInit("help,h", "this screen");
     // Include paths
     optsInit("include-paths,i",
-             po::value<paths>()->required()->multitoken()->composing()->notifier(
-                 make_paths_notifier<paths>("Include paths")),
+             po::value<paths>()->multitoken()->composing()->notifier(make_paths_notifier<paths>("Include paths")),
              "include paths");
     // Exclude paths
     optsInit("exclude-paths,e",

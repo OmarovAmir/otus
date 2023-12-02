@@ -136,7 +136,9 @@ po::variables_map parse_options(int argc, char** argv, const po::options_descrip
     po::store(po::parse_command_line(argc, argv, opts), vm);
     if (vm["verbose"].as<bool>())
     {
+        fmt::println("Options:");
         po::notify(vm);
+        fmt::println("");
     }
     return vm;
 }

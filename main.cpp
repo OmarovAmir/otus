@@ -1,6 +1,7 @@
 #include <filter.hpp>
 #include <iostream>
 #include <options.hpp>
+#include <search.hpp>
 namespace fs = boost::filesystem;
 namespace ud = boost::uuids::detail;
 
@@ -27,35 +28,13 @@ int main(int argc, char** argv)
         {
             ptrns = vm["patterns"].as<patterns>();
         }
-        std::size_t depth = vm["depth"].as<std::size_t>();
-        std::size_t mfs = vm["min-file-size"].as<std::size_t>();
+        auto depth = vm["depth"].as<std::size_t>();
+        auto mfs = vm["min-file-size"].as<std::size_t>();
+        auto block_size = vm["block-size"].as<std::size_t>();
+        auto hashAlgorithm = vm["hash-algorithm"].as<options::HashAlgorithm>();
 
-        auto files = filter::filter(include, exclude, ptrns, depth, mfs);
-        auto hasher = options::get_hasher(vm["hash-algorithm"].as<options::HashAlgorithm>());
-
-        std::size_t block_size = vm["block-size"].as<std::size_t>();
-        std::vector<char> block(block_size);
-        for (auto& file : files)
-        {
-            fmt::println("{}", file.path());
-
-            if (file.is_open())
-            {
-                while (!file.eof())
-                {
-                    std::fill(block.begin(), block.end(), '\0');
-                    file.read(block.data(), block_size);
-                    hasher->hash_bytes(block.data(), block_size);
-                }
-                file.close();
-                fmt::println("HASH: {0:x}", fmt::join(hasher->getHash(), ""));
-                hasher->reset();
-            }
-            else
-            {
-                fmt::println("Не удалось прочитать файл");
-            }
-        }
+        auto files = filter::filter(include, exclude, ptrns, depth, mfs, hashAlgorithm);
+        search::searchDublicates(files, block_size, vm.count("verbose"));
     }
     catch (std::exception& e)
     {

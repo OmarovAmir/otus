@@ -17,7 +17,7 @@ class MD5Hasher : public IHasher
         md5->process_bytes(buffer, byte_count);
     }
 
-    std::vector<uint> getHash() override final
+    std::vector<uint> getHash() const override final
     {
         std::vector<uint> result;
         if (md5)

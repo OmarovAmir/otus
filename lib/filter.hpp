@@ -28,7 +28,7 @@ bool checkFile(const patterns& ptrns, const std::size_t& mfs, const fs::path pat
 }
 
 std::list<FileReader> filter(const paths& include, const paths& exclude, const patterns& ptrns,
-                             const std::size_t& depth, const std::size_t& mfs)
+                             const std::size_t& depth, const std::size_t& mfs, options::HashAlgorithm& hashAlgorithm)
 {
     std::list<FileReader> files;
     for (const auto& path_str : include)
@@ -44,7 +44,7 @@ std::list<FileReader> filter(const paths& include, const paths& exclude, const p
             {
                 if (checkFile(ptrns, mfs, path))
                 {
-                    files.emplace_back(path, std::ios::binary);
+                    files.emplace_back(path, std::ios::binary, hashAlgorithm);
                 }
             }
             else if (fs::is_directory(path))
@@ -67,7 +67,7 @@ std::list<FileReader> filter(const paths& include, const paths& exclude, const p
                     {
                         if (checkFile(ptrns, mfs, ri->path()))
                         {
-                            files.emplace_back(ri->path(), std::ios::binary);
+                            files.emplace_back(ri->path(), std::ios::binary, hashAlgorithm);
                         }
                     }
                 }
@@ -84,4 +84,5 @@ std::list<FileReader> filter(const paths& include, const paths& exclude, const p
     }
     return files;
 }
+
 }; // namespace filter

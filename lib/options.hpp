@@ -124,6 +124,8 @@ po::options_description opts_init()
                  ->default_value(HashAlgorithm::CRC16)
                  ->notifier(make_paths_notifier<HashAlgorithm>("Hash algorithm")),
              "hash algorithm {crc16, crc32, md5, sha1}");
+    optsInit("verbose,v", po::value<bool>()->implicit_value(true)->notifier(make_paths_notifier<bool>("Verbose")),
+             "verbose");
     return opts;
 }
 
@@ -131,7 +133,10 @@ po::variables_map parse_options(int argc, char** argv, const po::options_descrip
 {
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
-    po::notify(vm);
+    if (vm.count("verbose"))
+    {
+        po::notify(vm);
+    }
     return vm;
 }
 

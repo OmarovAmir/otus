@@ -17,7 +17,7 @@ class SHA1Hasher : public IHasher
         sha1->process_bytes(buffer, byte_count);
     }
 
-    std::vector<uint> getHash() override final
+    std::vector<uint> getHash() const override final
     {
         std::vector<uint> result;
         if (sha1)

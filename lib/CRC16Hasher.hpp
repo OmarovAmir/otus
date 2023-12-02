@@ -15,7 +15,7 @@ class CRC16Hasher : public IHasher
         crc16->process_bytes(buffer, byte_count);
     }
 
-    std::vector<uint> getHash() override final
+    std::vector<uint> getHash() const override final
     {
         std::vector<uint> result;
         result.push_back(crc16->checksum());

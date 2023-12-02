@@ -34,13 +34,13 @@ void searchDublicates(std::list<FileReader>& files, const std::size_t& blockSize
             }
         }
     }
-    if (!files.empty())
+    if (files.size() > 1)
     {
         files.sort();
         auto hash = files.front().getHash();
         if (verbose)
         {
-            fmt::println("{0:x}", fmt::join(hash, ""));
+            fmt::println("Hash: {0:x}", fmt::join(hash, ""));
         }
         for (const auto& file : files)
         {
@@ -50,7 +50,7 @@ void searchDublicates(std::list<FileReader>& files, const std::size_t& blockSize
                 fmt::println("");
                 if (verbose)
                 {
-                    fmt::println("{0:x}", fmt::join(hash, ""));
+                    fmt::println("Hash: {0:x}", fmt::join(hash, ""));
                 }
             }
             fmt::println("{}", file.path());

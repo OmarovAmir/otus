@@ -36,9 +36,10 @@ int main(int argc, char** argv)
         auto mfs = vm["min-file-size"].as<std::size_t>();
         auto block_size = vm["block-size"].as<std::size_t>();
         auto hashAlgorithm = vm["hash-algorithm"].as<options::HashAlgorithm>();
+        auto verbose = vm["verbose"].as<bool>();
 
         auto files = filter::filter(include, exclude, ptrns, depth, mfs, hashAlgorithm);
-        search::searchDublicates(files, block_size, vm.count("verbose"));
+        search::searchDublicates(files, block_size, verbose);
     }
     catch (std::exception& e)
     {

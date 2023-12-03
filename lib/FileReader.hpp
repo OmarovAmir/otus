@@ -30,7 +30,7 @@ class FileReader
         }
         std::vector<char> block(blockSize);
         _stream->read(block.data(), blockSize);
-        if (_hasher)
+        if ((0 != _stream->gcount()) && _hasher)
         {
             _hasher->hash_bytes(block.data(), blockSize);
         }

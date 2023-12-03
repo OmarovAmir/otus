@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <iostream>
 #include <list>
 #include <options.hpp>
 namespace fs = boost::filesystem;

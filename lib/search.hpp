@@ -1,7 +1,6 @@
 #pragma once
 
 #include <FileReader.hpp>
-#include <IHasher.hpp>
 #include <algorithm>
 #include <list>
 

@@ -2,8 +2,6 @@
 #include <iostream>
 #include <options.hpp>
 #include <search.hpp>
-namespace fs = boost::filesystem;
-namespace ud = boost::uuids::detail;
 
 int main(int argc, char** argv)
 {

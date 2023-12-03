@@ -10,11 +10,11 @@ namespace search {
 void searchDublicates(std::list<FileReader>& files, const std::size_t& blockSize, bool verbose)
 {
     while ((files.size() > 1) &&
-           !std::all_of(files.begin(), files.end(), [](const FileReader& file) { return file.eof(); }))
+           !std::all_of(files.begin(), files.end(), [](const FileReader& file) { return file.isEof(); }))
     {
         for (auto& file : files)
         {
-            if (file.is_open())
+            if (file.isOpen())
             {
                 file.hashNext(blockSize);
             }

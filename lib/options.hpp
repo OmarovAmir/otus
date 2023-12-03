@@ -143,20 +143,20 @@ po::variables_map parse_options(int argc, char** argv, const po::options_descrip
     return vm;
 }
 
-std::shared_ptr<IHasher> get_hasher(const HashAlgorithm& hashAlgorithm)
+std::unique_ptr<IHasher> get_hasher(const HashAlgorithm& hashAlgorithm)
 {
     switch (hashAlgorithm)
     {
     case HashAlgorithm::CRC16:
-        return std::make_shared<CRC16Hasher>();
+        return std::make_unique<CRC16Hasher>();
     case HashAlgorithm::CRC32:
-        return std::make_shared<CRC32Hasher>();
+        return std::make_unique<CRC32Hasher>();
     case HashAlgorithm::MD5:
-        return std::make_shared<MD5Hasher>();
+        return std::make_unique<MD5Hasher>();
     case HashAlgorithm::SHA1:
-        return std::make_shared<SHA1Hasher>();
+        return std::make_unique<SHA1Hasher>();
     }
-    return std::make_shared<CRC16Hasher>();
+    return std::make_unique<CRC16Hasher>();
 }
 
 } // namespace options

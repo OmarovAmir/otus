@@ -18,7 +18,7 @@ class CommandBatch
 
     void save(const std::string& output) const
     {
-        FileManager::save("bulk" + std::to_string(_time) + "_" + std::to_string(_logfilenumber) + ".log", output);
+        FileManager::save("bulk_mtd" + std::to_string(_time) + "_" + std::to_string(_logfilenumber) + ".log", output);
     }
 
     void setTime()
@@ -57,7 +57,7 @@ class CommandBatch
             }
         }
         std::stringstream stream;
-        stream << "bulk: ";
+        stream << "bulk_mtd: ";
         for (auto cmd = _batch.cbegin(); cmd != _batch.cend(); ++cmd)
         {
             if (cmd != _batch.cbegin())

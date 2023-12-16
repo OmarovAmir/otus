@@ -8,9 +8,9 @@ int main(int argc, char** argv)
         std::cout << "Usage: bulk_mtd batchSize" << std::endl;
         return 0;
     }
-
-    auto handle = connect(static_cast<std::size_t>(std::atol(argv[1])));
-    auto handle2 = connect(static_cast<std::size_t>(std::atol(argv[1])));
+    auto size = static_cast<std::size_t>(std::atol(argv[1]));
+    auto handle = connect(size);
+    auto handle2 = connect(size);
     std::string str("cmd1");
     receive(handle, str.data(), str.size());
     receive(handle2, str.data(), str.size());

@@ -1,5 +1,4 @@
-#ifndef A8159899_07B5_4D41_AC7D_5826BDCA5394
-#define A8159899_07B5_4D41_AC7D_5826BDCA5394
+#pragma once
 
 #include <memory>
 #include <string>
@@ -20,5 +19,3 @@ class ICommand
 };
 
 using CommandPtr = std::shared_ptr<ICommand>;
-
-#endif /* A8159899_07B5_4D41_AC7D_5826BDCA5394 */

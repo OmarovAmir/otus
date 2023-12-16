@@ -1,5 +1,4 @@
-#ifndef A3FE653B_7759_468C_A44A_5ABAD4FC2625
-#define A3FE653B_7759_468C_A44A_5ABAD4FC2625
+#pragma once
 
 #include <filesystem>
 #include <fstream>
@@ -23,5 +22,3 @@ class FileManager
         }
     }
 };
-
-#endif /* A3FE653B_7759_468C_A44A_5ABAD4FC2625 */

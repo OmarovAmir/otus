@@ -8,7 +8,13 @@ project(bulk_mtd VERSION ${PROJECT_VESRION})
 configure_file(version.h.in version.h)
 
 include_directories(.)
+include_directories(./lib)
+
+add_library(async SHARED ./lib/async.cpp)
+
 add_executable(bulk_mtd main.cpp)
+
+target_link_libraries(bulk_mtd async)
 
 set_target_properties(bulk_mtd PROPERTIES
     CXX_STANDARD 17

@@ -1,5 +1,4 @@
-#ifndef BFCB4491_7393_4655_B226_E27BB7278D32
-#define BFCB4491_7393_4655_B226_E27BB7278D32
+#pragma once
 
 #include <chrono>
 #include <list>
@@ -15,10 +14,11 @@ class CommandBatch
     std::size_t _level;
     std::size_t _time;
     std::size_t _logfilenumber;
+    std::size_t _handle;
 
     void save(const std::string& output) const
     {
-        FileManager::save("bulk_mtd" + std::to_string(_time) + "_" + std::to_string(_logfilenumber) + ".log", output);
+        FileManager::save("bulk_mtd_" + std::to_string(_handle) + "_" + std::to_string(_time) + "_" + std::to_string(_logfilenumber) + ".log", output);
     }
 
     void setTime()
@@ -57,7 +57,7 @@ class CommandBatch
             }
         }
         std::stringstream stream;
-        stream << "bulk_mtd: ";
+        stream << "bulk_mtd_" + std::to_string(_handle) + ": ";
         for (auto cmd = _batch.cbegin(); cmd != _batch.cend(); ++cmd)
         {
             if (cmd != _batch.cbegin())
@@ -74,12 +74,13 @@ class CommandBatch
     }
 
   public:
-    explicit CommandBatch(std::size_t size)
+    explicit CommandBatch(std::size_t size, std::size_t handle)
         : _batch{}
         , _size{size}
         , _level{0}
         , _time{0}
         , _logfilenumber{0}
+        , _handle{handle}
     {}
 
     ~CommandBatch() { execute(false, true); }
@@ -113,5 +114,3 @@ class CommandBatch
         execute();
     }
 };
-
-#endif /* BFCB4491_7393_4655_B226_E27BB7278D32 */

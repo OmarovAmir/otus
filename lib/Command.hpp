@@ -1,5 +1,4 @@
-#ifndef D462B73C_978B_4C2C_B334_054CF9BB74F3
-#define D462B73C_978B_4C2C_B334_054CF9BB74F3
+#pragma once
 
 #include <ICommand.hpp>
 
@@ -59,5 +58,3 @@ CommandPtr make_command(const std::string& cmd)
     }
     return std::make_shared<WorkCommand>(cmd);
 }
-
-#endif /* D462B73C_978B_4C2C_B334_054CF9BB74F3 */

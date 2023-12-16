@@ -6,7 +6,7 @@
 
 #include <Command.hpp>
 #include <FileManager.hpp>
-
+#include <mutex>
 class CommandBatch
 {
     std::list<CommandPtr> _batch;
@@ -15,6 +15,7 @@ class CommandBatch
     std::size_t _time;
     std::size_t _logfilenumber;
     std::size_t _handle;
+    std::mutex _mutex;
 
     void save(const std::string& output) const
     {
@@ -83,10 +84,15 @@ class CommandBatch
         , _handle{handle}
     {}
 
-    ~CommandBatch() { execute(false, true); }
+    ~CommandBatch() 
+    {
+        std::unique_lock lock(_mutex);
+        execute(false, true);
+    }
 
     void levelUp()
     {
+        std::unique_lock lock(_mutex);
         if (!_level)
         {
             execute(true);
@@ -96,6 +102,7 @@ class CommandBatch
 
     void levelDown()
     {
+        std::unique_lock lock(_mutex);
         if (!_level)
         {
             return;
@@ -109,6 +116,7 @@ class CommandBatch
 
     void add(const CommandPtr cmd)
     {
+        std::unique_lock lock(_mutex);
         setTime();
         _batch.emplace_back(cmd);
         execute();

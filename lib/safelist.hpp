@@ -1,37 +1,26 @@
 #pragma once
-#include <list>
+#include <queue>
+#include <vector>
 #include <mutex>
 #include <algorithm>
 #include <functional>
 
-template <typename T> class SafeList
+template <typename T> class SafeQueue
 {
-    std::list<T> _data;
+    std::queue<T> _data;
     std::mutex _mutex;
 
   public:
-     std::list<T> readData(std::function<bool(T)> func = [](T a){ return true; })
+     std::vector<T> popAll()
      {
           std::unique_lock lock(_mutex);
-          std::list<T> result;
-
-          for(auto it = _data.begin(); it != _data.end();)
-          {
-               if(func(*it))
-               {
-                    result.push_back(std::move(*it));
-                    it = _data.erase(it);
-               }
-               else
-               {
-                    ++it;
-               }
-          }
+          std::vector<T> result;
+          
 
           return result;
      }
 
-     void writeData(std::list<T>& data)
+     void push()
      {
           std::unique_lock lock(_mutex);
           while(!data.empty())

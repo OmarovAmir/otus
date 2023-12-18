@@ -2,14 +2,16 @@
 
 #include <chrono>
 #include <list>
+#include <memory>
+#include <mutex>
 #include <sstream>
 
 #include <Command.hpp>
 #include <FileManager.hpp>
-#include <mutex>
+
 class CommandBatch
 {
-    std::list<CommandPtr> _batch;
+    std::shared_ptr<std::list<CommandPtr>> _batchPtr;
     std::size_t _size;
     std::size_t _level;
     std::size_t _time;
@@ -19,12 +21,22 @@ class CommandBatch
 
     void save(const std::string& output) const
     {
-        FileManager::save("bulk_mtd_" + std::to_string(_handle) + "_" + std::to_string(_time) + "_" + std::to_string(_logfilenumber) + ".log", output);
+        FileManager::save("bulk_mtd_" + std::to_string(_handle) + "_" + std::to_string(_time) + "_" +
+                              std::to_string(_logfilenumber) + ".log",
+                          output);
+    }
+
+    void checkBatchPtr()
+    {
+        if (!_batchPtr)
+        {
+            _batchPtr = std::make_shared<std::list<CommandPtr>>();
+        }
     }
 
     void setTime()
     {
-        if (!_batch.size())
+        if (_batchPtr && !_batchPtr->size())
         {
             std::size_t newTime =
                 std::chrono::seconds(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())).count();
@@ -42,7 +54,7 @@ class CommandBatch
 
     void execute(bool force = false, bool eof = false)
     {
-        if (!_batch.size())
+        if (!_batchPtr || !_batchPtr->size())
         {
             return;
         }
@@ -52,23 +64,23 @@ class CommandBatch
             {
                 return;
             }
-            if ((_batch.size() < _size) && !eof)
+            if ((_batchPtr->size() < _size) && !eof)
             {
                 return;
             }
         }
         std::stringstream stream;
         stream << "bulk_mtd_" + std::to_string(_handle) + ": ";
-        for (auto cmd = _batch.cbegin(); cmd != _batch.cend(); ++cmd)
+        for (auto cmd = _batchPtr->cbegin(); cmd != _batchPtr->cend(); ++cmd)
         {
-            if (cmd != _batch.cbegin())
+            if (cmd != _batchPtr->cbegin())
             {
                 stream << ", ";
             }
             stream << (*cmd)->execute();
         }
         stream << std::endl;
-        _batch.clear();
+        _batchPtr.reset();
         auto output = stream.str();
         std::cout << output;
         save(output);
@@ -76,7 +88,7 @@ class CommandBatch
 
   public:
     explicit CommandBatch(std::size_t size, std::size_t handle)
-        : _batch{}
+        : _batchPtr{nullptr}
         , _size{size}
         , _level{0}
         , _time{0}
@@ -84,7 +96,7 @@ class CommandBatch
         , _handle{handle}
     {}
 
-    ~CommandBatch() 
+    ~CommandBatch()
     {
         std::unique_lock lock(_mutex);
         execute(false, true);
@@ -117,8 +129,9 @@ class CommandBatch
     void add(const CommandPtr cmd)
     {
         std::unique_lock lock(_mutex);
+        checkBatchPtr();
         setTime();
-        _batch.emplace_back(cmd);
+        _batchPtr->emplace_back(cmd);
         execute();
     }
 };

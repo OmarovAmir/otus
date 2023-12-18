@@ -10,7 +10,7 @@ template <typename T> class SafeList
     std::mutex _mutex;
 
   public:
-     std::list<T> readData(std::function<bool(T)> func)
+     std::list<T> readData(std::function<bool(T)> func = [](T a){ return true; })
      {
           std::unique_lock lock(_mutex);
           std::list<T> result;
@@ -45,3 +45,9 @@ template <typename T> class SafeList
 
 // public getData for read or write data
 // public getMutex for unique_lock for write and shared_lock for read
+
+
+
+// Пусть этот список представляет из себя очередь из shared_ptr на list из CommandPtr
+// тогда можно создать 2 очереди, где будет храниться копия shared_ptr для логирования и для записи в файл
+// тогда сам list из CommandPtr удалится только когда все shared_ptr удалятся, то есть удалится из обеих очередей

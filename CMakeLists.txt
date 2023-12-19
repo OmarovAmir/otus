@@ -44,6 +44,7 @@ endif()
 
 install(TARGETS bulk_mtd RUNTIME DESTINATION bin)
 install(TARGETS async RUNTIME DESTINATION lib)
+install(FILES lib/async.hpp DESTINATION include)
 
 set(CPACK_GENERATOR DEB)
 

@@ -15,10 +15,10 @@ class DataExtractorManager
     std::unordered_map<std::size_t, DataExtractor> _dataExtractorMap;
     std::shared_mutex _mutex;
 
-    std::thread _logThread;
+    std::vector<std::thread> _logThreads;
     std::mutex _logMutex;
     std::shared_ptr<std::condition_variable> _logCV;
-    std::thread _fileSaveThread;
+    std::vector<std::thread> _fileSaveThreads;
     std::mutex _fileSaveMutex;
     std::shared_ptr<std::condition_variable> _fileSaveCV;
     CommandBatch::SafeBatchDataQueue _logData;
@@ -29,14 +29,18 @@ class DataExtractorManager
     {
         while(!finishThreads )
         {
-            std::unique_lock lock(_logMutex);
-            _logCV->wait(lock, [&]{ return finishThreads || !_logData->empty(); });
-            auto data = _logData->popAll();
+            std::vector<CommandBatch::SafeBatchDataQueue::element_type::data_type> data;
+            {
+                std::unique_lock lock(_logMutex);
+                _logCV->wait(lock, [&]{ return finishThreads || !_logData->empty(); });
+                data = _logData->popAll();
+            }
 
             for (const auto& it: data)
             {
                 std::stringstream stream;
                 stream << "bulk_mtd_";
+                stream << std::this_thread::get_id() << "_";
                 stream << std::to_string(it->handle) << "_";
                 stream << std::to_string(it->time) << "_";
                 stream << std::to_string(it->number) << ": ";
@@ -58,15 +62,19 @@ class DataExtractorManager
     {
         while(!finishThreads)
         {
-            std::unique_lock lock(_fileSaveMutex);
-            _fileSaveCV->wait(lock, [&]{ return finishThreads || !_fileSaveData->empty(); });
-            auto data = _fileSaveData->popAll();
+            std::vector<CommandBatch::SafeBatchDataQueue::element_type::data_type> data;
+            {
+                std::unique_lock lock(_fileSaveMutex);
+                _fileSaveCV->wait(lock, [&]{ return finishThreads || !_fileSaveData->empty(); });
+                data = _fileSaveData->popAll();
+            }
             
             for (const auto& it: data)
             {
                 std::stringstream filename;
                 std::stringstream commands;
                 filename << "bulk_mtd_";
+                filename << std::this_thread::get_id() << "_";
                 filename << std::to_string(it->handle) << "_";
                 filename << std::to_string(it->time) << "_";
                 filename << std::to_string(it->number) << ".log";
@@ -92,26 +100,35 @@ class DataExtractorManager
     , _fileSaveData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
     , finishThreads{false}
     {
-        _logThread = std::thread(&DataExtractorManager::log, this);
-        _fileSaveThread = std::thread(&DataExtractorManager::fileSave, this);
+        _logThreads.push_back(std::thread(&DataExtractorManager::log, this));
+        _logThreads.push_back(std::thread(&DataExtractorManager::log, this));
+        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
+        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
+        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
+        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
     }
 
     ~DataExtractorManager()
     {
-        std::cout << __FUNCTION__ << std::endl;
         {
             std::scoped_lock lock(_logMutex, _fileSaveMutex);
             finishThreads = true;
         }
         _logCV->notify_one();
-        _fileSaveCV->notify_one();
-        if(_logThread.joinable())
+        _fileSaveCV->notify_all();
+        for (auto& th: _logThreads)
         {
-            _logThread.join();
+            if(th.joinable())
+            {
+                th.join();
+            }
         }
-        if(_fileSaveThread.joinable())
+        for (auto& th: _fileSaveThreads)
         {
-            _fileSaveThread.join();
+            if(th.joinable())
+            {
+                th.join();
+            }
         }
     }
 

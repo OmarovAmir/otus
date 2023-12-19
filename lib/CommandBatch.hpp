@@ -14,7 +14,7 @@ class CommandBatch
 {
   public:
     using Data = std::shared_ptr<std::list<CommandPtr>>;
-    
+
     struct BatchData
     {
         std::size_t handle;
@@ -144,6 +144,6 @@ class CommandBatch
         _fileSaveData->push(data);
         _batchPtr.reset();
         _logCV->notify_one();
-        _fileSaveCV->notify_one();
+        _fileSaveCV->notify_all();
     }
 };

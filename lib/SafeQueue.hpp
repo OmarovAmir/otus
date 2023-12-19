@@ -11,6 +11,9 @@ template <typename T> class SafeQueue
     std::mutex _mutex;
 
   public:
+
+     using data_type = T;
+
      std::vector<T> popAll()
      {
           std::unique_lock lock(_mutex);

@@ -15,27 +15,32 @@ template <typename T> class SafeQueue
      {
           std::unique_lock lock(_mutex);
           std::vector<T> result;
-          
-
+          while (!_data.empty())
+          {
+               result.push_back(_data.front());
+               _data.pop();
+          }
           return result;
      }
 
-     void push()
+     void push(const T& data)
      {
           std::unique_lock lock(_mutex);
-          while(!data.empty())
-          {
-               _data.push_back(std::move(data.front()));
-               data.pop_front();
-          }
-          // запись данных назад и condition_variable notify_all();
+          _data.push_back(data);
+     }
+
+     std::size_t size()
+     {
+          std::unique_lock lock(_mutex);
+          return _data.size();
+     }
+
+     bool empty()
+     {
+          std::unique_lock lock(_mutex);
+          return _data.empty();
      }
 };
-
-// public getData for read or write data
-// public getMutex for unique_lock for write and shared_lock for read
-
-
 
 // Пусть этот список представляет из себя очередь из shared_ptr на list из CommandPtr
 // тогда можно создать 2 очереди, где будет храниться копия shared_ptr для логирования и для записи в файл

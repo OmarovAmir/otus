@@ -144,6 +144,6 @@ class CommandBatch
         _fileSaveData->push(data);
         _batchPtr.reset();
         _logCV->notify_one();
-        _fileSaveCV->notify_all();
+        _fileSaveCV->notify_one();
     }
 };

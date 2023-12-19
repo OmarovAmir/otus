@@ -114,7 +114,7 @@ class DataExtractorManager
             std::scoped_lock lock(_logMutex, _fileSaveMutex);
             finishThreads = true;
         }
-        _logCV->notify_one();
+        _logCV->notify_all();
         _fileSaveCV->notify_all();
         for (auto& th: _logThreads)
         {

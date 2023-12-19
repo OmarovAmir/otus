@@ -10,11 +10,13 @@
 #include <Command.hpp>
 #include <SafeQueue.hpp>
 
+/// @brief Класс блока команд
 class CommandBatch
 {
   public:
     using Data = std::shared_ptr<std::list<CommandPtr>>;
 
+    /// @brief Данные блока команд
     struct BatchData
     {
         std::size_t handle;
@@ -29,6 +31,13 @@ class CommandBatch
 
     using SafeBatchDataQueue = std::shared_ptr<SafeQueue<std::shared_ptr<BatchData>>>;
 
+    /// @brief Конструктор
+    /// @param size Размер блока команд
+    /// @param handle Дескриптор обработчика команд
+    /// @param logData Очередь потоков логирования
+    /// @param fileSaveData Очередь потоков сохранения в файл
+    /// @param logCV Условная переменная потоков логирования
+    /// @param fileSaveCV Условная переменная потоков сохранения в файл
     explicit CommandBatch(std::size_t size, std::size_t handle, 
             SafeBatchDataQueue logData, SafeBatchDataQueue fileSaveData, 
             std::shared_ptr<std::condition_variable> logCV, std::shared_ptr<std::condition_variable> fileSaveCV)
@@ -44,12 +53,14 @@ class CommandBatch
         , _handle{handle}
     {}
 
+    /// @brief Деструктор
     ~CommandBatch()
     {
         std::unique_lock lock(_mutex);
         execute(false, true);
     }
 
+    /// @brief Вход в блок с динамическим размером
     void levelUp()
     {
         std::unique_lock lock(_mutex);
@@ -60,6 +71,7 @@ class CommandBatch
         ++_level;
     }
 
+    /// @brief Выход из блока с динамическим размером
     void levelDown()
     {
         std::unique_lock lock(_mutex);
@@ -74,6 +86,8 @@ class CommandBatch
         }
     }
 
+    /// @brief Добавить команду
+    /// @param cmd Команда
     void add(const CommandPtr cmd)
     {
         std::unique_lock lock(_mutex);

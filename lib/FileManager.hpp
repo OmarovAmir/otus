@@ -5,9 +5,13 @@
 #include <iostream>
 #include <string>
 
+/// @brief Файловый менеджер
 class FileManager
 {
   public:
+    /// @brief Сохранить в файл
+    /// @param path Путь к файлу
+    /// @param data Данные
     static void save(const std::filesystem::path& path, const std::string& data)
     {
         std::ofstream logfile(path);

@@ -2,6 +2,7 @@
 
 #include <ICommand.hpp>
 
+/// @brief Основная команда
 class WorkCommand final : public ICommand
 {
     std::string _cmd;
@@ -15,6 +16,7 @@ class WorkCommand final : public ICommand
     virtual std::string execute() const override { return _cmd; }
 };
 
+/// @brief Пустая команда
 class EmptyCommand final : public ICommand
 {
   public:
@@ -23,6 +25,7 @@ class EmptyCommand final : public ICommand
     {}
 };
 
+/// @brief Команда входа в блок с динамическим размером
 class LevelUpCommand final : public ICommand
 {
   public:
@@ -31,6 +34,7 @@ class LevelUpCommand final : public ICommand
     {}
 };
 
+/// @brief Команда выхода из блока с динамическим размером
 class LevelDownCommand final : public ICommand
 {
   public:
@@ -39,6 +43,9 @@ class LevelDownCommand final : public ICommand
     {}
 };
 
+/// @brief Функция создания объекта команды
+/// @param cmd Команда
+/// @return Указатель на объект команды
 CommandPtr make_command(const std::string& cmd)
 {
     static const std::string _levelUp{"{"};

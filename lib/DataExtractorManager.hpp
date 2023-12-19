@@ -9,6 +9,7 @@
 #include <SafeQueue.hpp>
 #include <FileManager.hpp>
 
+/// @brief Менеджер обработчиков команд
 class DataExtractorManager
 {
     std::size_t _nextHandle;
@@ -25,6 +26,7 @@ class DataExtractorManager
     CommandBatch::SafeBatchDataQueue _fileSaveData;
     bool finishThreads;
 
+    /// @brief Метод логирования
     void log()
     {
         while(!finishThreads )
@@ -58,6 +60,7 @@ class DataExtractorManager
         }
     }
 
+    /// @brief Метод сохранения в файл
     void fileSave()
     {
         while(!finishThreads)
@@ -93,6 +96,8 @@ class DataExtractorManager
     }
 
   public:
+
+    /// @brief Конструктор
     DataExtractorManager()
     : _logCV{std::make_shared<std::condition_variable>()}
     , _fileSaveCV{std::make_shared<std::condition_variable>()}
@@ -108,6 +113,7 @@ class DataExtractorManager
         _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
     }
 
+    /// @brief Деструктор
     ~DataExtractorManager()
     {
         {
@@ -132,6 +138,9 @@ class DataExtractorManager
         }
     }
 
+    /// @brief Присоединиться к обработчику команд
+    /// @param size Размер блока команд
+    /// @return Дескриптор обработчика команд
     std::size_t connect(const std::size_t size)
     {
         std::unique_lock lock(_mutex);
@@ -142,6 +151,10 @@ class DataExtractorManager
         return _nextHandle;
     }
 
+    /// @brief Передать команду
+    /// @param handle Дескриптор обработчика команд
+    /// @param buffer Указатель на буффер с командой
+    /// @param size Размер команды
     void receive(const std::size_t handle, const void* buffer, const std::size_t size)
     {
         std::shared_lock lock(_mutex);
@@ -151,6 +164,8 @@ class DataExtractorManager
         }
     }
 
+    /// @brief Отсоединиться от обработчика команд
+    /// @param handle Дескриптор обработчика команд
     void disconnect(const std::size_t handle)
     {
         std::unique_lock lock(_mutex);

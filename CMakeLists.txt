@@ -5,6 +5,8 @@ set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
 project(bulk_mtd VERSION ${PROJECT_VESRION})
 
+find_package(Threads REQUIRED)
+
 configure_file(version.h.in version.h)
 
 include_directories(.)
@@ -16,6 +18,8 @@ set_target_properties(async PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
+
+target_link_libraries(async PRIVATE Threads::Threads)
 
 add_executable(bulk_mtd main.cpp)
 

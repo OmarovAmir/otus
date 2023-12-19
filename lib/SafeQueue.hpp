@@ -26,7 +26,7 @@ template <typename T> class SafeQueue
      void push(const T& data)
      {
           std::unique_lock lock(_mutex);
-          _data.push_back(data);
+          _data.push(data);
      }
 
      std::size_t size()

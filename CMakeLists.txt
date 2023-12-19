@@ -43,6 +43,7 @@ endif()
 
 
 install(TARGETS bulk_mtd RUNTIME DESTINATION bin)
+install(TARGETS async RUNTIME DESTINATION lib)
 
 set(CPACK_GENERATOR DEB)
 

@@ -12,6 +12,11 @@ include_directories(./lib)
 
 add_library(async SHARED ./lib/async.cpp)
 
+set_target_properties(async PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
+
 add_executable(bulk_mtd main.cpp)
 
 target_link_libraries(bulk_mtd async)

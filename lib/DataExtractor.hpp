@@ -3,6 +3,7 @@
 #include <memory>
 #include <condition_variable>
 #include <cassert>
+#include <exception>
 
 #include <CommandBatch.hpp>
 #include <SafeQueue.hpp>
@@ -26,7 +27,10 @@ class DataExtractor
             std::shared_ptr<std::condition_variable> logCV, std::shared_ptr<std::condition_variable> fileSaveCV)
         : _cmdBatch{std::make_unique<CommandBatch>(batchSize, handle, std::move(logData), std::move(fileSaveData), std::move(logCV), std::move(fileSaveCV))}
     {
-        assert(("batchSize can't be equal to zero", (0 != batchSize)));
+        if(0 == batchSize)
+        {
+            throw std::runtime_error("batchSize can't be equal to zero");
+        }
     }
 
     /// @brief Передать команду

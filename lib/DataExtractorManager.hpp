@@ -42,10 +42,10 @@ class DataExtractorManager
             {
                 std::stringstream stream;
                 stream << "bulk_mtd_";
-                stream << std::this_thread::get_id() << "_";
                 stream << std::to_string(it->handle) << "_";
                 stream << std::to_string(it->time) << "_";
-                stream << std::to_string(it->number) << ": ";
+                stream << std::to_string(it->number) << "_";
+                stream << std::this_thread::get_id() << ": ";
                 for (auto cmd = it->data->cbegin(); cmd != it->data->cend(); ++cmd)
                 {
                     if (cmd != it->data->cbegin())
@@ -77,10 +77,10 @@ class DataExtractorManager
                 std::stringstream filename;
                 std::stringstream commands;
                 filename << "bulk_mtd_";
-                filename << std::this_thread::get_id() << "_";
                 filename << std::to_string(it->handle) << "_";
                 filename << std::to_string(it->time) << "_";
-                filename << std::to_string(it->number) << ".log";
+                filename << std::to_string(it->number) << "_";
+                filename << std::this_thread::get_id() << ".log";
                 for (auto cmd = it->data->cbegin(); cmd != it->data->cend(); ++cmd)
                 {
                     if (cmd != it->data->cbegin())
@@ -144,11 +144,11 @@ class DataExtractorManager
     std::size_t connect(const std::size_t size)
     {
         std::unique_lock lock(_mutex);
-        while (!_dataExtractorMap.try_emplace(_nextHandle, DataExtractor(size, _nextHandle, _logData, _fileSaveData, _logCV, _fileSaveCV)).second)
+        while (!_dataExtractorMap.try_emplace(_nextHandle, size, _nextHandle, _logData, _fileSaveData, _logCV, _fileSaveCV).second)
         {
             ++_nextHandle;
         }
-        return _nextHandle;
+        return _nextHandle++;
     }
 
     /// @brief Передать команду

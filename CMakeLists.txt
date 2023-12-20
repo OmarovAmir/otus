@@ -34,8 +34,14 @@ if (MSVC)
     target_compile_options(bulk_mtd PRIVATE
         /W4
     )
+    target_compile_options(async PRIVATE
+        /W4
+    )
 else ()
     target_compile_options(bulk_mtd PRIVATE
+        -Wall -Wextra -pedantic -Werror -O3
+    )
+    target_compile_options(async PRIVATE
         -Wall -Wextra -pedantic -Werror -O3
     )
 endif()

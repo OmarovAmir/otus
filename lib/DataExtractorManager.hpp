@@ -116,12 +116,16 @@ class DataExtractorManager
     /// @brief Деструктор
     ~DataExtractorManager()
     {
+        do
         {
-            std::scoped_lock lock(_logMutex, _fileSaveMutex);
-            finishThreads = true;
-        }
-        _logCV->notify_all();
-        _fileSaveCV->notify_all();
+            std::scoped_lock lock(_logMutex, _fileSaveMutex, _mutex);
+            if(_logData->empty() && _fileSaveData->empty())
+            {
+                finishThreads = true;
+            }
+            _logCV->notify_all();
+            _fileSaveCV->notify_all();
+        } while (!finishThreads);
         for (auto& th: _logThreads)
         {
             if(th.joinable())

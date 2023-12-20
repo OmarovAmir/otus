@@ -105,12 +105,19 @@ class DataExtractorManager
     , _fileSaveData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
     , finishThreads{false}
     {
-        _logThreads.push_back(std::thread(&DataExtractorManager::log, this));
-        _logThreads.push_back(std::thread(&DataExtractorManager::log, this));
-        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
-        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
-        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
-        _fileSaveThreads.push_back(std::thread(&DataExtractorManager::fileSave, this));
+        std::size_t hwc = std::thread::hardware_concurrency();
+        std::size_t fileSaveNumber = (hwc / 2) ? (hwc / 2) : 1;
+        std::size_t logNumber = (fileSaveNumber - 1) ? (fileSaveNumber - 1) : 1;
+        _fileSaveThreads.reserve(fileSaveNumber);
+        _logThreads.reserve(logNumber);
+        for (std::size_t i = 0; i < fileSaveNumber; ++i)
+        {
+            _fileSaveThreads.emplace_back(&DataExtractorManager::fileSave, this);
+        }
+        for (std::size_t i = 0; i < logNumber; ++i)
+        {
+            _logThreads.emplace_back(&DataExtractorManager::log, this);
+        }
     }
 
     /// @brief Деструктор

@@ -1,2 +1,2 @@
 # otus
-bulk_mtd
+bulk_server

@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "Usage: bulk_mtd batchSize" << std::endl;
+        std::cout << "Usage: bulk_server batchSize" << std::endl;
         return 0;
     }
     auto size = static_cast<std::size_t>(std::atol(argv[1]));

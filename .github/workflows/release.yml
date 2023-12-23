@@ -1,9 +1,9 @@
 name: 'C++ CI'
 
 on:
-  push:
-    branches:
-      - hw9
+  # push:
+  #   branches:
+  #     - hw10
   workflow_dispatch:
 
 jobs:
@@ -35,6 +35,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bulk_mtd-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: bulk_mtd-0.0.${{ github.run_number }}-Linux.deb
+          asset_path: ./bulk_server-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: bulk_server-0.0.${{ github.run_number }}-Linux.deb
           asset_content_type: application/vnd.debian.binary-package

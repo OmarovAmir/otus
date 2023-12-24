@@ -24,6 +24,7 @@ class Connection : public std::enable_shared_from_this<Connection>
         {
             std::cout << std::this_thread::get_id() << " Client \"" << m_client << "\": Reading error: \"" << error
                       << "\"." << std::endl;
+            return;
         }
         else
         {

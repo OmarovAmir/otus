@@ -30,8 +30,7 @@ class Server : public std::enable_shared_from_this<Server>
                 self->accept();
                 if (!error)
                 {
-                    const std::shared_ptr<Connection> connection{
-                        new Connection{std::move(socket), self->m_size, self->m_general}};
+                    const auto connection = std::make_shared<Connection>(std::move(socket), self->m_size, self->m_general);
                     connection->read();
                 }
             });

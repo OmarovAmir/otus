@@ -56,6 +56,7 @@ class CommandBatch
     /// @brief Деструктор
     ~CommandBatch()
     {
+        std::cout << __FUNCTION__ << std::endl;
         std::unique_lock lock(_mutex);
         execute(false, true);
     }
@@ -138,6 +139,7 @@ class CommandBatch
 
     void execute(bool force = false, bool eof = false)
     {
+        std::cout << __FUNCTION__ << std::endl;
         if (!_batchPtr || !_batchPtr->size())
         {
             return;

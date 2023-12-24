@@ -6,11 +6,13 @@ set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 project(bulk_server VERSION ${PROJECT_VESRION})
 
 find_package(Threads REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 configure_file(version.h.in version.h)
 
 include_directories(.)
 include_directories(./lib)
+include_directories(./server)
 
 add_library(async SHARED ./lib/async.cpp)
 
@@ -23,7 +25,7 @@ target_link_libraries(async PRIVATE Threads::Threads)
 
 add_executable(bulk_server main.cpp)
 
-target_link_libraries(bulk_server async)
+target_link_libraries(bulk_server async ${Boost_LIBRARIES})
 
 set_target_properties(bulk_server PROPERTIES
     CXX_STANDARD 17

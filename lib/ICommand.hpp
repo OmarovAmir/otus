@@ -20,7 +20,7 @@ class ICommand
     /// @brief Получить тип команды
     /// @return Тип команды
     CommandType getType() const { return _type; }
-    
+
     /// @brief Вернуть данные команды
     /// @return Данные команды
     virtual std::string execute() const { return std::string(); };

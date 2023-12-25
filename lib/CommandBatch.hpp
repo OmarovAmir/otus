@@ -1,11 +1,11 @@
 #pragma once
 
 #include <chrono>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <mutex>
 #include <sstream>
-#include <iostream>
 
 #include <Command.hpp>
 #include <SafeQueue.hpp>
@@ -25,7 +25,10 @@ class CommandBatch
         Data data;
 
         explicit BatchData(std::size_t handle, std::size_t time, std::size_t number, Data data)
-        : handle{handle}, time{time}, number{number}, data{data}
+            : handle{handle}
+            , time{time}
+            , number{number}
+            , data{data}
         {}
     };
 
@@ -38,9 +41,9 @@ class CommandBatch
     /// @param fileSaveData Очередь потоков сохранения в файл
     /// @param logCV Условная переменная потоков логирования
     /// @param fileSaveCV Условная переменная потоков сохранения в файл
-    explicit CommandBatch(std::size_t size, std::size_t handle, 
-            SafeBatchDataQueue logData, SafeBatchDataQueue fileSaveData, 
-            std::shared_ptr<std::condition_variable> logCV, std::shared_ptr<std::condition_variable> fileSaveCV)
+    explicit CommandBatch(std::size_t size, std::size_t handle, SafeBatchDataQueue logData,
+                          SafeBatchDataQueue fileSaveData, std::shared_ptr<std::condition_variable> logCV,
+                          std::shared_ptr<std::condition_variable> fileSaveCV)
         : _batchPtr{nullptr}
         , _logData{std::move(logData)}
         , _fileSaveData{std::move(fileSaveData)}

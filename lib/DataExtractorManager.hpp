@@ -1,13 +1,13 @@
 #pragma once
+#include <condition_variable>
 #include <mutex>
 #include <shared_mutex>
-#include <unordered_map>
-#include <condition_variable>
 #include <thread>
+#include <unordered_map>
 
 #include <DataExtractor.hpp>
-#include <SafeQueue.hpp>
 #include <FileManager.hpp>
+#include <SafeQueue.hpp>
 
 /// @brief Менеджер обработчиков команд
 class DataExtractorManager
@@ -29,16 +29,16 @@ class DataExtractorManager
     /// @brief Метод логирования
     void log()
     {
-        while(!finishThreads )
+        while (!finishThreads)
         {
             std::vector<CommandBatch::SafeBatchDataQueue::element_type::data_type> data;
             {
                 std::unique_lock lock(_logMutex);
-                _logCV->wait(lock, [&]{ return finishThreads || !_logData->empty(); });
+                _logCV->wait(lock, [&] { return finishThreads || !_logData->empty(); });
                 data = _logData->popAll();
             }
 
-            for (const auto& it: data)
+            for (const auto& it : data)
             {
                 std::stringstream stream;
                 stream << "bulk_mtd_";
@@ -63,16 +63,16 @@ class DataExtractorManager
     /// @brief Метод сохранения в файл
     void fileSave()
     {
-        while(!finishThreads)
+        while (!finishThreads)
         {
             std::vector<CommandBatch::SafeBatchDataQueue::element_type::data_type> data;
             {
                 std::unique_lock lock(_fileSaveMutex);
-                _fileSaveCV->wait(lock, [&]{ return finishThreads || !_fileSaveData->empty(); });
+                _fileSaveCV->wait(lock, [&] { return finishThreads || !_fileSaveData->empty(); });
                 data = _fileSaveData->popAll();
             }
-            
-            for (const auto& it: data)
+
+            for (const auto& it : data)
             {
                 std::stringstream filename;
                 std::stringstream commands;
@@ -96,14 +96,13 @@ class DataExtractorManager
     }
 
   public:
-
     /// @brief Конструктор
     DataExtractorManager()
-    : _logCV{std::make_shared<std::condition_variable>()}
-    , _fileSaveCV{std::make_shared<std::condition_variable>()}
-    , _logData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
-    , _fileSaveData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
-    , finishThreads{false}
+        : _logCV{std::make_shared<std::condition_variable>()}
+        , _fileSaveCV{std::make_shared<std::condition_variable>()}
+        , _logData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
+        , _fileSaveData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
+        , finishThreads{false}
     {
         std::size_t hwc = std::thread::hardware_concurrency();
         std::size_t fileSaveNumber = (hwc / 2) ? (hwc / 2) : 1;
@@ -130,23 +129,24 @@ class DataExtractorManager
         do
         {
             std::scoped_lock lock(_logMutex, _fileSaveMutex, _mutex);
-            if(_logData->empty() && _fileSaveData->empty())
+            if (_logData->empty() && _fileSaveData->empty())
             {
                 finishThreads = true;
             }
             _logCV->notify_all();
             _fileSaveCV->notify_all();
-        } while (!finishThreads);
-        for (auto& th: _logThreads)
+        }
+        while (!finishThreads);
+        for (auto& th : _logThreads)
         {
-            if(th.joinable())
+            if (th.joinable())
             {
                 th.join();
             }
         }
-        for (auto& th: _fileSaveThreads)
+        for (auto& th : _fileSaveThreads)
         {
-            if(th.joinable())
+            if (th.joinable())
             {
                 th.join();
             }
@@ -159,7 +159,9 @@ class DataExtractorManager
     std::size_t connect(const std::size_t size)
     {
         std::unique_lock lock(_mutex);
-        while (!_dataExtractorMap.try_emplace(_nextHandle, size, _nextHandle, _logData, _fileSaveData, _logCV, _fileSaveCV).second)
+        while (
+            !_dataExtractorMap.try_emplace(_nextHandle, size, _nextHandle, _logData, _fileSaveData, _logCV, _fileSaveCV)
+                 .second)
         {
             ++_nextHandle;
         }

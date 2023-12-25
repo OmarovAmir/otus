@@ -1,9 +1,9 @@
 #pragma once
 
-#include <memory>
-#include <condition_variable>
 #include <cassert>
+#include <condition_variable>
 #include <exception>
+#include <memory>
 
 #include <CommandBatch.hpp>
 #include <SafeQueue.hpp>
@@ -14,7 +14,6 @@ class DataExtractor
     std::unique_ptr<CommandBatch> _cmdBatch;
 
   public:
-    
     /// @brief Конструктор
     /// @param batchSize Размер блока команд
     /// @param handle Дескриптор обработчика команд
@@ -22,12 +21,14 @@ class DataExtractor
     /// @param fileSaveData Очередь потоков сохранения в файл
     /// @param logCV Условная переменная потоков логирования
     /// @param fileSaveCV Условная переменная потоков сохранения в файл
-    explicit DataExtractor(std::size_t batchSize, std::size_t handle, 
-            CommandBatch::SafeBatchDataQueue logData, CommandBatch::SafeBatchDataQueue fileSaveData, 
-            std::shared_ptr<std::condition_variable> logCV, std::shared_ptr<std::condition_variable> fileSaveCV)
-        : _cmdBatch{std::make_unique<CommandBatch>(batchSize, handle, std::move(logData), std::move(fileSaveData), std::move(logCV), std::move(fileSaveCV))}
+    explicit DataExtractor(std::size_t batchSize, std::size_t handle, CommandBatch::SafeBatchDataQueue logData,
+                           CommandBatch::SafeBatchDataQueue fileSaveData,
+                           std::shared_ptr<std::condition_variable> logCV,
+                           std::shared_ptr<std::condition_variable> fileSaveCV)
+        : _cmdBatch{std::make_unique<CommandBatch>(batchSize, handle, std::move(logData), std::move(fileSaveData),
+                                                   std::move(logCV), std::move(fileSaveCV))}
     {
-        if(0 == batchSize)
+        if (0 == batchSize)
         {
             throw std::runtime_error("batchSize can't be equal to zero");
         }

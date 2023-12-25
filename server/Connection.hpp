@@ -3,10 +3,10 @@
 #include <iostream>
 #include <memory>
 
+#include <CommandType.hpp>
 #include <async.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
-#include <CommandType.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -62,10 +62,7 @@ class Connection : public std::enable_shared_from_this<Connection>
     {}
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;
-    ~Connection()
-    {
-        disconnect(m_client);
-    }
+    ~Connection() { disconnect(m_client); }
 
     void read()
     {

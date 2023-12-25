@@ -47,7 +47,9 @@ class Connection : public std::enable_shared_from_this<Connection>
     {}
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;
-    ~Connection() { disconnect(m_client); }
+    ~Connection() {
+        std::cout << __FUNCTION__ << std::endl;
+        disconnect(m_client); }
 
     void read()
     {

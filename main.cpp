@@ -76,16 +76,20 @@
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
+void startServer()
+{
+    auto server = Server::create(9000, 3);
+    server->run();
+    std::cout << "server.use_count " << server.use_count() << std::endl;
+}
+
 int main(int argc, char** argv)
 {
     (void)argc;
     (void)argv;
     try
     {
-        {
-            auto server = std::make_shared<Server>(9000, 3);
-            server->run();
-        }
+        startServer();
         return EXIT_SUCCESS;
     }
     catch (const std::exception& ex)

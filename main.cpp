@@ -82,8 +82,10 @@ int main(int argc, char** argv)
     (void)argv;
     try
     {
-        auto server = std::make_shared<Server>(9000, 3);
-        server->run();
+        {
+            auto server = std::make_shared<Server>(9000, 3);
+            server->run();
+        }
         return EXIT_SUCCESS;
     }
     catch (const std::exception& ex)

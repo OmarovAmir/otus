@@ -27,12 +27,12 @@ class Server : public std::enable_shared_from_this<Server>
         m_acceptor.async_accept(
             [self](const boost::system::error_code error, tcp::socket socket)
             {
-                self->accept();
                 if (!error)
                 {
                     const auto connection = std::make_shared<Connection>(std::move(socket), self->m_size, self->m_general);
                     connection->read();
                 }
+                self->accept();
             });
     }
 
@@ -46,7 +46,9 @@ class Server : public std::enable_shared_from_this<Server>
     {}
     Server(const Server&) = delete;
     Server(Server&&) = delete;
-    ~Server() { disconnect(m_general); }
+    ~Server() {
+        std::cout << __FUNCTION__ << std::endl;
+        disconnect(m_general); }
 
     void run()
     {

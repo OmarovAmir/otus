@@ -47,9 +47,10 @@ class Server : public std::enable_shared_from_this<Server>
     Server(Server&&) = delete;
 
   public:
-    ~Server() {
-        std::cout << __FUNCTION__ << std::endl;
-        disconnect(m_general); }
+    ~Server()
+    {
+        disconnect(m_general);
+    }
 
     static std::shared_ptr<Server> create(std::size_t port, std::size_t size)
     {

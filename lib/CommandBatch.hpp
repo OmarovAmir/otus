@@ -56,7 +56,6 @@ class CommandBatch
     /// @brief Деструктор
     ~CommandBatch()
     {
-        std::cout << __FUNCTION__ << std::endl;
         std::unique_lock lock(_mutex);
         execute(false, true);
     }

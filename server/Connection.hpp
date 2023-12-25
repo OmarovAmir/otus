@@ -6,6 +6,7 @@
 #include <async.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
+#include <CommandType.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -16,6 +17,7 @@ class Connection : public std::enable_shared_from_this<Connection>
     boost::asio::streambuf m_buffer;
     std::size_t m_client;
     std::size_t m_general;
+    std::size_t m_current;
     static const auto delimetr = '\n';
 
     void handleRead(const boost::system::error_code error, const std::size_t length)
@@ -24,19 +26,29 @@ class Connection : public std::enable_shared_from_this<Connection>
         {
             std::cout << std::this_thread::get_id() << " Client \"" << m_client << "\": Reading error: \"" << error
                       << "\"." << std::endl;
-            return;
         }
         else
         {
             if (length != 0)
             {
+                static const std::string _levelUp{"{"};
+                static const std::string _levelDown{"}"};
+
                 std::string data{asio::buffer_cast<const char*>(m_buffer.data()), length};
                 boost::trim(data);
                 m_buffer.consume(length);
-                receive(m_general, data.data(), data.size());
+                if (_levelUp == data)
+                {
+                    m_current = m_client;
+                }
+                receive(m_current, data.data(), data.size());
+                if (_levelDown == data)
+                {
+                    m_current = m_general;
+                }
             }
+            read();
         }
-        read();
     }
 
   public:
@@ -44,12 +56,14 @@ class Connection : public std::enable_shared_from_this<Connection>
         : m_socket{std::move(socket)}
         , m_client{connect(size)}
         , m_general{general}
+        , m_current{general}
     {}
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;
-    ~Connection() {
-        std::cout << __FUNCTION__ << std::endl;
-        disconnect(m_client); }
+    ~Connection()
+    {
+        disconnect(m_client);
+    }
 
     void read()
     {

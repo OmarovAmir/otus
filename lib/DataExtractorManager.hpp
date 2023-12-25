@@ -41,7 +41,7 @@ class DataExtractorManager
             for (const auto& it : data)
             {
                 std::stringstream stream;
-                stream << "bulk_mtd_";
+                stream << "bulk_server_";
                 stream << std::to_string(it->handle) << "_";
                 stream << std::to_string(it->time) << "_";
                 stream << std::to_string(it->number) << "_";
@@ -76,7 +76,7 @@ class DataExtractorManager
             {
                 std::stringstream filename;
                 std::stringstream commands;
-                filename << "bulk_mtd_";
+                filename << "bulk_server_";
                 filename << std::to_string(it->handle) << "_";
                 filename << std::to_string(it->time) << "_";
                 filename << std::to_string(it->number) << "_";

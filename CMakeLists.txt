@@ -25,7 +25,7 @@ target_link_libraries(async PRIVATE Threads::Threads)
 
 add_executable(bulk_server main.cpp)
 
-target_link_libraries(bulk_server async ${Boost_LIBRARIES})
+target_link_libraries(bulk_server async ${Boost_LIBRARIES} Threads::Threads)
 
 set_target_properties(bulk_server PROPERTIES
     CXX_STANDARD 17

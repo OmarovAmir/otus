@@ -123,6 +123,10 @@ class DataExtractorManager
     /// @brief Деструктор
     ~DataExtractorManager()
     {
+        {
+            std::scoped_lock lock(_logMutex, _fileSaveMutex);
+            _dataExtractorMap.clear();
+        }
         do
         {
             std::scoped_lock lock(_logMutex, _fileSaveMutex, _mutex);

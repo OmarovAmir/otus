@@ -80,7 +80,6 @@ void startServer()
 {
     auto server = Server::create(9000, 3);
     server->run();
-    std::cout << "server.use_count " << server.use_count() << std::endl;
 }
 
 int main(int argc, char** argv)

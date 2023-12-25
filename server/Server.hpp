@@ -68,6 +68,7 @@ class Server : public std::enable_shared_from_this<Server>
         m_signals.async_wait(
             [self](auto, auto)
             {
+                self->m_signals.clear();
                 self->m_acceptor.cancel();
                 self->m_acceptor.close();
                 self->m_ioContext.stop();

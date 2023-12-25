@@ -18,6 +18,7 @@ class Connection : public std::enable_shared_from_this<Connection>
     std::size_t m_client;
     std::size_t m_general;
     std::size_t m_current;
+    std::size_t m_level;
     static const auto delimetr = '\n';
 
     void handleRead(const boost::system::error_code error, const std::size_t length)
@@ -39,12 +40,17 @@ class Connection : public std::enable_shared_from_this<Connection>
                 m_buffer.consume(length);
                 if (_levelUp == data)
                 {
+                    ++m_level;
                     m_current = m_client;
                 }
                 receive(m_current, data.data(), data.size());
                 if (_levelDown == data)
                 {
-                    m_current = m_general;
+                    --m_level;
+                    if (!m_level)
+                    {
+                        m_current = m_general;
+                    }
                 }
             }
             read();
@@ -57,6 +63,7 @@ class Connection : public std::enable_shared_from_this<Connection>
         , m_client{connect(size)}
         , m_general{general}
         , m_current{general}
+        , m_level{0}
     {}
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;

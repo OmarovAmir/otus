@@ -23,12 +23,7 @@ class Connection : public std::enable_shared_from_this<Connection>
 
     void handleRead(const boost::system::error_code error, const std::size_t length)
     {
-        if (error)
-        {
-            std::cout << std::this_thread::get_id() << " Client \"" << m_client << "\": Reading error: \"" << error
-                      << "\"." << std::endl;
-        }
-        else
+        if (!error)
         {
             if (length != 0)
             {

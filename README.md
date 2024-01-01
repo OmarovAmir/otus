@@ -1,2 +1,2 @@
 # otus
-bulk_server
+join_server

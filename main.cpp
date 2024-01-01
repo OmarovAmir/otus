@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 {
     if (argc != 3)
     {
-        std::cout << "Usage: bulk_server port batchSize" << std::endl;
+        std::cout << "Usage: join_server port batchSize" << std::endl;
         return 0;
     }
     auto port = static_cast<std::size_t>(std::atol(argv[1]));

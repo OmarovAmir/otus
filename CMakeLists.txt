@@ -14,18 +14,9 @@ include_directories(.)
 include_directories(./lib)
 include_directories(./server)
 
-add_library(async SHARED ./lib/async.cpp)
-
-set_target_properties(async PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
-
-target_link_libraries(async PRIVATE Threads::Threads)
-
 add_executable(join_server main.cpp)
 
-target_link_libraries(join_server async ${Boost_LIBRARIES} Threads::Threads)
+target_link_libraries(join_server ${Boost_LIBRARIES} Threads::Threads)
 
 set_target_properties(join_server PROPERTIES
     CXX_STANDARD 17
@@ -36,14 +27,8 @@ if (MSVC)
     target_compile_options(join_server PRIVATE
         /W4
     )
-    target_compile_options(async PRIVATE
-        /W4
-    )
 else ()
     target_compile_options(join_server PRIVATE
-        -Wall -Wextra -pedantic -Werror -O3
-    )
-    target_compile_options(async PRIVATE
         -Wall -Wextra -pedantic -Werror -O3
     )
 endif()
@@ -51,8 +36,6 @@ endif()
 
 
 install(TARGETS join_server RUNTIME DESTINATION bin)
-install(TARGETS async RUNTIME DESTINATION lib)
-install(FILES lib/async.hpp DESTINATION include)
 
 set(CPACK_GENERATOR DEB)
 

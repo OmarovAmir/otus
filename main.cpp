@@ -1,11 +1,12 @@
 #include <Server.hpp>
+#include <fmt/format.h>
 #include <iostream>
 #include <sqlite3.h>
-#include <fmt/format.h>
+#include <stdexcept>
 
 [[noreturn]] void sqlite_throw(int code, const char* msg = "")
 {
-    throw std::runtime_error{fmt::println("SQL Method failed: {} {}", sqlite3_errstr(code), msg)};
+    throw std::runtime_error{fmt::format("SQL Method failed: {} {}", sqlite3_errstr(code), msg)};
 }
 
 int sqlite_check(int code, const char* msg = "", int expected = SQLITE_OK)
@@ -36,24 +37,67 @@ int main(int argc, char** argv)
     }
 
     sqlite3* db;
-    sqlite_check(sqlite3_open("db", &db));
-    final_action sqlite_deleter{[db]()
-                                {
-                                    sqlite_check(sqlite3_close(db));
-                                }};
+    sqlite_check(sqlite3_open("data.db", &db));
+    final_action sqlite_deleter{[db]() { sqlite_check(sqlite3_close(db)); }};
 
-    std::string_view sql{
-      "CREATE TABLE IF NOT EXISTS user"
-      "(id INTEGER PRIMARY KEY,"
-      "balance UNSIGNED BIG INT CHECK (balance >= 0),"
-      "name VARCHAR(255) NOT NULL);"};
-    sqlite3_stmt* create_table_stmt;
-    const char* stmt_tail;
-    if (sqlite3_prepare_v2(db, sql.data(), sql.size(), &create_table_stmt,
-                            &stmt_tail) != SQLITE_OK) {
-        fmt::println("Error preparing statement: {}",
-                                sqlite3_errmsg(db));
-        return -1;
+    auto sql = "CREATE TABLE IF NOT EXISTS {}"
+               "(id INTEGER PRIMARY KEY,"
+               "name TEXT NOT NULL);";
+    auto create_A = fmt::format(sql, "A");
+    auto create_B = fmt::format(sql, "B");
+    {
+        sqlite3_stmt* create_table_stmt;
+        const char* stmt_tail;
+        if (sqlite3_prepare_v2(db, create_A.data(), create_A.size(), &create_table_stmt, &stmt_tail) != SQLITE_OK)
+        {
+            fmt::println("Error preparing statement: {}", sqlite3_errmsg(db));
+            return -1;
+        }
+
+        int res;
+        do
+        {
+            res = sqlite3_step(create_table_stmt);
+            if (res == SQLITE_ROW)
+            {}
+            else if (res == SQLITE_DONE)
+            {
+                // ok
+            }
+            else
+            {
+                sqlite_throw(res);
+            }
+        }
+        while (res != SQLITE_DONE);
+        sqlite_check(sqlite3_finalize(create_table_stmt));
+    }
+    {
+        sqlite3_stmt* create_table_stmt;
+        const char* stmt_tail;
+        if (sqlite3_prepare_v2(db, create_B.data(), create_B.size(), &create_table_stmt, &stmt_tail) != SQLITE_OK)
+        {
+            fmt::println("Error preparing statement: {}", sqlite3_errmsg(db));
+            return -1;
+        }
+
+        int res;
+        do
+        {
+            res = sqlite3_step(create_table_stmt);
+            if (res == SQLITE_ROW)
+            {}
+            else if (res == SQLITE_DONE)
+            {
+                // ok
+            }
+            else
+            {
+                sqlite_throw(res);
+            }
+        }
+        while (res != SQLITE_DONE);
+        sqlite_check(sqlite3_finalize(create_table_stmt));
     }
 
     auto port = static_cast<std::size_t>(std::atol(argv[1]));

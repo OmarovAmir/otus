@@ -14,6 +14,7 @@ FetchContent_MakeAvailable(fmt)
 
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
+find_package (SQLite3)
 
 configure_file(version.h.in version.h)
 
@@ -25,6 +26,7 @@ add_executable(join_server main.cpp)
 
 target_link_libraries(join_server 
                 ${Boost_LIBRARIES}
+                SQLite::SQLite3
                 Threads::Threads
                 fmt::fmt-header-only)
 

@@ -4,6 +4,10 @@
 #include <sqlite3.h>
 #include <stdexcept>
 
+/*
+TODO вернуть логику запуска DataExtractorManager и выполнять запросы в отдельном потоке при их наличии в очереди запросов
+*/
+
 [[noreturn]] void sqlite_throw(int code, const char* msg = "")
 {
     throw std::runtime_error{fmt::format("SQL Method failed: {} {}", sqlite3_errstr(code), msg)};

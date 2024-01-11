@@ -5,6 +5,13 @@ set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
 project(join_server VERSION ${PROJECT_VESRION})
 
+include(FetchContent)
+FetchContent_Declare(fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(fmt)
+
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
@@ -16,7 +23,10 @@ include_directories(./server)
 
 add_executable(join_server main.cpp)
 
-target_link_libraries(join_server ${Boost_LIBRARIES} Threads::Threads)
+target_link_libraries(join_server 
+                ${Boost_LIBRARIES}
+                Threads::Threads
+                fmt::fmt-header-only)
 
 set_target_properties(join_server PROPERTIES
     CXX_STANDARD 17

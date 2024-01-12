@@ -53,9 +53,9 @@ class Connection : public std::enable_shared_from_this<Connection>
     }
 
   public:
-    explicit Connection(tcp::socket socket, std::size_t size, std::size_t general)
+    explicit Connection(tcp::socket socket, std::size_t general)
         : m_socket{std::move(socket)}
-        , m_client{connect(size)}
+        , m_client{connect()}
         , m_general{general}
         , m_current{general}
         , m_level{0}

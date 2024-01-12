@@ -19,11 +19,7 @@ class DataExtractorManager
     std::vector<std::thread> _logThreads;
     std::mutex _logMutex;
     std::shared_ptr<std::condition_variable> _logCV;
-    std::vector<std::thread> _fileSaveThreads;
-    std::mutex _fileSaveMutex;
-    std::shared_ptr<std::condition_variable> _fileSaveCV;
     CommandBatch::SafeBatchDataQueue _logData;
-    CommandBatch::SafeBatchDataQueue _fileSaveData;
     bool finishThreads;
 
     /// @brief Метод логирования
@@ -60,59 +56,16 @@ class DataExtractorManager
         }
     }
 
-    /// @brief Метод сохранения в файл
-    void fileSave()
-    {
-        while (!finishThreads)
-        {
-            std::vector<CommandBatch::SafeBatchDataQueue::element_type::data_type> data;
-            {
-                std::unique_lock lock(_fileSaveMutex);
-                _fileSaveCV->wait(lock, [&] { return finishThreads || !_fileSaveData->empty(); });
-                data = _fileSaveData->popAll();
-            }
-
-            for (const auto& it : data)
-            {
-                std::stringstream filename;
-                std::stringstream commands;
-                filename << "bulk_server_";
-                filename << std::to_string(it->handle) << "_";
-                filename << std::to_string(it->time) << "_";
-                filename << std::to_string(it->number) << "_";
-                filename << std::this_thread::get_id() << ".log";
-                for (auto cmd = it->data->cbegin(); cmd != it->data->cend(); ++cmd)
-                {
-                    if (cmd != it->data->cbegin())
-                    {
-                        commands << ", ";
-                    }
-                    commands << (*cmd)->execute();
-                }
-                commands << std::endl;
-                FileManager::save(filename.str(), commands.str());
-            }
-        }
-    }
-
   public:
     /// @brief Конструктор
     DataExtractorManager()
         : _logCV{std::make_shared<std::condition_variable>()}
-        , _fileSaveCV{std::make_shared<std::condition_variable>()}
         , _logData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
-        , _fileSaveData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
         , finishThreads{false}
     {
         std::size_t hwc = std::thread::hardware_concurrency();
-        std::size_t fileSaveNumber = (hwc / 2) ? (hwc / 2) : 1;
-        std::size_t logNumber = (fileSaveNumber - 1) ? (fileSaveNumber - 1) : 1;
-        _fileSaveThreads.reserve(fileSaveNumber);
+        std::size_t logNumber = (hwc / 2) ? (hwc / 2) : 1;
         _logThreads.reserve(logNumber);
-        for (std::size_t i = 0; i < fileSaveNumber; ++i)
-        {
-            _fileSaveThreads.emplace_back(&DataExtractorManager::fileSave, this);
-        }
         for (std::size_t i = 0; i < logNumber; ++i)
         {
             _logThreads.emplace_back(&DataExtractorManager::log, this);
@@ -123,18 +76,17 @@ class DataExtractorManager
     ~DataExtractorManager()
     {
         {
-            std::scoped_lock lock(_logMutex, _fileSaveMutex);
+            std::unique_lock lock(_logMutex);
             _dataExtractorMap.clear();
         }
         do
         {
-            std::scoped_lock lock(_logMutex, _fileSaveMutex, _mutex);
-            if (_logData->empty() && _fileSaveData->empty())
+            std::scoped_lock lock(_logMutex, _mutex);
+            if (_logData->empty())
             {
                 finishThreads = true;
             }
             _logCV->notify_all();
-            _fileSaveCV->notify_all();
         }
         while (!finishThreads);
         for (auto& th : _logThreads)
@@ -144,23 +96,15 @@ class DataExtractorManager
                 th.join();
             }
         }
-        for (auto& th : _fileSaveThreads)
-        {
-            if (th.joinable())
-            {
-                th.join();
-            }
-        }
     }
 
     /// @brief Присоединиться к обработчику команд
-    /// @param size Размер блока команд
     /// @return Дескриптор обработчика команд
-    std::size_t connect(const std::size_t size)
+    std::size_t connect()
     {
         std::unique_lock lock(_mutex);
         while (
-            !_dataExtractorMap.try_emplace(_nextHandle, size, _nextHandle, _logData, _fileSaveData, _logCV, _fileSaveCV)
+            !_dataExtractorMap.try_emplace(_nextHandle, _nextHandle, _logData, _logCV)
                  .second)
         {
             ++_nextHandle;

@@ -15,24 +15,13 @@ class DataExtractor
 
   public:
     /// @brief Конструктор
-    /// @param batchSize Размер блока команд
     /// @param handle Дескриптор обработчика команд
     /// @param logData Очередь потоков логирования
-    /// @param fileSaveData Очередь потоков сохранения в файл
     /// @param logCV Условная переменная потоков логирования
-    /// @param fileSaveCV Условная переменная потоков сохранения в файл
-    explicit DataExtractor(std::size_t batchSize, std::size_t handle, CommandBatch::SafeBatchDataQueue logData,
-                           CommandBatch::SafeBatchDataQueue fileSaveData,
-                           std::shared_ptr<std::condition_variable> logCV,
-                           std::shared_ptr<std::condition_variable> fileSaveCV)
-        : _cmdBatch{std::make_unique<CommandBatch>(batchSize, handle, std::move(logData), std::move(fileSaveData),
-                                                   std::move(logCV), std::move(fileSaveCV))}
-    {
-        if (0 == batchSize)
-        {
-            throw std::runtime_error("batchSize can't be equal to zero");
-        }
-    }
+    explicit DataExtractor(std::size_t handle, CommandBatch::SafeBatchDataQueue logData,
+                           std::shared_ptr<std::condition_variable> logCV)
+        : _cmdBatch{std::make_unique<CommandBatch>(handle, std::move(logData), std::move(logCV))}
+    {}
 
     /// @brief Передать команду
     /// @param buffer Указатель на буффер с командой

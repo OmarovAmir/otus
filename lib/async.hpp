@@ -2,9 +2,8 @@
 #include <cstddef>
 
 /// @brief Присоединиться к обработчику команд
-/// @param size Размер блока команд
 /// @return Дескриптор обработчика команд
-std::size_t connect(const std::size_t size);
+std::size_t connect();
 
 /// @brief Передать команду
 /// @param handle Дескриптор обработчика команд

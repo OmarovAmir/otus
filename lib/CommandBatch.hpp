@@ -35,21 +35,13 @@ class CommandBatch
     using SafeBatchDataQueue = std::shared_ptr<SafeQueue<std::shared_ptr<BatchData>>>;
 
     /// @brief Конструктор
-    /// @param size Размер блока команд
     /// @param handle Дескриптор обработчика команд
     /// @param logData Очередь потоков логирования
-    /// @param fileSaveData Очередь потоков сохранения в файл
     /// @param logCV Условная переменная потоков логирования
-    /// @param fileSaveCV Условная переменная потоков сохранения в файл
-    explicit CommandBatch(std::size_t size, std::size_t handle, SafeBatchDataQueue logData,
-                          SafeBatchDataQueue fileSaveData, std::shared_ptr<std::condition_variable> logCV,
-                          std::shared_ptr<std::condition_variable> fileSaveCV)
+    explicit CommandBatch(std::size_t handle, SafeBatchDataQueue logData, std::shared_ptr<std::condition_variable> logCV)
         : _batchPtr{nullptr}
         , _logData{std::move(logData)}
-        , _fileSaveData{std::move(fileSaveData)}
         , _logCV{std::move(logCV)}
-        , _fileSaveCV{std::move(fileSaveCV)}
-        , _size{size}
         , _level{0}
         , _time{0}
         , _logfilenumber{0}
@@ -60,7 +52,7 @@ class CommandBatch
     ~CommandBatch()
     {
         std::unique_lock lock(_mutex);
-        execute(false, true);
+        execute(true);
     }
 
     /// @brief Вход в блок с динамическим размером
@@ -103,10 +95,7 @@ class CommandBatch
   private:
     Data _batchPtr;
     SafeBatchDataQueue _logData;
-    SafeBatchDataQueue _fileSaveData;
     std::shared_ptr<std::condition_variable> _logCV;
-    std::shared_ptr<std::condition_variable> _fileSaveCV;
-    std::size_t _size;
     std::size_t _level;
     std::size_t _time;
     std::size_t _logfilenumber;
@@ -139,7 +128,7 @@ class CommandBatch
         }
     }
 
-    void execute(bool force = false, bool eof = false)
+    void execute(bool force = false)
     {
         if (!_batchPtr || !_batchPtr->size())
         {
@@ -151,16 +140,10 @@ class CommandBatch
             {
                 return;
             }
-            if ((_batchPtr->size() < _size) && !eof)
-            {
-                return;
-            }
         }
         auto data = std::make_shared<BatchData>(_handle, _time, _logfilenumber, _batchPtr);
         _logData->push(data);
-        _fileSaveData->push(data);
         _batchPtr.reset();
         _logCV->notify_one();
-        _fileSaveCV->notify_one();
     }
 };

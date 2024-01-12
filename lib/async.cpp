@@ -3,7 +3,7 @@
 
 static auto manager = DataExtractorManager();
 
-std::size_t connect(const std::size_t size) { return manager.connect(size); }
+std::size_t connect() { return manager.connect(); }
 
 void receive(const std::size_t handle, const void* buffer, const std::size_t size)
 {

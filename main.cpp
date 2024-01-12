@@ -34,9 +34,9 @@ template <typename F> struct final_action
 
 int main(int argc, char** argv)
 {
-    if (argc != 3)
+    if (argc != 2)
     {
-        std::cout << "Usage: join_server port batchSize" << std::endl;
+        std::cout << "Usage: join_server port" << std::endl;
         return 0;
     }
 
@@ -105,10 +105,9 @@ int main(int argc, char** argv)
     }
 
     auto port = static_cast<std::size_t>(std::atol(argv[1]));
-    auto size = static_cast<std::size_t>(std::atol(argv[2]));
     try
     {
-        auto server = Server::create(port, size);
+        auto server = Server::create(port);
         server->run();
     }
     catch (const std::exception& ex)

@@ -26,6 +26,19 @@ class Connection : public std::enable_shared_from_this<Connection>
                 boost::trim(data);
                 m_buffer.consume(length);
                 std::cout << data << std::endl;
+                auto self = shared_from_this();
+                asio::async_write(m_socket, boost::asio::buffer(data.data(), data.size()),
+                               [self](const boost::system::error_code error, const std::size_t length)
+                               {
+                                    if(error)
+                                    {
+                                        std::cout << "async_write error" << std::endl;
+                                    }
+                                    else
+                                    {
+                                        std::cout << "async_write success transferred " << length << " bytes" << std::endl;
+                                    }
+                                });
             }
             read();
         }

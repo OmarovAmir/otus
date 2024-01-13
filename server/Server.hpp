@@ -14,7 +14,6 @@ using tcp = asio::ip::tcp;
 
 class Server : public std::enable_shared_from_this<Server>
 {
-    std::size_t m_general;
     asio::io_context m_ioContext;
     tcp::acceptor m_acceptor;
     asio::signal_set m_signals;
@@ -29,7 +28,7 @@ class Server : public std::enable_shared_from_this<Server>
                 if (!error)
                 {
                     const auto connection =
-                        std::make_shared<Connection>(std::move(socket), self->m_general);
+                        std::make_shared<Connection>(std::move(socket));
                     connection->read();
                     self->accept();
                 }
@@ -37,8 +36,7 @@ class Server : public std::enable_shared_from_this<Server>
     }
 
     explicit Server(std::size_t port)
-        : m_general{connect()}
-        , m_ioContext{}
+        : m_ioContext{}
         , m_acceptor{m_ioContext, tcp::endpoint(tcp::v4(), port)}
         , m_signals{m_ioContext, SIGINT, SIGTERM}
     {}
@@ -46,7 +44,7 @@ class Server : public std::enable_shared_from_this<Server>
     Server(Server&&) = delete;
 
   public:
-    ~Server() { disconnect(m_general); }
+    ~Server() {}
 
     static std::shared_ptr<Server> create(std::size_t port)
     {

@@ -16,9 +16,6 @@ class Connection : public std::enable_shared_from_this<Connection>
     tcp::socket m_socket;
     boost::asio::streambuf m_buffer;
     std::size_t m_client;
-    std::size_t m_general;
-    std::size_t m_current;
-    std::size_t m_level;
     static const auto delimetr = '\n';
 
     void handleRead(const boost::system::error_code error, const std::size_t length)
@@ -27,38 +24,19 @@ class Connection : public std::enable_shared_from_this<Connection>
         {
             if (length != 0)
             {
-                static const std::string _levelUp{"{"};
-                static const std::string _levelDown{"}"};
-
                 std::string data{asio::buffer_cast<const char*>(m_buffer.data()), length};
                 boost::trim(data);
                 m_buffer.consume(length);
-                if (_levelUp == data)
-                {
-                    ++m_level;
-                    m_current = m_client;
-                }
-                receive(m_current, data.data(), data.size());
-                if (_levelDown == data)
-                {
-                    --m_level;
-                    if (!m_level)
-                    {
-                        m_current = m_general;
-                    }
-                }
+                receive(m_client, data.data(), data.size());
             }
             read();
         }
     }
 
   public:
-    explicit Connection(tcp::socket socket, std::size_t general)
+    explicit Connection(tcp::socket socket)
         : m_socket{std::move(socket)}
         , m_client{connect()}
-        , m_general{general}
-        , m_current{general}
-        , m_level{0}
     {}
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;

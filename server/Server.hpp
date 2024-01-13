@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <Connection.hpp>
+#include <async.hpp>
 #include <boost/asio.hpp>
 
 namespace asio = boost::asio;

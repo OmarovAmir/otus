@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 
-#include <fmt/format.h>
-
+#include <CommandType.hpp>
+#include <async.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
 
@@ -15,6 +15,7 @@ class Connection : public std::enable_shared_from_this<Connection>
 {
     tcp::socket m_socket;
     boost::asio::streambuf m_buffer;
+    std::size_t m_client;
     static const auto delimetr = '\n';
 
     void handleRead(const boost::system::error_code error, const std::size_t length)
@@ -26,7 +27,7 @@ class Connection : public std::enable_shared_from_this<Connection>
                 std::string data{asio::buffer_cast<const char*>(m_buffer.data()), length};
                 boost::trim(data);
                 m_buffer.consume(length);
-                fmt::println("{}", data);
+                receive(m_client, data.data(), data.size());
             }
             read();
         }
@@ -35,10 +36,11 @@ class Connection : public std::enable_shared_from_this<Connection>
   public:
     explicit Connection(tcp::socket socket)
         : m_socket{std::move(socket)}
+        , m_client{connect()}
     {}
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;
-    ~Connection() {}
+    ~Connection() { disconnect(m_client); }
 
     void read()
     {

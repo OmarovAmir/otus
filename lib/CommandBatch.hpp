@@ -52,17 +52,14 @@ class CommandBatch
     ~CommandBatch()
     {
         std::unique_lock lock(_mutex);
-        execute(true);
+        execute();
     }
 
     /// @brief Вход в блок с динамическим размером
     void levelUp()
     {
         std::unique_lock lock(_mutex);
-        if (!_level)
-        {
-            execute(true);
-        }
+        execute();
         ++_level;
     }
 
@@ -75,10 +72,7 @@ class CommandBatch
             return;
         }
         --_level;
-        if (!_level)
-        {
-            execute(true);
-        }
+        execute();
     }
 
     /// @brief Добавить команду
@@ -128,18 +122,15 @@ class CommandBatch
         }
     }
 
-    void execute(bool force = false)
+    void execute()
     {
         if (!_batchPtr || !_batchPtr->size())
         {
             return;
         }
-        if (!force)
+        if (_level)
         {
-            if (_level)
-            {
-                return;
-            }
+            return;
         }
         auto data = std::make_shared<BatchData>(_handle, _time, _logfilenumber, _batchPtr);
         _logData->push(data);

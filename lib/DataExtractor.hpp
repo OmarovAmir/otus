@@ -26,24 +26,23 @@ class DataExtractor
     /// @brief Передать команду
     /// @param buffer Указатель на буффер с командой
     /// @param size Размер команды
-    void receive(const void* buffer, const std::size_t size)
+    void receive(const std::string& cmd)
     {
-        std::string input{static_cast<const char*>(buffer), static_cast<const char*>(buffer) + size};
-        auto cmd = make_command(input);
-        if (CommandType::Empty == cmd->getType())
+        auto ICmd = make_command(cmd);
+        if (CommandType::Empty == ICmd->getType())
         {
             return;
         }
-        if (CommandType::LevelUp == cmd->getType())
+        if (CommandType::LevelUp == ICmd->getType())
         {
             _cmdBatch->levelUp();
             return;
         }
-        if (CommandType::LevelDown == cmd->getType())
+        if (CommandType::LevelDown == ICmd->getType())
         {
             _cmdBatch->levelDown();
             return;
         }
-        _cmdBatch->add(cmd);
+        _cmdBatch->add(ICmd);
     }
 };

@@ -8,12 +8,14 @@
 #include <DataExtractor.hpp>
 #include <FileManager.hpp>
 #include <SafeQueue.hpp>
+#include <fmt/format.h>
 
 /// @brief Менеджер обработчиков команд
 class DataExtractorManager
 {
     std::size_t _nextHandle;
     std::unordered_map<std::size_t, DataExtractor> _dataExtractorMap;
+    std::unordered_map<std::size_t, std::function<void(const std::string&)>> _callBackMap;
     std::shared_mutex _mutex;
 
     std::vector<std::thread> _logThreads;
@@ -36,22 +38,27 @@ class DataExtractorManager
 
             for (const auto& it : data)
             {
-                std::stringstream stream;
-                stream << "bulk_server_";
-                stream << std::to_string(it->handle) << "_";
-                stream << std::to_string(it->time) << "_";
-                stream << std::to_string(it->number) << "_";
-                stream << std::this_thread::get_id() << ": ";
-                for (auto cmd = it->data->cbegin(); cmd != it->data->cend(); ++cmd)
+                if (auto findResult = _callBackMap.find(it->handle); findResult != _callBackMap.end())
                 {
-                    if (cmd != it->data->cbegin())
+                    std::stringstream stream;
+                    stream << "bulk_server_";
+                    stream << std::to_string(it->handle) << "_";
+                    stream << std::to_string(it->time) << "_";
+                    stream << std::to_string(it->number) << "_";
+                    stream << std::this_thread::get_id() << ": ";
+                    for (auto cmd = it->data->cbegin(); cmd != it->data->cend(); ++cmd)
                     {
-                        stream << ", ";
+                        if (cmd != it->data->cbegin())
+                        {
+                            stream << ", ";
+                        }
+                        stream << (*cmd)->execute();
                     }
-                    stream << (*cmd)->execute();
+                    stream << std::endl;
+                    auto data = stream.str();
+                    std::cout << data;
+                    findResult->second(data);
                 }
-                stream << std::endl;
-                std::cout << stream.str();
             }
         }
     }
@@ -75,10 +82,12 @@ class DataExtractorManager
     /// @brief Деструктор
     ~DataExtractorManager()
     {
+        fmt::println("1{}", __FUNCTION__);
         {
-            std::unique_lock lock(_logMutex);
+            std::scoped_lock lock(_logMutex, _mutex);
             _dataExtractorMap.clear();
         }
+        fmt::println("2{}", __FUNCTION__);
         do
         {
             std::scoped_lock lock(_logMutex, _mutex);
@@ -96,19 +105,24 @@ class DataExtractorManager
                 th.join();
             }
         }
+        fmt::println("3{}", __FUNCTION__);
+        {
+            std::unique_lock lock(_mutex);
+            _callBackMap.clear();
+        }
+        fmt::println("4{}", __FUNCTION__);
     }
 
     /// @brief Присоединиться к обработчику команд
     /// @return Дескриптор обработчика команд
-    std::size_t connect()
+    std::size_t connect(std::function<void(const std::string&)> transmitCallback)
     {
         std::unique_lock lock(_mutex);
-        while (
-            !_dataExtractorMap.try_emplace(_nextHandle, _nextHandle, _logData, _logCV)
-                 .second)
+        while (!_dataExtractorMap.try_emplace(_nextHandle, _nextHandle, _logData, _logCV).second)
         {
             ++_nextHandle;
         }
+        _callBackMap.emplace(_nextHandle, transmitCallback);
         return _nextHandle++;
     }
 
@@ -116,12 +130,12 @@ class DataExtractorManager
     /// @param handle Дескриптор обработчика команд
     /// @param buffer Указатель на буффер с командой
     /// @param size Размер команды
-    void receive(const std::size_t handle, const void* buffer, const std::size_t size)
+    void receive(const std::size_t handle, const std::string& cmd)
     {
         std::shared_lock lock(_mutex);
         if (auto findResult = _dataExtractorMap.find(handle); findResult != _dataExtractorMap.end())
         {
-            findResult->second.receive(buffer, size);
+            findResult->second.receive(cmd);
         }
     }
 
@@ -129,7 +143,18 @@ class DataExtractorManager
     /// @param handle Дескриптор обработчика команд
     void disconnect(const std::size_t handle)
     {
+        fmt::println("1{}", __FUNCTION__);
         std::unique_lock lock(_mutex);
-        _dataExtractorMap.erase(handle);
+        if (auto findResult = _dataExtractorMap.find(handle); findResult != _dataExtractorMap.end())
+        {
+            fmt::println("2{}", __FUNCTION__);
+            _dataExtractorMap.erase(handle);
+        }
+        if (auto findResult = _callBackMap.find(handle); findResult != _callBackMap.end())
+        {
+            fmt::println("3{}", __FUNCTION__);
+            _callBackMap.erase(handle);
+        }
+        fmt::println("4{}", __FUNCTION__);
     }
 };

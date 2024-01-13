@@ -3,11 +3,11 @@
 
 static auto manager = DataExtractorManager();
 
-std::size_t connect() { return manager.connect(); }
+std::size_t connect(std::function<void(const std::string&)> transmitCallback) { return manager.connect(transmitCallback); }
 
-void receive(const std::size_t handle, const void* buffer, const std::size_t size)
+void receive(const std::size_t handle, const std::string& cmd)
 {
-    manager.receive(handle, buffer, size);
+    manager.receive(handle, cmd);
 }
 
 void disconnect(const std::size_t handle) { manager.disconnect(handle); }

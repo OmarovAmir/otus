@@ -29,7 +29,9 @@ set_target_properties(async PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
-target_link_libraries(async PRIVATE Threads::Threads)
+target_link_libraries(async PRIVATE 
+                    Threads::Threads
+                    fmt::fmt-header-only)
 
 add_executable(join_server main.cpp)
 

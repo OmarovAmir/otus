@@ -50,10 +50,6 @@ class Data
                 result << "ERR while inserting" << std::endl;
             }
         }
-        for (const auto& item : tbl)
-        {
-            fmt::println("{} {}", item._id, item._value);
-        }
         return result.str();
     }
 

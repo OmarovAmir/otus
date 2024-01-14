@@ -1,3 +1,4 @@
+{
 INSERT A 0 lean
 INSERT A 1 sweater
 INSERT A 2 frank
@@ -15,3 +16,4 @@ INSERT B 8 selection
 
 INTERSECTION
 SYMMETRIC_DIFFERENCE
+}

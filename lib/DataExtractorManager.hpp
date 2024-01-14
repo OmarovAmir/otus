@@ -46,7 +46,6 @@ class DataExtractorManager
                         stream << (*cmd)->execute();
                     }
                     auto data = stream.str();
-                    std::cout << data;
                     findResult->second(data);
                 }
             }

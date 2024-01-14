@@ -36,12 +36,13 @@ class CommandBatch
 
     /// @brief Конструктор
     /// @param handle Дескриптор обработчика команд
-    /// @param logData Очередь потоков логирования
-    /// @param logCV Условная переменная потоков логирования
-    explicit CommandBatch(std::size_t handle, SafeBatchDataQueue logData, std::shared_ptr<std::condition_variable> logCV)
+    /// @param cmdQueue Очередь потоков логирования
+    /// @param cmdQueueCV Условная переменная потоков логирования
+    explicit CommandBatch(std::size_t handle, SafeBatchDataQueue cmdQueue,
+                          std::shared_ptr<std::condition_variable> cmdQueueCV)
         : _batchPtr{nullptr}
-        , _logData{std::move(logData)}
-        , _logCV{std::move(logCV)}
+        , _cmdQueue{std::move(cmdQueue)}
+        , _cmdQueueCV{std::move(cmdQueueCV)}
         , _level{0}
         , _time{0}
         , _logfilenumber{0}
@@ -88,8 +89,8 @@ class CommandBatch
 
   private:
     Data _batchPtr;
-    SafeBatchDataQueue _logData;
-    std::shared_ptr<std::condition_variable> _logCV;
+    SafeBatchDataQueue _cmdQueue;
+    std::shared_ptr<std::condition_variable> _cmdQueueCV;
     std::size_t _level;
     std::size_t _time;
     std::size_t _logfilenumber;
@@ -133,8 +134,8 @@ class CommandBatch
             return;
         }
         auto data = std::make_shared<BatchData>(_handle, _time, _logfilenumber, _batchPtr);
-        _logData->push(data);
+        _cmdQueue->push(data);
         _batchPtr.reset();
-        _logCV->notify_one();
+        _cmdQueueCV->notify_one();
     }
 };

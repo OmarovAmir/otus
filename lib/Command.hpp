@@ -1,12 +1,12 @@
 #pragma once
 
+#include <Data.hpp>
 #include <ICommand.hpp>
 #include <regex>
-#include <Data.hpp>
 
 static Data data;
 
-/// @brief Основная команда
+/// @brief Неизвестная команда
 class UnknownCommand final : public ICommand
 {
   public:
@@ -37,10 +37,7 @@ class InsertCommand final : public ICommand
         , _value{value}
     {}
 
-    std::string execute() const
-    {
-        return data.insert(_table, _id, _value);
-    }
+    std::string execute() const { return data.insert(_table, _id, _value); }
 };
 
 /// @brief Команда очистки
@@ -54,10 +51,7 @@ class TruncateCommand final : public ICommand
         , _table{table}
     {}
 
-    std::string execute() const
-    {
-        return data.truncate(_table);
-    }
+    std::string execute() const { return data.truncate(_table); }
 };
 
 /// @brief Команда поиска пересечений
@@ -68,10 +62,7 @@ class IntersectionCommand final : public ICommand
         : ICommand(CommandType::Intersection)
     {}
 
-    std::string execute() const
-    {
-        return data.intersection();
-    }
+    std::string execute() const { return data.intersection(); }
 };
 
 /// @brief Команда поиска различий
@@ -82,10 +73,7 @@ class SymmetricDifferenceCommand final : public ICommand
         : ICommand(CommandType::SymmetricDifference)
     {}
 
-    std::string execute() const
-    {
-        return data.symmetric_difference();
-    }
+    std::string execute() const { return data.symmetric_difference(); }
 };
 
 /// @brief Команда входа в блок с динамическим размером

@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include <DataExtractor.hpp>
-#include <FileManager.hpp>
 #include <SafeQueue.hpp>
 #include <fmt/format.h>
 
@@ -19,9 +18,9 @@ class DataExtractorManager
     std::shared_mutex _mutex;
 
     std::vector<std::thread> _logThreads;
-    std::mutex _logMutex;
-    std::shared_ptr<std::condition_variable> _logCV;
-    CommandBatch::SafeBatchDataQueue _logData;
+    std::mutex _cmdQueueMutex;
+    std::shared_ptr<std::condition_variable> _cmdQueueCV;
+    CommandBatch::SafeBatchDataQueue _cmdQueue;
     bool finishThreads;
 
     /// @brief Метод логирования
@@ -31,11 +30,11 @@ class DataExtractorManager
         {
             std::vector<CommandBatch::SafeBatchDataQueue::element_type::data_type> data;
             {
-                std::unique_lock lock(_logMutex);
-                _logCV->wait(lock, [&] { return finishThreads || !_logData->empty(); });
-                data = _logData->popAll();
+                std::unique_lock lock(_cmdQueueMutex);
+                _cmdQueueCV->wait(lock, [&] { return finishThreads || !_cmdQueue->empty(); });
+                data = _cmdQueue->popAll();
             }
-
+            std::shared_lock lock(_mutex);
             for (const auto& it : data)
             {
                 if (auto findResult = _callBackMap.find(it->handle); findResult != _callBackMap.end())
@@ -55,8 +54,8 @@ class DataExtractorManager
   public:
     /// @brief Конструктор
     DataExtractorManager()
-        : _logCV{std::make_shared<std::condition_variable>()}
-        , _logData{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
+        : _cmdQueueCV{std::make_shared<std::condition_variable>()}
+        , _cmdQueue{std::make_shared<CommandBatch::SafeBatchDataQueue::element_type>()}
         , finishThreads{false}
     {
         std::size_t hwc = std::thread::hardware_concurrency();
@@ -72,17 +71,17 @@ class DataExtractorManager
     ~DataExtractorManager()
     {
         {
-            std::scoped_lock lock(_logMutex, _mutex);
+            std::scoped_lock lock(_cmdQueueMutex, _mutex);
             _dataExtractorMap.clear();
         }
         do
         {
-            std::scoped_lock lock(_logMutex, _mutex);
-            if (_logData->empty())
+            std::scoped_lock lock(_cmdQueueMutex, _mutex);
+            if (_cmdQueue->empty())
             {
                 finishThreads = true;
             }
-            _logCV->notify_all();
+            _cmdQueueCV->notify_all();
         }
         while (!finishThreads);
         for (auto& th : _logThreads)
@@ -99,11 +98,12 @@ class DataExtractorManager
     }
 
     /// @brief Присоединиться к обработчику команд
+    /// @param transmitCallback Функция для отправки ответа клиенту
     /// @return Дескриптор обработчика команд
     std::size_t connect(std::function<void(const std::string&)> transmitCallback)
     {
         std::unique_lock lock(_mutex);
-        while (!_dataExtractorMap.try_emplace(_nextHandle, _nextHandle, _logData, _logCV).second)
+        while (!_dataExtractorMap.try_emplace(_nextHandle, _nextHandle, _cmdQueue, _cmdQueueCV).second)
         {
             ++_nextHandle;
         }
@@ -113,8 +113,7 @@ class DataExtractorManager
 
     /// @brief Передать команду
     /// @param handle Дескриптор обработчика команд
-    /// @param buffer Указатель на буффер с командой
-    /// @param size Размер команды
+    /// @param cmd Команда
     void receive(const std::size_t handle, const std::string& cmd)
     {
         std::shared_lock lock(_mutex);

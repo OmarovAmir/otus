@@ -16,11 +16,11 @@ class DataExtractor
   public:
     /// @brief Конструктор
     /// @param handle Дескриптор обработчика команд
-    /// @param logData Очередь потоков логирования
-    /// @param logCV Условная переменная потоков логирования
-    explicit DataExtractor(std::size_t handle, CommandBatch::SafeBatchDataQueue logData,
-                           std::shared_ptr<std::condition_variable> logCV)
-        : _cmdBatch{std::make_unique<CommandBatch>(handle, std::move(logData), std::move(logCV))}
+    /// @param cmdQueue Очередь потоков логирования
+    /// @param cmdQueueCV Условная переменная потоков логирования
+    explicit DataExtractor(std::size_t handle, CommandBatch::SafeBatchDataQueue cmdQueue,
+                           std::shared_ptr<std::condition_variable> cmdQueueCV)
+        : _cmdBatch{std::make_unique<CommandBatch>(handle, std::move(cmdQueue), std::move(cmdQueueCV))}
     {}
 
     /// @brief Передать команду

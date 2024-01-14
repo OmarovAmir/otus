@@ -41,20 +41,10 @@ class DataExtractorManager
                 if (auto findResult = _callBackMap.find(it->handle); findResult != _callBackMap.end())
                 {
                     std::stringstream stream;
-                    stream << "bulk_server_";
-                    stream << std::to_string(it->handle) << "_";
-                    stream << std::to_string(it->time) << "_";
-                    stream << std::to_string(it->number) << "_";
-                    stream << std::this_thread::get_id() << ": ";
                     for (auto cmd = it->data->cbegin(); cmd != it->data->cend(); ++cmd)
                     {
-                        if (cmd != it->data->cbegin())
-                        {
-                            stream << ", ";
-                        }
                         stream << (*cmd)->execute();
                     }
-                    stream << std::endl;
                     auto data = stream.str();
                     std::cout << data;
                     findResult->second(data);
@@ -82,12 +72,10 @@ class DataExtractorManager
     /// @brief Деструктор
     ~DataExtractorManager()
     {
-        fmt::println("1{}", __FUNCTION__);
         {
             std::scoped_lock lock(_logMutex, _mutex);
             _dataExtractorMap.clear();
         }
-        fmt::println("2{}", __FUNCTION__);
         do
         {
             std::scoped_lock lock(_logMutex, _mutex);
@@ -105,12 +93,10 @@ class DataExtractorManager
                 th.join();
             }
         }
-        fmt::println("3{}", __FUNCTION__);
         {
             std::unique_lock lock(_mutex);
             _callBackMap.clear();
         }
-        fmt::println("4{}", __FUNCTION__);
     }
 
     /// @brief Присоединиться к обработчику команд
@@ -143,18 +129,14 @@ class DataExtractorManager
     /// @param handle Дескриптор обработчика команд
     void disconnect(const std::size_t handle)
     {
-        fmt::println("1{}", __FUNCTION__);
         std::unique_lock lock(_mutex);
         if (auto findResult = _dataExtractorMap.find(handle); findResult != _dataExtractorMap.end())
         {
-            fmt::println("2{}", __FUNCTION__);
             _dataExtractorMap.erase(handle);
         }
         if (auto findResult = _callBackMap.find(handle); findResult != _callBackMap.end())
         {
-            fmt::println("3{}", __FUNCTION__);
             _callBackMap.erase(handle);
         }
-        fmt::println("4{}", __FUNCTION__);
     }
 };

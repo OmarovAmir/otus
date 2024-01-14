@@ -27,8 +27,7 @@ class Server : public std::enable_shared_from_this<Server>
             {
                 if (!error)
                 {
-                    const auto connection =
-                        std::make_shared<Connection>(std::move(socket));
+                    const auto connection = std::make_shared<Connection>(std::move(socket));
                     connection->read();
                     self->accept();
                 }
@@ -44,15 +43,9 @@ class Server : public std::enable_shared_from_this<Server>
     Server(Server&&) = delete;
 
   public:
-    ~Server() {
+    ~Server() {}
 
-        fmt::println("1{}", __FUNCTION__);
-    }
-
-    static std::shared_ptr<Server> create(std::size_t port)
-    {
-        return std::shared_ptr<Server>(new Server(port));
-    }
+    static std::shared_ptr<Server> create(std::size_t port) { return std::shared_ptr<Server>(new Server(port)); }
 
     std::shared_ptr<Server> clone() { return shared_from_this(); }
 

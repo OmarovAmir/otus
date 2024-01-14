@@ -3,8 +3,11 @@
 /// @brief Тип команды
 enum class CommandType
 {
-    Empty,
+    Unknown,
     LevelUp,
     LevelDown,
-    Work
+    Insert,
+    Truncate,
+    Intersection,
+    SymmetricDifference
 };

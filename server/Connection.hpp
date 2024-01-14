@@ -39,7 +39,6 @@ class Connection : public std::enable_shared_from_this<Connection>
         }
         else
         {
-            fmt::println("Error acync read");
             if (m_client)
             {
                 disconnect(*m_client);
@@ -48,18 +47,10 @@ class Connection : public std::enable_shared_from_this<Connection>
         }
     }
 
-    void handleWrite(const boost::system::error_code error, const std::size_t length)
+    void handleWrite(const boost::system::error_code error, [[maybe_unused]] const std::size_t length)
     {
-        if (!error)
+        if (error)
         {
-            if (length != 0)
-            {
-                fmt::println("Success acync write");
-            }
-        }
-        else
-        {
-            fmt::println("Error acync write");
             if (m_client)
             {
                 disconnect(*m_client);

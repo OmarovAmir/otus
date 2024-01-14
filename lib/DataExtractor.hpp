@@ -28,11 +28,11 @@ class DataExtractor
     /// @param size Размер команды
     void receive(const std::string& cmd)
     {
-        auto ICmd = make_command(cmd);
-        if (CommandType::Empty == ICmd->getType())
+        if(cmd.empty())
         {
             return;
         }
+        auto ICmd = make_command(cmd);
         if (CommandType::LevelUp == ICmd->getType())
         {
             _cmdBatch->levelUp();

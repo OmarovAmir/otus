@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <Connection.hpp>
-#include <async.hpp>
 #include <boost/asio.hpp>
 
 namespace asio = boost::asio;
@@ -30,6 +29,10 @@ class Server : public std::enable_shared_from_this<Server>
                     const auto connection = std::make_shared<Connection>(std::move(socket));
                     connection->read();
                     self->accept();
+                }
+                else
+                {
+                    fmt::println("{}", error.message());
                 }
             });
     }

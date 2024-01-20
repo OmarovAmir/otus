@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
-project(join_server VERSION ${PROJECT_VESRION})
+project(adapter VERSION ${PROJECT_VESRION})
 
 include(FetchContent)
 FetchContent_Declare(fmt
@@ -18,54 +18,31 @@ find_package(Boost REQUIRED COMPONENTS system)
 configure_file(version.h.in version.h)
 
 include_directories(.)
-include_directories(./lib)
-include_directories(./server)
+include_directories(./adapter)
 
-add_library(async SHARED ./lib/async.cpp)
+add_executable(adapter main.cpp)
 
-set_target_properties(async PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
-
-target_link_libraries(async PRIVATE 
-                    Threads::Threads
-                    fmt::fmt-header-only)
-
-add_executable(join_server main.cpp)
-
-target_link_libraries(join_server
-                async
+target_link_libraries(adapter
                 ${Boost_LIBRARIES}
                 Threads::Threads
                 fmt::fmt-header-only)
 
-set_target_properties(join_server PROPERTIES
+set_target_properties(adapter PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
 
 if (MSVC)
-    target_compile_options(join_server PRIVATE
-        /W4
-    )
-    target_compile_options(async PRIVATE
+    target_compile_options(adapter PRIVATE
         /W4
     )
 else ()
-    target_compile_options(join_server PRIVATE
-        -Wall -Wextra -pedantic -Werror -O3
-    )
-    target_compile_options(async PRIVATE
+    target_compile_options(adapter PRIVATE
         -Wall -Wextra -pedantic -Werror -O3
     )
 endif()
 
-
-
-install(TARGETS join_server RUNTIME DESTINATION bin)
-install(TARGETS async RUNTIME DESTINATION lib)
-install(FILES lib/async.hpp DESTINATION include)
+install(TARGETS adapter RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 

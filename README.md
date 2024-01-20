@@ -1,2 +1,2 @@
 # otus
-join_server
+adapter

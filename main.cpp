@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "Usage: join_server port" << std::endl;
+        std::cout << "Usage: adapter port" << std::endl;
         return 0;
     }
     auto port = static_cast<std::size_t>(std::atol(argv[1]));

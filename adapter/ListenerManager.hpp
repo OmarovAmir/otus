@@ -6,124 +6,63 @@
 
 #include <boost/asio/io_context.hpp>
 #include <Listener.hpp>
+#include <ContextPool.hpp>
 
 namespace asio = boost::asio;
 
 class ListenerManager
 {
-     class ioContext
-     {
-          asio::io_context ctx;
-          asio::executor_work_guard<asio::io_context::executor_type> guard;
-          std::thread ctxThread;
-     public:
-          explicit ioContext()
-          : ctx{}
-          , guard{ctx.get_executor()}
-          , ctxThread{[this](){ctx.run();}}
-          {}
-          void join()
-          {
-               if(ctxThread.joinable())
-               {
-                    ctxThread.join();
-               }
-          }
-          asio::io_context& getContext()
-          {
-               return ctx;
-          }
-     };
-
-     std::size_t nextContext;
-     std::size_t contextNumber;
-     std::vector<std::shared_ptr<ioContext>> ioContexts;
+     ContextPool contextPool;
      std::vector<std::size_t> ports;
      std::vector<std::shared_ptr<Listener>> listeners;
-     asio::io_context signalsCtx;
      asio::signal_set signals;
 
-     asio::io_context& getNextContext()
-     {
-          std::shared_ptr<ioContext> ctx;
-          if(ioContexts.size() < contextNumber)
-          {
-               ctx = std::make_shared<ioContext>();
-               ioContexts.push_back(ctx);
-          }
-          else
-          {
-               ctx = ioContexts[nextContext++];
-               nextContext %= contextNumber;
-          }
-          std::size_t x = reinterpret_cast<std::size_t>(ctx.get());
-          fmt::println("{}", x);
-          return ctx->getContext();
-     }
-
-     void runAllListeners()
+     void runAll()
      {
           for (const auto& port: ports)
           {
-               auto listener = std::make_shared<Listener>(getNextContext(), port);
+               auto listener = std::make_shared<Listener>(contextPool.getNext(), port);
                listeners.push_back(listener);
                listener->run();
           }
-          joinAllContexts();
+          contextPool.joinAll();
      }
 
-     void stopAllListeners()
+     void stopAll()
      {
+          signals.clear();
           for(auto& listener: listeners)
           {
                listener->stop();
           }
-     }
-
-     void stopAllContexts()
-     {
-          for(auto& ctx: ioContexts)
-          {
-               ctx->getContext().stop();
-          }
-     }
-     
-     void joinAllContexts()
-     {
-          for (auto& ctx: ioContexts)
-          {
-               ctx->join();
-          }
+          contextPool.stopAll();
      }
 
 public:
-     ListenerManager(std::size_t ioContextNumber, 
+     ListenerManager(std::size_t contextNumber, 
      std::vector<std::size_t> ports)
-     : nextContext{0}
-     , contextNumber{(0 != ioContextNumber) ? ioContextNumber : 1}
-     , ioContexts{}
+     : contextPool{contextNumber}
      , ports{ports}
      , listeners{}
-     , signals{getNextContext(), SIGINT, SIGTERM}
-     {}
-     ListenerManager(const ListenerManager&) = delete;
-     ListenerManager(ListenerManager&&) = delete;
-     ~ListenerManager(){}
-
-     void stop()
-     {
-          signals.clear();
-          stopAllListeners();
-          stopAllContexts();
-     }
-     
-     void run()
+     , signals{contextPool.getNext(), SIGINT, SIGTERM}
      {
           signals.async_wait(
                [this](auto, auto)
                {
                     stop();
                });
-          runAllListeners();
+     }
+     ListenerManager(const ListenerManager&) = delete;
+     ListenerManager(ListenerManager&&) = delete;
+     ~ListenerManager(){}
+
+     void stop()
+     {
+          stopAll();
+     }
+     
+     void run()
+     {
+          runAll();
      }
 };

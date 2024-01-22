@@ -2,6 +2,8 @@
 #include <fmt/format.h>
 #include <iostream>
 #include <stdexcept>
+#include <Listener.hpp>
+#include <ListenerManager.hpp>
 
 int main(int argc, char** argv)
 {
@@ -13,8 +15,8 @@ int main(int argc, char** argv)
     auto port = static_cast<std::size_t>(std::atol(argv[1]));
     try
     {
-        auto server = Server::create(port);
-        server->run();
+        auto mng = ListenerManager(4, {port, 2222, 6666, 5555, 4444});
+        mng.run();
     }
     catch (const std::exception& ex)
     {

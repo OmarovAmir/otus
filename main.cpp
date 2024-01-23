@@ -1,4 +1,3 @@
-#include <Server.hpp>
 #include <fmt/format.h>
 #include <iostream>
 #include <stdexcept>
@@ -15,7 +14,7 @@ int main(int argc, char** argv)
     auto port = static_cast<std::size_t>(std::atol(argv[1]));
     try
     {
-        auto mng = ListenerManager(4, {port, 2222, 6666, 5555, 4444});
+        auto mng = ListenerManager(4, {port});
         mng.run();
     }
     catch (const std::exception& ex)

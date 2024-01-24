@@ -11,36 +11,36 @@ class ContextPool
 {
      class ioContext
      {
-          asio::io_context ctx;
-          asio::executor_work_guard<asio::io_context::executor_type> guard;
-          std::thread ctxThread;
+          asio::io_context m_ctx;
+          asio::executor_work_guard<asio::io_context::executor_type> m_guard;
+          std::thread m_ctxThread;
      public:
           explicit ioContext()
-          : ctx{}
-          , guard{ctx.get_executor()}
-          , ctxThread{[this](){ctx.run();}}
+          : m_ctx{}
+          , m_guard{m_ctx.get_executor()}
+          , m_ctxThread{[this](){m_ctx.run();}}
           {}
           void join()
           {
-               if(ctxThread.joinable())
+               if(m_ctxThread.joinable())
                {
-                    ctxThread.join();
+                    m_ctxThread.join();
                }
           }
           asio::io_context& getContext()
           {
-               return ctx;
+               return m_ctx;
           }
      };
 
-     std::size_t contextNumber;
-     std::size_t nextContext;
-     std::vector<std::shared_ptr<ioContext>> ioContexts;
+     std::size_t m_contextNumber;
+     std::size_t m_nextContext;
+     std::vector<std::shared_ptr<ioContext>> m_ioContexts;
 public:
      ContextPool(std::size_t contextNumber)
-     : contextNumber{(0 != contextNumber) ? contextNumber : 1}
-     , nextContext{0}
-     , ioContexts{}
+     : m_contextNumber{(0 != contextNumber) ? contextNumber : 1}
+     , m_nextContext{0}
+     , m_ioContexts{}
      {}
      ContextPool(const ContextPool&) = delete;
      ContextPool(ContextPool&&) = delete;
@@ -49,22 +49,22 @@ public:
      asio::io_context& getNext()
      {
           std::shared_ptr<ioContext> ctx;
-          if(ioContexts.size() < contextNumber)
+          if(m_ioContexts.size() < m_contextNumber)
           {
                ctx = std::make_shared<ioContext>();
-               ioContexts.push_back(ctx);
+               m_ioContexts.push_back(ctx);
           }
           else
           {
-               ctx = ioContexts[nextContext++];
-               nextContext %= contextNumber;
+               ctx = m_ioContexts[m_nextContext++];
+               m_nextContext %= m_contextNumber;
           }
           return ctx->getContext();
      }
 
      void stopAll()
      {
-          for(auto& ctx: ioContexts)
+          for(auto& ctx: m_ioContexts)
           {
                ctx->getContext().stop();
           }
@@ -72,7 +72,7 @@ public:
 
      void joinAll()
      {
-          for (auto& ctx: ioContexts)
+          for (auto& ctx: m_ioContexts)
           {
                ctx->join();
           }

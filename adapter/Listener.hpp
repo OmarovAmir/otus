@@ -5,17 +5,19 @@
 #include <boost/asio.hpp>
 
 #include <Connection.hpp>
+#include <ConnectionManager.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
 class Listener
 {
-     tcp::acceptor acceptor;
+     tcp::acceptor m_acceptor;
+     ConnectionManager m_connectionManager;
 
      void accept()
      {
-          acceptor.async_accept(
+          m_acceptor.async_accept(
           [this](const boost::system::error_code error, tcp::socket socket)
           {
                if (error)
@@ -26,8 +28,7 @@ class Listener
                {
                     fmt::print("remote: {} {} ", socket.remote_endpoint().address().to_string(), socket.remote_endpoint().port());
                     fmt::println("local: {} {}", socket.local_endpoint().address().to_string(), socket.local_endpoint().port());
-                    const auto connection = std::make_shared<Connection>(std::move(socket));
-                    connection->start();
+                    m_connectionManager.createConnection(std::move(socket));
                     accept();
                }
           });
@@ -35,7 +36,8 @@ class Listener
 
 public:
      explicit Listener(asio::io_context& context, std::size_t port)
-          : acceptor{context, tcp::endpoint(tcp::v4(), port)}
+          : m_acceptor{context, tcp::endpoint(tcp::v4(), port)}
+          , m_connectionManager{}
      {}
      Listener(const Listener&) = delete;
      Listener(Listener&&) = delete;
@@ -48,6 +50,6 @@ public:
 
      void stop()
      {
-          acceptor.close();
+          m_acceptor.close();
      }
 };

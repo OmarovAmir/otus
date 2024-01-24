@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <condition_variable>
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
@@ -10,28 +11,32 @@
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
-class Connection : public std::enable_shared_from_this<Connection>
+class Connection
 {
     static const auto delimetr = '\n';
 
-    tcp::socket input_socket;
-    boost::asio::streambuf input_buffer;
-    tcp::socket output_socket;
-    boost::asio::streambuf output_buffer;
+    std::shared_ptr<std::condition_variable> m_removeCV;
+    tcp::socket m_input_socket;
+    boost::asio::streambuf m_input_buffer;
+    tcp::socket m_output_socket;
+    boost::asio::streambuf m_output_buffer;
+    bool m_connected;
 
     void handleInputRead(const boost::system::error_code error, const std::size_t length)
     {
         if (error)
         {
             fmt::println("{}", error.message());
+            m_connected = false;
+            m_removeCV->notify_one();
         }
         else
         {
             if (length != 0)
             {
-                std::string data{asio::buffer_cast<const char*>(input_buffer.data()), length};
+                std::string data{asio::buffer_cast<const char*>(m_input_buffer.data()), length};
                 boost::trim(data);
-                input_buffer.consume(length);
+                m_input_buffer.consume(length);
                 fmt::println("input read: {}", data);
                 outputWrite("HAHAHAHA" + data);
             }
@@ -44,14 +49,16 @@ class Connection : public std::enable_shared_from_this<Connection>
         if (error)
         {
             fmt::println("{}", error.message());
+            m_connected = false;
+            m_removeCV->notify_one();
         }
         else
         {
             if (length != 0)
             {
-                std::string data{asio::buffer_cast<const char*>(output_buffer.data()), length};
+                std::string data{asio::buffer_cast<const char*>(m_output_buffer.data()), length};
                 boost::trim(data);
-                output_buffer.consume(length);
+                m_output_buffer.consume(length);
                 fmt::println("output read: {}", data);
                 size_t pos = data.find("HAHAHAHA");
                 if( pos != std::string::npos)
@@ -69,6 +76,8 @@ class Connection : public std::enable_shared_from_this<Connection>
         if (error)
         {
             fmt::println("{}", error.message());
+            m_connected = false;
+            m_removeCV->notify_one();
         }
     }
 
@@ -77,6 +86,8 @@ class Connection : public std::enable_shared_from_this<Connection>
         if (error)
         {
             fmt::println("{}", error.message());
+            m_connected = false;
+            m_removeCV->notify_one();
         }
     }
 
@@ -85,65 +96,74 @@ class Connection : public std::enable_shared_from_this<Connection>
         if (error)
         {
             fmt::println("{}", error.message());
+            m_connected = false;
+            m_removeCV->notify_one();
         }
         else
         {
             inputRead();
             outputRead();
+            m_connected = true;
         }
     }
 
+    void inputRead()
+    {
+        asio::async_read_until(m_input_socket, m_input_buffer, delimetr,
+                               [this](const boost::system::error_code error, const std::size_t length)
+                               { handleInputRead(error, length); });
+    }
+
+    void outputRead()
+    {
+        asio::async_read_until(m_output_socket, m_output_buffer, delimetr,
+                               [this](const boost::system::error_code error, const std::size_t length)
+                               { handleOutputRead(error, length); });
+    }
+
+    void inputWrite(std::string data)
+    {
+        asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
+                          [this](const boost::system::error_code error, const std::size_t length)
+                          { handleInputWrite(error, length); });
+    }
+
+    void outputWrite(std::string data)
+    {
+        asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
+                          [this](const boost::system::error_code error, const std::size_t length)
+                          { handleOutputWrite(error, length); });
+    }
+
   public:
-    explicit Connection(tcp::socket socket)
-        : input_socket{std::move(socket)}
-        , input_buffer{}
-        , output_socket{input_socket.get_executor()}
-        , output_buffer{}
+    explicit Connection(tcp::socket socket, std::shared_ptr<std::condition_variable> removeCV)
+        : m_removeCV{removeCV}
+        , m_input_socket{std::move(socket)}
+        , m_input_buffer{}
+        , m_output_socket{m_input_socket.get_executor()}
+        , m_output_buffer{}
+        , m_connected{true}
     {}
 
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;
     ~Connection() {}
 
-    void inputRead()
+    void connect()
     {
-        auto self = shared_from_this();
-
-        asio::async_read_until(input_socket, input_buffer, delimetr,
-                               [self](const boost::system::error_code error, const std::size_t length)
-                               { self->handleInputRead(error, length); });
+        m_output_socket.async_connect(/*m_input_socket.remote_endpoint()*/asio::ip::tcp::endpoint(m_input_socket.local_endpoint().address(), 4567),
+                                [this](const boost::system::error_code error)
+                                { handleConnect(error); });
     }
 
-    void outputRead()
+    void disconnect()
     {
-        auto self = shared_from_this();
-
-        asio::async_read_until(output_socket, output_buffer, delimetr,
-                               [self](const boost::system::error_code error, const std::size_t length)
-                               { self->handleOutputRead(error, length); });
+        m_input_socket.close();
+        m_output_socket.close();
     }
 
-    void inputWrite(std::string data)
+    bool isConnected()
     {
-        auto self = shared_from_this();
-        asio::async_write(input_socket, asio::buffer(data.data(), data.size()),
-                          [self](const boost::system::error_code error, const std::size_t length)
-                          { self->handleInputWrite(error, length); });
-    }
-
-    void outputWrite(std::string data)
-    {
-        auto self = shared_from_this();
-        asio::async_write(output_socket, asio::buffer(data.data(), data.size()),
-                          [self](const boost::system::error_code error, const std::size_t length)
-                          { self->handleOutputWrite(error, length); });
-    }
-
-    void start()
-    {
-        auto self = shared_from_this();
-        output_socket.async_connect(/*input_socket.remote_endpoint()*/asio::ip::tcp::endpoint(input_socket.local_endpoint().address(), 4567),
-                                [self](const boost::system::error_code error)
-                                { self->handleConnect(error); });
+        return m_connected;
     }
 };

@@ -20,6 +20,7 @@ class Connection
     boost::asio::streambuf m_input_buffer;
     tcp::socket m_output_socket;
     boost::asio::streambuf m_output_buffer;
+    asio::ip::tcp::resolver m_resolver;
     bool m_connected;
 
     void handleInputRead(const boost::system::error_code error, const std::size_t length)
@@ -91,7 +92,7 @@ class Connection
         }
     }
 
-    void handleConnect(const boost::system::error_code error)
+    void handleConnect(const boost::system::error_code error, asio::ip::tcp::resolver::iterator result)
     {
         if (error)
         {
@@ -101,9 +102,27 @@ class Connection
         }
         else
         {
+            fmt::println("connected to {} {}", result->endpoint().address().to_string(), result->endpoint().port());
             inputRead();
             outputRead();
             m_connected = true;
+        }
+    }
+
+    void handlerResolve(const boost::system::error_code& error, asio::ip::tcp::resolver::iterator result)
+    {
+        if (error)
+        {
+            fmt::println("{}", error.message());
+            m_connected = false;
+            m_removeCV->notify_one();
+        }
+        else
+        {
+            asio::ip::tcp::resolver::iterator end;
+            asio::async_connect(m_output_socket, result, end,  
+                            [this](const boost::system::error_code error, asio::ip::tcp::resolver::iterator result)
+                            { handleConnect(error, result); });
         }
     }
 
@@ -142,6 +161,7 @@ class Connection
         , m_input_buffer{}
         , m_output_socket{m_input_socket.get_executor()}
         , m_output_buffer{}
+        , m_resolver{m_input_socket.get_executor()}
         , m_connected{true}
     {}
 
@@ -151,9 +171,9 @@ class Connection
 
     void connect()
     {
-        m_output_socket.async_connect(/*m_input_socket.remote_endpoint()*/asio::ip::tcp::endpoint(m_input_socket.local_endpoint().address(), 4567),
-                                [this](const boost::system::error_code error)
-                                { handleConnect(error); });
+        m_resolver.async_resolve(asio::ip::tcp::endpoint(m_input_socket.local_endpoint().address(), 4567), 
+            [this](const boost::system::error_code& error, asio::ip::tcp::resolver::iterator result)
+            {handlerResolve(error, result);});
     }
 
     void disconnect()

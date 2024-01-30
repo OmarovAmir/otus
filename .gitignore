@@ -31,8 +31,8 @@
 *.out
 *.app
 
-# Drawio
-*.drawio
+# Drawio backup
+*.drawio.bkp
 
 build/
 .vscode/

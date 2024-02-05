@@ -10,10 +10,14 @@
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
+#include <netinet/in.h>
+
 class Listener
 {
      tcp::acceptor m_acceptor;
      ConnectionManager m_connectionManager;
+
+     using ip_transparent = boost::asio::detail::socket_option::boolean<SOL_IP, IP_TRANSPARENT>;
 
      void accept()
      {
@@ -38,7 +42,10 @@ public:
      explicit Listener(asio::io_context& context, std::size_t port)
           : m_acceptor{context, tcp::endpoint(tcp::v4(), port)}
           , m_connectionManager{}
-     {}
+     {
+          ip_transparent opt(true);
+          m_acceptor.set_option(opt);
+     }
      Listener(const Listener&) = delete;
      Listener(Listener&&) = delete;
      ~Listener() {}

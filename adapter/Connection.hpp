@@ -171,7 +171,7 @@ class Connection
 
     void connect()
     {
-        m_resolver.async_resolve(asio::ip::tcp::endpoint(m_input_socket.local_endpoint().address(), 4567), 
+        m_resolver.async_resolve(m_input_socket.local_endpoint(), 
             [this](const boost::system::error_code& error, asio::ip::tcp::resolver::iterator result)
             {handlerResolve(error, result);});
     }

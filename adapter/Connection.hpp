@@ -115,32 +115,6 @@ class Connection
         }
     }
 
-    void handlerResolve(const boost::system::error_code& error, asio::ip::tcp::resolver::iterator result)
-    {
-        fmt::println("{}", __FUNCTION__);
-        if (error)
-        {
-            fmt::println("{}", error.message());
-            m_connected = false;
-            m_removeCV->notify_one();
-        }
-        else
-        {
-            asio::ip::tcp::resolver::iterator end;
-            ip_transparent opt(true);
-            m_output_socket.set_option(opt);
-            fmt::println("local_endpoint {} {}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
-            fmt::println("remote_endpoint {} {}", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
-            fmt::println("local_endpoint {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
-            m_output_socket.async_connect(result->endpoint(),
-            [this](const boost::system::error_code error)
-                            { handleConnect(error); });
-            // asio::async_connect(m_output_socket, result, end,  
-            //                 [this](const boost::system::error_code error, asio::ip::tcp::resolver::iterator result)
-            //                 { handleConnect(error, result); });
-        }
-    }
-
     void inputRead()
     {
         asio::async_read_until(m_input_socket, m_input_buffer, delimetr,
@@ -192,9 +166,9 @@ class Connection
 
     void connect()
     {
-        m_resolver.async_resolve(m_input_socket.local_endpoint(), 
-            [this](const boost::system::error_code& error, asio::ip::tcp::resolver::iterator result)
-            {handlerResolve(error, result);});
+        m_output_socket.async_connect(m_input_socket.local_endpoint(),
+            [this](const boost::system::error_code error)
+                            { handleConnect(error); });
     }
 
     void disconnect()

@@ -6,15 +6,22 @@
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
+    if (argc < 2)
     {
-        std::cout << "Usage: adapter port" << std::endl;
+        std::cout << "Usage: adapter port [port]" << std::endl;
         return 0;
     }
-    auto port = static_cast<std::size_t>(std::atol(argv[1]));
+
+    std::vector<std::size_t> ports;
+
+    for (auto p = 1; p < argc; ++p)
+    {
+        ports.push_back(static_cast<std::size_t>(std::atol(argv[p])));
+    }
+
     try
     {
-        auto mng = ListenerManager(4, {port});
+        auto mng = ListenerManager(4, ports);
         mng.run();
     }
     catch (const std::exception& ex)

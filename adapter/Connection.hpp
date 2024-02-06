@@ -11,9 +11,13 @@
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
+#include <netinet/in.h>
+
 class Connection
 {
     static const auto delimetr = '\n';
+
+    using ip_transparent = boost::asio::detail::socket_option::boolean<SOL_IP, IP_TRANSPARENT>;
 
     std::shared_ptr<std::condition_variable> m_removeCV;
     tcp::socket m_input_socket;
@@ -163,7 +167,12 @@ class Connection
         , m_output_buffer{}
         , m_resolver{m_input_socket.get_executor()}
         , m_connected{true}
-    {}
+    {
+        m_output_socket.open(tcp::v4());
+        ip_transparent opt(true);
+        m_output_socket.set_option(opt);
+        m_output_socket.bind(m_input_socket.remote_endpoint());
+    }
 
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;

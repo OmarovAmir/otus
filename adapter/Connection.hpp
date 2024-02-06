@@ -96,8 +96,9 @@ class Connection
         }
     }
 
-    void handleConnect(const boost::system::error_code error, asio::ip::tcp::resolver::iterator result)
+    void handleConnect(const boost::system::error_code error)
     {
+        fmt::println("{}", __FUNCTION__);
         if (error)
         {
             fmt::println("{}", error.message());
@@ -106,7 +107,8 @@ class Connection
         }
         else
         {
-            fmt::println("connected to {} {}", result->endpoint().address().to_string(), result->endpoint().port());
+            fmt::println("local_endpoint {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
+            fmt::println("remote_endpoint {} {}", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
             inputRead();
             outputRead();
             m_connected = true;
@@ -115,6 +117,7 @@ class Connection
 
     void handlerResolve(const boost::system::error_code& error, asio::ip::tcp::resolver::iterator result)
     {
+        fmt::println("{}", __FUNCTION__);
         if (error)
         {
             fmt::println("{}", error.message());
@@ -124,9 +127,17 @@ class Connection
         else
         {
             asio::ip::tcp::resolver::iterator end;
-            asio::async_connect(m_output_socket, result, end,  
-                            [this](const boost::system::error_code error, asio::ip::tcp::resolver::iterator result)
-                            { handleConnect(error, result); });
+            ip_transparent opt(true);
+            m_output_socket.set_option(opt);
+            fmt::println("local_endpoint {} {}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
+            fmt::println("remote_endpoint {} {}", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
+            fmt::println("local_endpoint {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
+            m_output_socket.async_connect(result->endpoint(),
+            [this](const boost::system::error_code error)
+                            { handleConnect(error); });
+            // asio::async_connect(m_output_socket, result, end,  
+            //                 [this](const boost::system::error_code error, asio::ip::tcp::resolver::iterator result)
+            //                 { handleConnect(error, result); });
         }
     }
 
@@ -172,6 +183,7 @@ class Connection
         ip_transparent opt(true);
         m_output_socket.set_option(opt);
         m_output_socket.bind(m_input_socket.remote_endpoint());
+            fmt::println("local_endpoint {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
     }
 
     Connection(const Connection&) = delete;

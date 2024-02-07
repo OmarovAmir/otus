@@ -126,7 +126,7 @@ class Connection
 
     void inputWrite(std::string data)
     {
-        fmt::println("{}:{} ===> {}:{} [{}]",
+        fmt::println("From {}:{} to {}:{} [{}]", 
             m_input_socket.local_endpoint().address().to_string(), 
             m_input_socket.local_endpoint().port(),
             m_input_socket.remote_endpoint().address().to_string(), 
@@ -139,7 +139,7 @@ class Connection
 
     void outputWrite(std::string data)
     {
-        fmt::println("{}:{} ===> {}:{} [{}]", 
+        fmt::println("From {}:{} to {}:{} [{}]", 
             m_output_socket.local_endpoint().address().to_string(), 
             m_output_socket.local_endpoint().port(),
             m_output_socket.remote_endpoint().address().to_string(), 

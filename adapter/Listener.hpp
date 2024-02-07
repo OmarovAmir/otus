@@ -30,8 +30,6 @@ class Listener
                }
                else
                {
-                    fmt::print("remote: {} {} ", socket.remote_endpoint().address().to_string(), socket.remote_endpoint().port());
-                    fmt::println("local: {} {}", socket.local_endpoint().address().to_string(), socket.local_endpoint().port());
                     m_connectionManager.createConnection(std::move(socket));
                     accept();
                }

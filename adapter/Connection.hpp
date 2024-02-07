@@ -63,10 +63,10 @@ class Connection
                 size_t pos = std::string::npos;
                 do
                 {
-                    pos = data.find("HAHAHAHA");
+                    pos = data.find("HA");
                     if( pos != std::string::npos)
                     {
-                        data.erase(pos, std::string("HAHAHAHA").size());
+                        data.erase(pos, std::string("HA").size());
                     }
                 }
                 while( pos != std::string::npos);
@@ -126,9 +126,11 @@ class Connection
 
     void inputWrite(std::string data)
     {
-        fmt::println("{} ===> {} : {}", 
+        fmt::println("{}:{} ===> {}:{} [{}]",
             m_input_socket.local_endpoint().address().to_string(), 
+            m_input_socket.local_endpoint().port(),
             m_input_socket.remote_endpoint().address().to_string(), 
+            m_input_socket.remote_endpoint().port(),
             data);
         asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
@@ -137,9 +139,11 @@ class Connection
 
     void outputWrite(std::string data)
     {
-        fmt::println("{} ===> {} : {}", 
+        fmt::println("{}:{} ===> {}:{} [{}]", 
             m_output_socket.local_endpoint().address().to_string(), 
+            m_output_socket.local_endpoint().port(),
             m_output_socket.remote_endpoint().address().to_string(), 
+            m_output_socket.remote_endpoint().port(),
             data);
         asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
@@ -206,14 +210,14 @@ class Connection
             if(m_connectedClient)
             {
                 fmt::print("Input socket: ");
-                fmt::print("remote: {} {} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
-                fmt::println("local: {} {}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
+                fmt::print("remote: {}:{} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
+                fmt::println("local: {}:{}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
             }
             if(m_connectedServer)
             {
                 fmt::print("Output socket: ");
-                fmt::print("remote: {} {} ", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
-                fmt::println("local: {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
+                fmt::print("remote: {}:{} ", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
+                fmt::println("local: {}:{}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
             }
             fmt::println("");
         }

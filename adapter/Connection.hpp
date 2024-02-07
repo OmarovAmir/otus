@@ -8,7 +8,7 @@
 #include <boost/asio.hpp>
 #include <fmt/format.h>
 
-#include <IpTransparentOption.hpp>
+#include <SocketIpTransparentOption.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;

@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  client:
+    image: debian:latest
+    tty: true
+    init: true
+    networks:
+      host:
+      net1:
+        ipv4_address: 192.168.1.12
+  adapter:
+    image: debian:latest
+    tty: true
+    init: true
+    networks:
+      host:
+      net1:
+        ipv4_address: 192.168.1.11
+      net2:
+        ipv4_address: 192.168.2.11
+
+  server:
+    image: debian:latest
+    tty: true
+    init: true
+    networks:
+      host:
+      net2:
+        ipv4_address: 192.168.2.12
+
+networks:
+  net1:
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.1.0/24"
+  net2:
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.2.0/24"
+  host:
+    driver: bridge
+  

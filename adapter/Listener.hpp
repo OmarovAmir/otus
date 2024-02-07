@@ -6,18 +6,15 @@
 
 #include <Connection.hpp>
 #include <ConnectionManager.hpp>
+#include <IpTransparentOption.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
-
-#include <netinet/in.h>
 
 class Listener
 {
      tcp::acceptor m_acceptor;
      ConnectionManager m_connectionManager;
-
-     using ip_transparent = boost::asio::detail::socket_option::boolean<SOL_IP, IP_TRANSPARENT>;
 
      void accept()
      {

@@ -8,16 +8,14 @@
 #include <boost/asio.hpp>
 #include <fmt/format.h>
 
+#include <IpTransparentOption.hpp>
+
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
-
-#include <netinet/in.h>
 
 class Connection
 {
     static const auto delimetr = '\n';
-
-    using ip_transparent = boost::asio::detail::socket_option::boolean<SOL_IP, IP_TRANSPARENT>;
 
     std::shared_ptr<std::condition_variable> m_removeCV;
     tcp::socket m_input_socket;
@@ -26,18 +24,6 @@ class Connection
     boost::asio::streambuf m_output_buffer;
     asio::ip::tcp::resolver m_resolver;
     bool m_connected;
-
-    void printSocketsEndpoints()
-    {
-        fmt::println("Connection");
-        fmt::print("Input socket: ");
-        fmt::print("remote: {} {} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
-        fmt::println("local: {} {}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
-        fmt::print("Output socket: ");
-        fmt::print("remote: {} {} ", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
-        fmt::println("local: {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
-        fmt::println("");
-    }
 
     void handleInputRead(const boost::system::error_code error, const std::size_t length)
     {
@@ -54,7 +40,6 @@ class Connection
             m_input_buffer.consume(length);
             if(data.size())
             {
-                fmt::println("input read: {}", data);
                 outputWrite("HAHAHAHA" + data);
             }
             inputRead();
@@ -76,12 +61,16 @@ class Connection
             m_output_buffer.consume(length);
             if(data.size())
             {
-                fmt::println("output read: {}", data);
-                size_t pos = data.find("HAHAHAHA");
-                if( pos != std::string::npos)
+                size_t pos = std::string::npos;
+                do
                 {
-                    data.erase(pos, std::string("HAHAHAHA").size());
+                    pos = data.find("HAHAHAHA");
+                    if( pos != std::string::npos)
+                    {
+                        data.erase(pos, std::string("HAHAHAHA").size());
+                    }
                 }
+                while( pos != std::string::npos);
                 inputWrite(data);
             }
             outputRead();
@@ -118,7 +107,7 @@ class Connection
         }
         else
         {
-            printSocketsEndpoints();
+            printConnection("Connection");
             inputRead();
             outputRead();
             m_connected = true;
@@ -141,6 +130,10 @@ class Connection
 
     void inputWrite(std::string data)
     {
+        fmt::println("{} ===> {} : {}", 
+            m_input_socket.local_endpoint().address().to_string(), 
+            m_input_socket.remote_endpoint().address().to_string(), 
+            data);
         asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
                           { handleInputWrite(error, length); });
@@ -148,6 +141,10 @@ class Connection
 
     void outputWrite(std::string data)
     {
+        fmt::println("{} ===> {} : {}", 
+            m_output_socket.local_endpoint().address().to_string(), 
+            m_output_socket.remote_endpoint().address().to_string(), 
+            data);
         asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
                           { handleOutputWrite(error, length); });
@@ -189,5 +186,17 @@ class Connection
     bool isConnected()
     {
         return m_connected;
+    }
+
+    void printConnection(std::string action)
+    {
+        fmt::println("{}", action);
+        fmt::print("Input socket: ");
+        fmt::print("remote: {} {} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
+        fmt::println("local: {} {}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
+        fmt::print("Output socket: ");
+        fmt::print("remote: {} {} ", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
+        fmt::println("local: {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
+        fmt::println("");
     }
 };

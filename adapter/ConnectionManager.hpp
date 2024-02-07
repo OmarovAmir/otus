@@ -36,6 +36,7 @@ class ConnectionManager
                     }
                     else
                     {
+                         (*connection)->printConnection("Disconnection");
                          connection = m_connections.erase(connection);
                     }
                }

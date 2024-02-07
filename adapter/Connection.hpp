@@ -106,7 +106,6 @@ class Connection
             inputRead();
             outputRead();
             m_connectedServer = true;
-            printConnection("Connection");
         }
     }
 
@@ -126,7 +125,7 @@ class Connection
 
     void inputWrite(std::string data)
     {
-        fmt::println("From {}:{} to {}:{} [{}]", 
+        fmt::println("From server {}:{} to client {}:{} [{}]", 
             m_input_socket.local_endpoint().address().to_string(), 
             m_input_socket.local_endpoint().port(),
             m_input_socket.remote_endpoint().address().to_string(), 
@@ -139,7 +138,7 @@ class Connection
 
     void outputWrite(std::string data)
     {
-        fmt::println("From {}:{} to {}:{} [{}]", 
+        fmt::println("From client {}:{} to server {}:{} [{}]", 
             m_output_socket.local_endpoint().address().to_string(), 
             m_output_socket.local_endpoint().port(),
             m_output_socket.remote_endpoint().address().to_string(), 
@@ -173,6 +172,7 @@ class Connection
 
     void connect()
     {
+        printConnection("Connection");
         m_output_socket.async_connect(m_input_socket.local_endpoint(),
             [this](const boost::system::error_code error)
                             { handleConnect(error); });
@@ -181,13 +181,14 @@ class Connection
     void disconnect()
     {
         printConnection("Disconnection");
+        boost::system::error_code error;
         if(m_input_socket.is_open())
         {
-            m_input_socket.shutdown(tcp::socket::shutdown_both);
+            m_input_socket.shutdown(tcp::socket::shutdown_both, error);
         }
         if(m_output_socket.is_open())
         {
-            m_output_socket.shutdown(tcp::socket::shutdown_both);
+            m_output_socket.shutdown(tcp::socket::shutdown_both, error);
         }
         m_input_socket.close();
         m_output_socket.close();
@@ -209,15 +210,8 @@ class Connection
             fmt::println("{}", action);
             if(m_connectedClient)
             {
-                fmt::print("Input socket: ");
-                fmt::print("remote: {}:{} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
-                fmt::println("local: {}:{}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
-            }
-            if(m_connectedServer)
-            {
-                fmt::print("Output socket: ");
-                fmt::print("remote: {}:{} ", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
-                fmt::println("local: {}:{}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
+                fmt::print("client: {}:{} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
+                fmt::println("server: {}:{}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
             }
             fmt::println("");
         }

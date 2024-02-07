@@ -57,10 +57,12 @@ public:
      {
           {
                std::unique_lock lock(m_removeMutex);
-               m_connections.clear();
+               for(auto connection: m_connections)
+               {
+                    connection->disconnect();
+               }
                m_removeThreadFinish = true;
           }
-          m_removeCV->notify_one();
           if(m_removeThread.joinable())
           {
                m_removeThread.join();

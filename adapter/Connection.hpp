@@ -23,15 +23,15 @@ class Connection
     tcp::socket m_output_socket;
     boost::asio::streambuf m_output_buffer;
     asio::ip::tcp::resolver m_resolver;
-    bool m_connected;
+    bool m_connectedClient;
+    bool m_connectedServer;
 
     void handleInputRead(const boost::system::error_code error, const std::size_t length)
     {
         if (error)
         {
             fmt::println("{}", error.message());
-            m_connected = false;
-            m_removeCV->notify_one();
+            disconnect();
         }
         else
         {
@@ -51,8 +51,7 @@ class Connection
         if (error)
         {
             fmt::println("{}", error.message());
-            m_connected = false;
-            m_removeCV->notify_one();
+            disconnect();
         }
         else
         {
@@ -82,8 +81,7 @@ class Connection
         if (error)
         {
             fmt::println("{}", error.message());
-            m_connected = false;
-            m_removeCV->notify_one();
+            disconnect();
         }
     }
 
@@ -92,8 +90,7 @@ class Connection
         if (error)
         {
             fmt::println("{}", error.message());
-            m_connected = false;
-            m_removeCV->notify_one();
+            disconnect();
         }
     }
 
@@ -102,15 +99,14 @@ class Connection
         if (error)
         {
             fmt::println("{}", error.message());
-            m_connected = false;
-            m_removeCV->notify_one();
+            disconnect();
         }
         else
         {
-            printConnection("Connection");
             inputRead();
             outputRead();
-            m_connected = true;
+            m_connectedServer = true;
+            printConnection("Connection");
         }
     }
 
@@ -158,7 +154,8 @@ class Connection
         , m_output_socket{m_input_socket.get_executor()}
         , m_output_buffer{}
         , m_resolver{m_input_socket.get_executor()}
-        , m_connected{true}
+        , m_connectedClient{true}
+        , m_connectedServer{false}
     {
         m_output_socket.open(tcp::v4());
         ip_transparent opt(true);
@@ -179,24 +176,40 @@ class Connection
 
     void disconnect()
     {
+        printConnection("Disconnection");
         m_input_socket.close();
-        m_output_socket.close();
+        if(m_connectedServer)
+        {
+            m_output_socket.close();
+        }
+        m_connectedClient = false;
+        m_connectedServer = false;
+        m_removeCV->notify_one();
     }
 
     bool isConnected()
     {
-        return m_connected;
+        return m_connectedClient || m_connectedServer;
     }
 
     void printConnection(std::string action)
     {
-        fmt::println("{}", action);
-        fmt::print("Input socket: ");
-        fmt::print("remote: {} {} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
-        fmt::println("local: {} {}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
-        fmt::print("Output socket: ");
-        fmt::print("remote: {} {} ", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
-        fmt::println("local: {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
-        fmt::println("");
+        if(isConnected())
+        {
+            fmt::println("{}", action);
+            if(m_connectedClient)
+            {
+                fmt::print("Input socket: ");
+                fmt::print("remote: {} {} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
+                fmt::println("local: {} {}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
+            }
+            if(m_connectedServer)
+            {
+                fmt::print("Output socket: ");
+                fmt::print("remote: {} {} ", m_output_socket.remote_endpoint().address().to_string(), m_output_socket.remote_endpoint().port());
+                fmt::println("local: {} {}", m_output_socket.local_endpoint().address().to_string(), m_output_socket.local_endpoint().port());
+            }
+            fmt::println("");
+        }
     }
 };

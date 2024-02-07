@@ -30,7 +30,7 @@ class Connection
     {
         if (error)
         {
-            fmt::println("{}", error.message());
+            // fmt::println("{}", error.message());
             disconnect();
         }
         else
@@ -50,7 +50,7 @@ class Connection
     {
         if (error)
         {
-            fmt::println("{}", error.message());
+            // fmt::println("{}", error.message());
             disconnect();
         }
         else
@@ -80,7 +80,7 @@ class Connection
     {
         if (error)
         {
-            fmt::println("{}", error.message());
+            // fmt::println("{}", error.message());
             disconnect();
         }
     }
@@ -89,7 +89,7 @@ class Connection
     {
         if (error)
         {
-            fmt::println("{}", error.message());
+            // fmt::println("{}", error.message());
             disconnect();
         }
     }
@@ -98,7 +98,7 @@ class Connection
     {
         if (error)
         {
-            fmt::println("{}", error.message());
+            // fmt::println("{}", error.message());
             disconnect();
         }
         else
@@ -177,11 +177,16 @@ class Connection
     void disconnect()
     {
         printConnection("Disconnection");
-        m_input_socket.close();
-        if(m_connectedServer)
+        if(m_input_socket.is_open())
         {
-            m_output_socket.close();
+            m_input_socket.shutdown(tcp::socket::shutdown_both);
         }
+        if(m_output_socket.is_open())
+        {
+            m_output_socket.shutdown(tcp::socket::shutdown_both);
+        }
+        m_input_socket.close();
+        m_output_socket.close();
         m_connectedClient = false;
         m_connectedServer = false;
         m_removeCV->notify_one();
@@ -196,6 +201,7 @@ class Connection
     {
         if(isConnected())
         {
+            fmt::println("");
             fmt::println("{}", action);
             if(m_connectedClient)
             {

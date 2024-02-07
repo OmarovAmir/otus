@@ -27,7 +27,6 @@ class ConnectionManager
           {
                std::unique_lock lock(m_removeMutex);
                m_removeCV->wait(lock, [this]{ return m_removeThreadFinish || !m_connections.empty(); });
-
                for (auto connection = m_connections.begin(); connection != m_connections.end();)
                {
                     if ((*connection)->isConnected())
@@ -63,6 +62,7 @@ public:
                }
                m_removeThreadFinish = true;
           }
+          m_removeCV->notify_one();
           if(m_removeThread.joinable())
           {
                m_removeThread.join();

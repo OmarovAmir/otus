@@ -23,7 +23,7 @@ class Listener
           {
                if (error)
                {
-                    fmt::println("{}", error.message());
+                    // fmt::println("{}", error.message());
                }
                else
                {

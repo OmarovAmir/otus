@@ -1,8 +1,8 @@
 #pragma once
 
+#include <condition_variable>
 #include <iostream>
 #include <memory>
-#include <condition_variable>
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/asio.hpp>
@@ -38,7 +38,7 @@ class Connection
             std::string data{asio::buffer_cast<const char*>(m_input_buffer.data()), length};
             boost::trim(data);
             m_input_buffer.consume(length);
-            if(data.size())
+            if (data.size())
             {
                 outputWrite("HAHAHAHA" + data);
             }
@@ -58,18 +58,18 @@ class Connection
             std::string data{asio::buffer_cast<const char*>(m_output_buffer.data()), length};
             boost::trim(data);
             m_output_buffer.consume(length);
-            if(data.size())
+            if (data.size())
             {
                 size_t pos = std::string::npos;
                 do
                 {
                     pos = data.find("HA");
-                    if( pos != std::string::npos)
+                    if (pos != std::string::npos)
                     {
                         data.erase(pos, std::string("HA").size());
                     }
                 }
-                while( pos != std::string::npos);
+                while (pos != std::string::npos);
                 inputWrite(data);
             }
             outputRead();
@@ -125,12 +125,9 @@ class Connection
 
     void inputWrite(std::string data)
     {
-        fmt::println("From server {}:{} to client {}:{} [{}]", 
-            m_input_socket.local_endpoint().address().to_string(), 
-            m_input_socket.local_endpoint().port(),
-            m_input_socket.remote_endpoint().address().to_string(), 
-            m_input_socket.remote_endpoint().port(),
-            data);
+        fmt::println("From server {}:{} to client {}:{} [{}]", m_input_socket.local_endpoint().address().to_string(),
+                     m_input_socket.local_endpoint().port(), m_input_socket.remote_endpoint().address().to_string(),
+                     m_input_socket.remote_endpoint().port(), data);
         asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
                           { handleInputWrite(error, length); });
@@ -138,12 +135,9 @@ class Connection
 
     void outputWrite(std::string data)
     {
-        fmt::println("From client {}:{} to server {}:{} [{}]", 
-            m_output_socket.local_endpoint().address().to_string(), 
-            m_output_socket.local_endpoint().port(),
-            m_output_socket.remote_endpoint().address().to_string(), 
-            m_output_socket.remote_endpoint().port(),
-            data);
+        fmt::println("From client {}:{} to server {}:{} [{}]", m_output_socket.local_endpoint().address().to_string(),
+                     m_output_socket.local_endpoint().port(), m_output_socket.remote_endpoint().address().to_string(),
+                     m_output_socket.remote_endpoint().port(), data);
         asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
                           { handleOutputWrite(error, length); });
@@ -174,19 +168,18 @@ class Connection
     {
         printConnection("Connection");
         m_output_socket.async_connect(m_input_socket.local_endpoint(),
-            [this](const boost::system::error_code error)
-                            { handleConnect(error); });
+                                      [this](const boost::system::error_code error) { handleConnect(error); });
     }
 
     void disconnect()
     {
         printConnection("Disconnection");
         boost::system::error_code error;
-        if(m_input_socket.is_open())
+        if (m_input_socket.is_open())
         {
             m_input_socket.shutdown(tcp::socket::shutdown_both, error);
         }
-        if(m_output_socket.is_open())
+        if (m_output_socket.is_open())
         {
             m_output_socket.shutdown(tcp::socket::shutdown_both, error);
         }
@@ -197,21 +190,20 @@ class Connection
         m_removeCV->notify_one();
     }
 
-    bool isConnected()
-    {
-        return m_connectedClient || m_connectedServer;
-    }
+    bool isConnected() { return m_connectedClient || m_connectedServer; }
 
     void printConnection(std::string action)
     {
-        if(isConnected())
+        if (isConnected())
         {
             fmt::println("");
             fmt::println("{}", action);
-            if(m_connectedClient)
+            if (m_connectedClient)
             {
-                fmt::print("client: {}:{} ", m_input_socket.remote_endpoint().address().to_string(), m_input_socket.remote_endpoint().port());
-                fmt::println("server: {}:{}", m_input_socket.local_endpoint().address().to_string(), m_input_socket.local_endpoint().port());
+                fmt::print("client: {}:{} ", m_input_socket.remote_endpoint().address().to_string(),
+                           m_input_socket.remote_endpoint().port());
+                fmt::println("server: {}:{}", m_input_socket.local_endpoint().address().to_string(),
+                             m_input_socket.local_endpoint().port());
             }
             fmt::println("");
         }

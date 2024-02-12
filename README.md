@@ -1,5 +1,11 @@
 # otus project: Adapter
+**Требования для сборки и запуска:**
+* Debian
+* Cmake
+* Docker Compose
+
 ## Сборка проекта
+**Команды по сборке выполняются из корневой директории проекта**
 ```
 mkdir build
 cd build
@@ -7,6 +13,8 @@ cmake ..
 cmake --build .
 ```
 ## Сборка и запуск контейнеров
+**Представленные команды выполняются из корневой директории проекта**\
+**Необходимо иметь на машине установленный docker**
 ### Проверка запущены ли контейнеры
 ```
 sudo docker compose -f docker/adapter.yaml ps -a
@@ -32,6 +40,8 @@ sudo docker compose -f docker/adapter.yaml exec --privileged adapter bash
 sudo docker compose -f docker/adapter.yaml down --rmi all
 ```
 ## Подготовка к работе
+**Представленные команды выполняются из директории в которой был запущен контейнер (/home/user/)**\
+**Команды достаточно выполнить один раз при первом старте контейнеров**
 ### Настройка контейнера client
 ```
 sudo docker/scripts/client/client.sh
@@ -45,10 +55,10 @@ sudo docker/scripts/server/server.sh
 sudo docker/scripts/adapter/adapter.sh
 ```
 # Описание проекта
-Проекта описан по модели C4 (https://c4model.com/)
+Описание проекта представлено по модели C4 (https://c4model.com/)
 ## Диаграмма контекста системы
-![Alt text](./diagrams/SystemContextDiagram.svg)
+![Alt image](./diagrams/SystemContextDiagram.svg)
 ## Диаграмма контейнеров
-![Alt text](./diagrams/ContainerDiagram.svg)
+![Alt image](./diagrams/ContainerDiagram.svg)
 ## Диаграмма компонентов
-![Alt text](./diagrams/ComponentDiagram.svg)
+![Alt image](./diagrams/ComponentDiagram.svg)

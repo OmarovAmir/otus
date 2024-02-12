@@ -31,8 +31,8 @@
 *.out
 *.app
 
-# Drawio backup
-*.drawio.bkp
+# Backups
+*.bkp
 
 # Docker logs
 .sudo_as_admin_successful

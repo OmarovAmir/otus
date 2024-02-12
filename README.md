@@ -44,3 +44,11 @@ sudo docker/scripts/server/server.sh
 ```
 sudo docker/scripts/adapter/adapter.sh
 ```
+# Описание проекта
+Проекта описан по модели C4 (https://c4model.com/)
+## Диаграмма контекста системы
+![Alt text](./diagrams/SystemContextDiagram.svg)
+## Диаграмма контейнеров
+![Alt text](./diagrams/ContainerDiagram.svg)
+## Диаграмма компонентов
+![Alt text](./diagrams/ComponentDiagram.svg)

@@ -26,6 +26,73 @@ class Connection
     bool m_connectedClient;
     bool m_connectedServer;
 
+public:
+    explicit Connection(tcp::socket socket, std::shared_ptr<std::condition_variable> removeCV)
+        : m_removeCV{removeCV}
+        , m_input_socket{std::move(socket)}
+        , m_input_buffer{}
+        , m_output_socket{m_input_socket.get_executor()}
+        , m_output_buffer{}
+        , m_resolver{m_input_socket.get_executor()}
+        , m_connectedClient{true}
+        , m_connectedServer{false}
+    {
+        m_output_socket.open(tcp::v4());
+        ip_transparent opt(true);
+        m_output_socket.set_option(opt);
+        m_output_socket.bind(m_input_socket.remote_endpoint());
+    }
+
+    Connection(const Connection&) = delete;
+    Connection(Connection&&) = delete;
+    ~Connection() {}
+
+    void connect()
+    {
+        printConnection("Connection");
+        m_output_socket.async_connect(m_input_socket.local_endpoint(),
+                                      [this](const boost::system::error_code error) { handleConnect(error); });
+    }
+
+    void disconnect()
+    {
+        printConnection("Disconnection");
+        boost::system::error_code error;
+        if (m_input_socket.is_open())
+        {
+            m_input_socket.shutdown(tcp::socket::shutdown_both, error);
+        }
+        if (m_output_socket.is_open())
+        {
+            m_output_socket.shutdown(tcp::socket::shutdown_both, error);
+        }
+        m_input_socket.close();
+        m_output_socket.close();
+        m_connectedClient = false;
+        m_connectedServer = false;
+        m_removeCV->notify_one();
+    }
+
+    bool isConnected() { return m_connectedClient || m_connectedServer; }
+
+    void printConnection(std::string action)
+    {
+        if (isConnected())
+        {
+            fmt::println("");
+            fmt::println("{}", action);
+            if (m_connectedClient)
+            {
+                fmt::print("client: {}:{} ", m_input_socket.remote_endpoint().address().to_string(),
+                           m_input_socket.remote_endpoint().port());
+                fmt::println("server: {}:{}", m_input_socket.local_endpoint().address().to_string(),
+                             m_input_socket.local_endpoint().port());
+            }
+            fmt::println("");
+        }
+    }
+
+private:
     void handleInputRead(const boost::system::error_code error, const std::size_t length)
     {
         if (error)
@@ -131,71 +198,5 @@ class Connection
         asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
                           { handleOutputWrite(error, length); });
-    }
-
-  public:
-    explicit Connection(tcp::socket socket, std::shared_ptr<std::condition_variable> removeCV)
-        : m_removeCV{removeCV}
-        , m_input_socket{std::move(socket)}
-        , m_input_buffer{}
-        , m_output_socket{m_input_socket.get_executor()}
-        , m_output_buffer{}
-        , m_resolver{m_input_socket.get_executor()}
-        , m_connectedClient{true}
-        , m_connectedServer{false}
-    {
-        m_output_socket.open(tcp::v4());
-        ip_transparent opt(true);
-        m_output_socket.set_option(opt);
-        m_output_socket.bind(m_input_socket.remote_endpoint());
-    }
-
-    Connection(const Connection&) = delete;
-    Connection(Connection&&) = delete;
-    ~Connection() {}
-
-    void connect()
-    {
-        printConnection("Connection");
-        m_output_socket.async_connect(m_input_socket.local_endpoint(),
-                                      [this](const boost::system::error_code error) { handleConnect(error); });
-    }
-
-    void disconnect()
-    {
-        printConnection("Disconnection");
-        boost::system::error_code error;
-        if (m_input_socket.is_open())
-        {
-            m_input_socket.shutdown(tcp::socket::shutdown_both, error);
-        }
-        if (m_output_socket.is_open())
-        {
-            m_output_socket.shutdown(tcp::socket::shutdown_both, error);
-        }
-        m_input_socket.close();
-        m_output_socket.close();
-        m_connectedClient = false;
-        m_connectedServer = false;
-        m_removeCV->notify_one();
-    }
-
-    bool isConnected() { return m_connectedClient || m_connectedServer; }
-
-    void printConnection(std::string action)
-    {
-        if (isConnected())
-        {
-            fmt::println("");
-            fmt::println("{}", action);
-            if (m_connectedClient)
-            {
-                fmt::print("client: {}:{} ", m_input_socket.remote_endpoint().address().to_string(),
-                           m_input_socket.remote_endpoint().port());
-                fmt::println("server: {}:{}", m_input_socket.local_endpoint().address().to_string(),
-                             m_input_socket.local_endpoint().port());
-            }
-            fmt::println("");
-        }
     }
 };

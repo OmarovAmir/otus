@@ -7,7 +7,7 @@
 
 /// @brief Шаблонные класс потокобезопасной очереди
 /// @tparam T Тип хранящийся в очереди
-template <typename T> class DataQueue
+template <typename T> class SafeQueue
 {
     std::queue<T> _data;
     std::mutex _mutex;

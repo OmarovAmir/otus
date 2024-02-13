@@ -40,7 +40,7 @@ class Connection
             m_input_buffer.consume(length);
             if (data.size())
             {
-                outputWrite("HAHAHAHA" + data);
+                outputWrite(data);
             }
             inputRead();
         }
@@ -60,16 +60,6 @@ class Connection
             m_output_buffer.consume(length);
             if (data.size())
             {
-                size_t pos = std::string::npos;
-                do
-                {
-                    pos = data.find("HA");
-                    if (pos != std::string::npos)
-                    {
-                        data.erase(pos, std::string("HA").size());
-                    }
-                }
-                while (pos != std::string::npos);
                 inputWrite(data);
             }
             outputRead();

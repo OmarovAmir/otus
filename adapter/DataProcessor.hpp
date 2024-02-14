@@ -29,19 +29,26 @@ class DataProcessor
                auto in = m_input_queue.popAll();
                for (auto& data: in)
                {
-                    switch(data->GetDirection())
+                    try
                     {
-                         case DataDirection::FromClient:
-                              data->SetData(base64::to_base64(data->GetData()));
-                              break;
-                         case DataDirection::FromServer:
-                              data->SetData(base64::from_base64(data->GetData()));
-                              break;
-                         default:
-                              break;
+                         switch(data->GetDirection())
+                         {
+                              case DataDirection::FromClient:
+                                   data->SetData(base64::to_base64(data->GetData()));
+                                   break;
+                              case DataDirection::FromServer:
+                                   data->SetData(base64::from_base64(data->GetData()));
+                                   break;
+                              default:
+                                   break;
+                         }
+                         data->Processed();
+                         m_output_queue.push(data);
                     }
-                    data->Processed();
-                    m_output_queue.push(data);
+                    catch(const std::exception& e)
+                    {
+                         fmt::println("{}", e.what());
+                    }
                }
                if(!m_output_queue.empty())
                {

@@ -7,6 +7,7 @@
 
 #include <Data.hpp>
 #include <SafeQueue.hpp>
+#include <Base64.hpp>
 
 class DataProcessor
 {
@@ -28,6 +29,17 @@ class DataProcessor
                auto in = m_input_queue.popAll();
                for (auto& data: in)
                {
+                    switch(data->GetDirection())
+                    {
+                         case DataDirection::FromClient:
+                              data->SetData(base64::to_base64(data->GetData()));
+                              break;
+                         case DataDirection::FromServer:
+                              data->SetData(base64::from_base64(data->GetData()));
+                              break;
+                         default:
+                              break;
+                    }
                     data->Processed();
                     m_output_queue.push(data);
                }

@@ -47,14 +47,15 @@ class Connection
                 auto sd = d->GetData();
                 if(!sd.empty())
                 {
+                    sd += delimetr;
                     switch (d->GetDirection())
                     {
                         case DataDirection::ToClient:
-                            inputWrite(d->GetData());
+                            inputWrite(sd);
                             break;
                         
                         case DataDirection::ToServer:
-                            outputWrite(d->GetData());
+                            outputWrite(sd);
                             break;
                         default:
                             break;
@@ -92,7 +93,6 @@ public:
     {
         {
             std::unique_lock lock(m_processedMutex);
-            m_processor.Stop();
             m_processedThreadFinish = true;
         }
         m_processedCV->notify_one();
@@ -111,6 +111,10 @@ public:
 
     void disconnect()
     {
+        {
+            std::unique_lock lock(m_processedMutex);
+            m_processor.Stop();
+        }
         printConnection("Disconnection");
         boost::system::error_code error;
         if (m_input_socket.is_open())

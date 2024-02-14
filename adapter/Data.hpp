@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <DataDirection.hpp>
 
 class Data
@@ -34,8 +35,27 @@ public:
                case DataDirection::FromServer:
                     m_direction = DataDirection::ToClient;
                     break;
+               default:
+                    break;
                }
                m_processed = true;
           }
      }
+
+     auto GetData()
+     {
+          return m_data;
+     }
+     
+     void SetData(const std::string& data)
+     {
+          m_data = data;
+     }
+
+     auto GetDirection()
+     {
+          return m_direction;
+     }
 };
+
+using DataPtr = std::shared_ptr<Data>;

@@ -54,4 +54,13 @@ template <typename T> class SafeQueue
         std::unique_lock lock(_mutex);
         return _data.empty();
     }
+
+    void clear()
+    {
+        std::unique_lock lock(_mutex);
+        while (!_data.empty())
+        {
+            _data.pop();
+        }
+    }
 };

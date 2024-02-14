@@ -9,6 +9,8 @@
 #include <fmt/format.h>
 
 #include <SocketIpTransparentOption.hpp>
+#include <DataProcessor.hpp>
+#include <Data.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -16,6 +18,13 @@ using tcp = asio::ip::tcp;
 class Connection
 {
     static const auto delimetr = '\n';
+
+    std::mutex m_processedMutex;
+    std::shared_ptr<std::condition_variable> m_processedCV;
+    bool m_processedThreadFinish;
+    std::thread m_processedThread;
+
+    DataProcessor m_processor;
 
     std::shared_ptr<std::condition_variable> m_removeCV;
     tcp::socket m_input_socket;
@@ -26,9 +35,43 @@ class Connection
     bool m_connectedClient;
     bool m_connectedServer;
 
+    void sendProcessed()
+    {
+        while (!m_processedThreadFinish)
+        {
+            std::unique_lock lock(m_processedMutex);
+            m_processedCV->wait(lock, [this] { return m_processedThreadFinish || !m_processor.IsProcessedEmpty(); });
+            auto data = m_processor.popAll();
+            for (const auto& d: data)
+            {
+                auto sd = d->GetData();
+                if(!sd.empty())
+                {
+                    switch (d->GetDirection())
+                    {
+                        case DataDirection::ToClient:
+                            inputWrite(d->GetData());
+                            break;
+                        
+                        case DataDirection::ToServer:
+                            outputWrite(d->GetData());
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
 public:
     explicit Connection(tcp::socket socket, std::shared_ptr<std::condition_variable> removeCV)
-        : m_removeCV{removeCV}
+        : m_processedMutex{}
+        , m_processedCV{std::make_shared<std::condition_variable>()}
+        , m_processedThreadFinish{false}
+        , m_processedThread{&Connection::sendProcessed, this}
+        , m_processor{m_processedCV}
+        , m_removeCV{removeCV}
         , m_input_socket{std::move(socket)}
         , m_input_buffer{}
         , m_output_socket{m_input_socket.get_executor()}
@@ -45,7 +88,19 @@ public:
 
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;
-    ~Connection() {}
+    ~Connection()
+    {
+        {
+            std::unique_lock lock(m_processedMutex);
+            m_processor.Stop();
+            m_processedThreadFinish = true;
+        }
+        m_processedCV->notify_one();
+        if (m_processedThread.joinable())
+        {
+            m_processedThread.join();
+        }
+    }
 
     void connect()
     {
@@ -105,10 +160,12 @@ private:
             std::string data{asio::buffer_cast<const char*>(m_input_buffer.data()), length};
             boost::trim(data);
             m_input_buffer.consume(length);
-            if (data.size())
-            {
-                outputWrite(data);
-            }
+            auto pd = std::make_shared<Data>(DataDirection::FromClient, data);
+            m_processor.push(pd);
+            // if (data.size())
+            // {
+            //     outputWrite(data);
+            // }
             inputRead();
         }
     }
@@ -125,10 +182,12 @@ private:
             std::string data{asio::buffer_cast<const char*>(m_output_buffer.data()), length};
             boost::trim(data);
             m_output_buffer.consume(length);
-            if (data.size())
-            {
-                inputWrite(data);
-            }
+            auto pd = std::make_shared<Data>(DataDirection::FromServer, data);
+            m_processor.push(pd);
+            // if (data.size())
+            // {
+            //     inputWrite(data);
+            // }
             outputRead();
         }
     }

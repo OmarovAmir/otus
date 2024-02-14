@@ -27,7 +27,7 @@ class DataProcessor
                std::unique_lock lock(m_processMutex);
                m_processCV->wait(lock, [this] { return m_processThreadFinish || !m_input_queue.empty(); });
                auto in = m_input_queue.popAll();
-               for (auto& data: in)
+               for (auto& data: *in)
                {
                     try
                     {
@@ -47,7 +47,7 @@ class DataProcessor
                     }
                     catch(const std::exception& e)
                     {
-                         fmt::println("{}", e.what());
+                         // fmt::println("{}", e.what());
                     }
                }
                if(!m_output_queue.empty())

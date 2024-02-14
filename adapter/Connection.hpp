@@ -42,7 +42,7 @@ class Connection
             std::unique_lock lock(m_processedMutex);
             m_processedCV->wait(lock, [this] { return m_processedThreadFinish || !m_processor.IsProcessedEmpty(); });
             auto data = m_processor.popAll();
-            for (const auto& d: data)
+            for (const auto& d: *data)
             {
                 auto sd = d->GetData();
                 if(!sd.empty())
@@ -109,14 +109,17 @@ public:
                                       [this](const boost::system::error_code error) { handleConnect(error); });
     }
 
-    void disconnect()
+    void disconnect(boost::system::error_code error = boost::system::error_code())
     {
+        if (error)
+        {
+            // fmt::println("{}", error.message());
+        }
         {
             std::unique_lock lock(m_processedMutex);
             m_processor.Stop();
         }
         printConnection("Disconnection");
-        boost::system::error_code error;
         if (m_input_socket.is_open())
         {
             m_input_socket.shutdown(tcp::socket::shutdown_both, error);
@@ -156,8 +159,7 @@ private:
     {
         if (error)
         {
-            // fmt::println("{}", error.message());
-            disconnect();
+            disconnect(error);
         }
         else
         {
@@ -166,10 +168,6 @@ private:
             m_input_buffer.consume(length);
             auto pd = std::make_shared<Data>(DataDirection::FromClient, data);
             m_processor.push(pd);
-            // if (data.size())
-            // {
-            //     outputWrite(data);
-            // }
             inputRead();
         }
     }
@@ -178,8 +176,7 @@ private:
     {
         if (error)
         {
-            // fmt::println("{}", error.message());
-            disconnect();
+            disconnect(error);
         }
         else
         {
@@ -188,10 +185,6 @@ private:
             m_output_buffer.consume(length);
             auto pd = std::make_shared<Data>(DataDirection::FromServer, data);
             m_processor.push(pd);
-            // if (data.size())
-            // {
-            //     inputWrite(data);
-            // }
             outputRead();
         }
     }
@@ -200,8 +193,7 @@ private:
     {
         if (error)
         {
-            // fmt::println("{}", error.message());
-            disconnect();
+            disconnect(error);
         }
     }
 
@@ -209,8 +201,7 @@ private:
     {
         if (error)
         {
-            // fmt::println("{}", error.message());
-            disconnect();
+            disconnect(error);
         }
     }
 
@@ -218,8 +209,7 @@ private:
     {
         if (error)
         {
-            // fmt::println("{}", error.message());
-            disconnect();
+            disconnect(error);
         }
         else
         {

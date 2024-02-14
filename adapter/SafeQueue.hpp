@@ -3,31 +3,34 @@
 #include <functional>
 #include <mutex>
 #include <queue>
-#include <vector>
+#include <list>
+#include <memory>
 
 /// @brief Шаблонные класс потокобезопасной очереди
 /// @tparam T Тип хранящийся в очереди
 template <typename T> class SafeQueue
 {
-    std::queue<T> _data;
+    std::unique_ptr<std::list<T>> _data;
     std::mutex _mutex;
+
+    void check()
+    {
+        if(!_data)
+        {
+            _data = std::make_unique<std::list<T>>();
+        }
+    }
 
   public:
     using data_type = T;
 
     /// @brief Получить все данные из очереди
     /// @return Массив данных
-    std::vector<T> popAll()
+    std::unique_ptr<std::list<T>> popAll()
     {
         std::unique_lock lock(_mutex);
-        std::vector<T> result;
-        result.reserve(_data.size());
-        while (!_data.empty())
-        {
-            result.push_back(_data.front());
-            _data.pop();
-        }
-        return result;
+        check();
+        return std::move(_data);
     }
 
     /// @brief Добавить данные в очередь
@@ -35,7 +38,8 @@ template <typename T> class SafeQueue
     void push(const T& data)
     {
         std::unique_lock lock(_mutex);
-        _data.push(data);
+        check();
+        _data->push_back(data);
     }
 
     /// @brief Получить размер очереди
@@ -43,7 +47,8 @@ template <typename T> class SafeQueue
     std::size_t size()
     {
         std::unique_lock lock(_mutex);
-        return _data.size();
+        check();
+        return _data->size();
     }
 
     /// @brief Проверить пуста ли очередь
@@ -52,15 +57,14 @@ template <typename T> class SafeQueue
     bool empty()
     {
         std::unique_lock lock(_mutex);
-        return _data.empty();
+        check();
+        return _data->empty();
     }
 
     void clear()
     {
         std::unique_lock lock(_mutex);
-        while (!_data.empty())
-        {
-            _data.pop();
-        }
+        check();
+        _data->clear();
     }
 };

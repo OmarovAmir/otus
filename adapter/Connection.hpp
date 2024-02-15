@@ -32,8 +32,11 @@ class Connection
     tcp::socket m_output_socket;
     boost::asio::streambuf m_output_buffer;
     asio::ip::tcp::resolver m_resolver;
-    bool m_connectedClient;
-    bool m_connectedServer;
+    bool m_connectedInput;
+    bool m_connectedOutput;
+
+    tcp::endpoint inputEndpoint;
+    tcp::endpoint outputEndpoint;
 
     void sendProcessed()
     {
@@ -42,12 +45,11 @@ class Connection
             std::unique_lock lock(m_processedMutex);
             m_processedCV->wait(lock, [this] { return m_processedThreadFinish || !m_processor.IsProcessedEmpty(); });
             auto data = m_processor.popAll();
-            for (const auto& d: *data)
+            for (auto& d: *data)
             {
                 auto sd = d->GetData();
                 if(!sd.empty())
                 {
-                    sd += delimetr;
                     switch (d->GetDirection())
                     {
                         case DataDirection::ToClient:
@@ -78,8 +80,10 @@ public:
         , m_output_socket{m_input_socket.get_executor()}
         , m_output_buffer{}
         , m_resolver{m_input_socket.get_executor()}
-        , m_connectedClient{true}
-        , m_connectedServer{false}
+        , m_connectedInput{true}
+        , m_connectedOutput{false}
+        , inputEndpoint{m_input_socket.remote_endpoint()}
+        , outputEndpoint{m_input_socket.local_endpoint()}
     {
         m_output_socket.open(tcp::v4());
         ip_transparent opt(true);
@@ -111,9 +115,11 @@ public:
 
     void disconnect(boost::system::error_code error = boost::system::error_code())
     {
+        m_connectedInput = false;
+        m_connectedOutput = false;
         if (error)
         {
-            // fmt::println("{}", error.message());
+            fmt::println("{} {}", __FUNCTION__, error.message());
         }
         {
             std::unique_lock lock(m_processedMutex);
@@ -130,12 +136,10 @@ public:
         }
         m_input_socket.close();
         m_output_socket.close();
-        m_connectedClient = false;
-        m_connectedServer = false;
         m_removeCV->notify_one();
     }
 
-    bool isConnected() { return m_connectedClient || m_connectedServer; }
+    bool isConnected() { return m_connectedInput || m_connectedOutput; }
 
     void printConnection(std::string action)
     {
@@ -143,13 +147,10 @@ public:
         {
             fmt::println("");
             fmt::println("{}", action);
-            if (m_connectedClient)
-            {
-                fmt::print("client: {}:{} ", m_input_socket.remote_endpoint().address().to_string(),
-                           m_input_socket.remote_endpoint().port());
-                fmt::println("server: {}:{}", m_input_socket.local_endpoint().address().to_string(),
-                             m_input_socket.local_endpoint().port());
-            }
+            fmt::print("client: {}:{} ", inputEndpoint.address().to_string(),
+                        inputEndpoint.port());
+            fmt::println("server: {}:{}", outputEndpoint.address().to_string(),
+                            outputEndpoint.port());
             fmt::println("");
         }
     }
@@ -215,7 +216,7 @@ private:
         {
             inputRead();
             outputRead();
-            m_connectedServer = true;
+            m_connectedOutput = true;
         }
     }
 
@@ -233,21 +234,23 @@ private:
                                { handleOutputRead(error, length); });
     }
 
-    void inputWrite(std::string data)
+    void inputWrite(std::string& data)
     {
-        fmt::println("From server {}:{} to client {}:{} [{}]", m_input_socket.local_endpoint().address().to_string(),
-                     m_input_socket.local_endpoint().port(), m_input_socket.remote_endpoint().address().to_string(),
-                     m_input_socket.remote_endpoint().port(), data);
+        fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
+                     outputEndpoint.port(), inputEndpoint.address().to_string(),
+                     inputEndpoint.port(), data);
+        data += delimetr;
         asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
                           { handleInputWrite(error, length); });
     }
 
-    void outputWrite(std::string data)
+    void outputWrite(std::string& data)
     {
-        fmt::println("From client {}:{} to server {}:{} [{}]", m_output_socket.local_endpoint().address().to_string(),
-                     m_output_socket.local_endpoint().port(), m_output_socket.remote_endpoint().address().to_string(),
-                     m_output_socket.remote_endpoint().port(), data);
+        fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
+                     inputEndpoint.port(), outputEndpoint.address().to_string(),
+                     outputEndpoint.port(), data);
+        data += delimetr;
         asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
                           [this](const boost::system::error_code error, const std::size_t length)
                           { handleOutputWrite(error, length); });

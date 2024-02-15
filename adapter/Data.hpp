@@ -52,7 +52,7 @@ public:
           m_data = data;
      }
 
-     auto GetDirection()
+     const auto& GetDirection()
      {
           return m_direction;
      }

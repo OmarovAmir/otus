@@ -107,9 +107,9 @@ public:
 
     void disconnect(boost::system::error_code error = boost::system::error_code())
     {
+        printConnection("Disconnection");
         m_connectedInput = false;
         m_connectedOutput = false;
-        printConnection("Disconnection");
         if (m_input_socket.is_open())
         {
             m_input_socket.shutdown(tcp::socket::shutdown_both, error);
@@ -127,13 +127,16 @@ public:
 
     void printConnection(std::string action)
     {
-        fmt::println("");
-        fmt::println("{}", action);
-        fmt::print("client: {}:{} ", inputEndpoint.address().to_string(),
-                    inputEndpoint.port());
-        fmt::println("server: {}:{}", outputEndpoint.address().to_string(),
-                        outputEndpoint.port());
-        fmt::println("");
+        if(isConnected())
+        {
+            fmt::println("");
+            fmt::println("{}", action);
+            fmt::print("client: {}:{} ", inputEndpoint.address().to_string(),
+                        inputEndpoint.port());
+            fmt::println("server: {}:{}", outputEndpoint.address().to_string(),
+                            outputEndpoint.port());
+            fmt::println("");
+        }
     }
 
 private:

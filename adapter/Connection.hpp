@@ -109,10 +109,6 @@ public:
     {
         m_connectedInput = false;
         m_connectedOutput = false;
-        if (error)
-        {
-            fmt::println("{} {}", __FUNCTION__, error.message());
-        }
         printConnection("Disconnection");
         if (m_input_socket.is_open())
         {
@@ -145,6 +141,7 @@ private:
     {
         if (error)
         {
+            fmt::println("{}: {}", __FUNCTION__, error.message());
             disconnect(error);
         }
         else
@@ -161,6 +158,7 @@ private:
     {
         if (error)
         {
+            fmt::println("{}: {}", __FUNCTION__, error.message());
             disconnect(error);
         }
         else
@@ -177,6 +175,7 @@ private:
     {
         if (error)
         {
+            fmt::println("{}: {}", __FUNCTION__, error.message());
             disconnect(error);
         }
     }
@@ -185,6 +184,7 @@ private:
     {
         if (error)
         {
+            fmt::println("{}: {}", __FUNCTION__, error.message());
             disconnect(error);
         }
     }
@@ -193,6 +193,7 @@ private:
     {
         if (error)
         {
+            fmt::println("{}: {}", __FUNCTION__, error.message());
             disconnect(error);
         }
         else

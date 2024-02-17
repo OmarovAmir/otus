@@ -16,20 +16,25 @@ class Listener
     tcp::acceptor m_acceptor;
     ConnectionManager m_connectionManager;
 
+    void handleAccept(const boost::system::error_code error, tcp::socket socket)
+    {
+        if (error)
+        {
+            fmt::println("{}: {}", __FUNCTION__, error.message());
+        }
+        else
+        {
+            m_connectionManager.createConnection(std::move(socket));
+            accept();
+        }
+    }
+
     void accept()
     {
         m_acceptor.async_accept(
             [this](const boost::system::error_code error, tcp::socket socket)
             {
-                if (error)
-                {
-                    fmt::println("{} {}", __FUNCTION__, error.message());
-                }
-                else
-                {
-                    m_connectionManager.createConnection(std::move(socket));
-                    accept();
-                }
+                handleAccept(error, std::move(socket));
             });
     }
 

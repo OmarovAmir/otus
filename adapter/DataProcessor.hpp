@@ -18,12 +18,10 @@ class DataProcessor
 
      void process()
      {
-          fmt::println("{} start", __FUNCTION__);
           while (!m_processThreadFinish)
           {
                m_input_queue->wait();
                auto data = m_input_queue->pop();
-               fmt::println("{} execute", __FUNCTION__);
                try
                {
                     if(data)
@@ -45,10 +43,9 @@ class DataProcessor
                }
                catch(const std::exception& e)
                {
-                    // fmt::println("{}", e.what());
+                    fmt::println("{}: {}", __FUNCTION__, e.what());
                }
           }
-          fmt::println("{} end", __FUNCTION__);
      }
 
 public:
@@ -62,10 +59,8 @@ public:
      }
      ~DataProcessor()
      {
-          fmt::println("{} start", __FUNCTION__);
           m_processThreadFinish = true;
           m_input_queue->clear();
           m_input_queue->stop();
-          fmt::println("{} end", __FUNCTION__);
      }
 };

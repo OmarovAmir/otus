@@ -46,15 +46,28 @@ class Connection
             auto data = m_output_queue->pop();
             if(data)
             {
+
                 if(!data->IsEmpty())
                 {
                     switch (data->GetDirection())
                     {
                         case DataDirection::ToClient:
+                            if(LOG_INFO)
+                            {
+                                fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
+                                        outputEndpoint.port(), inputEndpoint.address().to_string(),
+                                        inputEndpoint.port(), data->GetData());
+                            }
                             inputWrite(data->GetData() + delimetr);
                             break;
                         
                         case DataDirection::ToServer:
+                            if(LOG_INFO)
+                            {
+                                fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
+                                        inputEndpoint.port(), outputEndpoint.address().to_string(),
+                                        outputEndpoint.port(), data->GetData());
+                            }
                             outputWrite(data->GetData() + delimetr);
                             break;
                         default:
@@ -247,12 +260,6 @@ private:
     {
         if(m_connectedInput)
         {
-            if(LOG_INFO)
-            {
-                fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
-                        outputEndpoint.port(), inputEndpoint.address().to_string(),
-                        inputEndpoint.port(), data);
-            }
             asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
                             [this](const boost::system::error_code error, const std::size_t length)
                             { handleInputWrite(error, length); });
@@ -263,12 +270,6 @@ private:
     {
         if(m_connectedOutput)
         {
-            if(LOG_INFO)
-            {
-                fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
-                        inputEndpoint.port(), outputEndpoint.address().to_string(),
-                        outputEndpoint.port(), data);
-            }
             asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
                             [this](const boost::system::error_code error, const std::size_t length)
                             { handleOutputWrite(error, length); });

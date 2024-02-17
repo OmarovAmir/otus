@@ -11,25 +11,22 @@
 
 class DataProcessor
 {
-     std::shared_ptr<std::condition_variable> m_processedCV;
-     std::mutex m_processMutex;
-     std::shared_ptr<std::condition_variable> m_processCV;
-     bool m_processThreadFinish;
+     SafeQueuePtr<DataPtr> m_input_queue;
+     SafeQueuePtr<DataPtr> m_output_queue;
+     std::atomic_bool m_processThreadFinish;
      std::thread m_processThread;
-
-     SafeQueue<DataPtr> m_input_queue;
-     SafeQueue<DataPtr> m_output_queue;
 
      void process()
      {
+          fmt::println("{} start", __FUNCTION__);
           while (!m_processThreadFinish)
           {
-               std::unique_lock lock(m_processMutex);
-               m_processCV->wait(lock, [this] { return m_processThreadFinish || !m_input_queue.empty(); });
-               auto in = m_input_queue.popAll();
-               for (auto& data: *in)
+               m_input_queue->wait();
+               auto data = m_input_queue->pop();
+               fmt::println("{} execute", __FUNCTION__);
+               try
                {
-                    try
+                    if(data)
                     {
                          switch(data->GetDirection())
                          {
@@ -43,65 +40,32 @@ class DataProcessor
                                    break;
                          }
                          data->Processed();
-                         m_output_queue.push(data);
-                    }
-                    catch(const std::exception& e)
-                    {
-                         // fmt::println("{}", e.what());
+                         m_output_queue->push(std::move(data));
                     }
                }
-               if(!m_output_queue.empty())
+               catch(const std::exception& e)
                {
-                    m_processedCV->notify_one();
+                    // fmt::println("{}", e.what());
                }
           }
+          fmt::println("{} end", __FUNCTION__);
      }
 
 public:
-     explicit DataProcessor(std::shared_ptr<std::condition_variable> processedCV)
-     : m_processedCV{processedCV}
-     , m_processMutex{}
-     , m_processCV{std::make_shared<std::condition_variable>()}
+     explicit DataProcessor(SafeQueuePtr<DataPtr> input_queue, SafeQueuePtr<DataPtr> output_queue)
+     : m_input_queue{input_queue}
+     , m_output_queue{output_queue}
      , m_processThreadFinish{false}
      , m_processThread{&DataProcessor::process, this}
-     , m_input_queue{}
-     , m_output_queue{}
-     {}
-
-     void push(DataPtr& data)
      {
-          m_input_queue.push(data);
-          m_processCV->notify_one();
+          m_processThread.detach();
      }
-
-     auto popAll()
+     ~DataProcessor()
      {
-          auto data = m_output_queue.popAll(); 
-          return data;
-     }
-
-     bool IsProcessedEmpty()
-     {
-          return m_output_queue.empty();
-     }
-
-     void Clear()
-     {
-          m_input_queue.clear();
-          m_output_queue.clear();
-     }
-
-     void Stop()
-     {
-          {
-               std::unique_lock lock(m_processMutex);
-               Clear();
-               m_processThreadFinish = true;
-          }
-          m_processCV->notify_one();
-          if (m_processThread.joinable())
-          {
-               m_processThread.join();
-          }
+          fmt::println("{} start", __FUNCTION__);
+          m_processThreadFinish = true;
+          m_input_queue->clear();
+          m_input_queue->stop();
+          fmt::println("{} end", __FUNCTION__);
      }
 };

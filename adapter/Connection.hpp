@@ -19,11 +19,11 @@ class Connection
 {
     static const auto delimetr = '\n';
 
-    std::mutex m_processedMutex;
-    std::shared_ptr<std::condition_variable> m_processedCV;
-    bool m_processedThreadFinish;
+    SafeQueuePtr<DataPtr> m_input_queue;
+    SafeQueuePtr<DataPtr> m_output_queue;
+    std::atomic_bool m_processedThreadFinish;
     std::thread m_processedThread;
-
+    
     DataProcessor m_processor;
 
     std::shared_ptr<std::condition_variable> m_removeCV;
@@ -42,22 +42,19 @@ class Connection
     {
         while (!m_processedThreadFinish)
         {
-            std::unique_lock lock(m_processedMutex);
-            m_processedCV->wait(lock, [this] { return m_processedThreadFinish || !m_processor.IsProcessedEmpty(); });
-            auto data = m_processor.popAll();
-            for (auto& d: *data)
+            auto data = m_output_queue->pop();
+            if(data)
             {
-                auto sd = d->GetData();
-                if(!sd.empty())
+                if(!data->IsEmpty())
                 {
-                    switch (d->GetDirection())
+                    switch (data->GetDirection())
                     {
                         case DataDirection::ToClient:
-                            inputWrite(sd);
+                            inputWrite(data->GetData() + delimetr);
                             break;
                         
                         case DataDirection::ToServer:
-                            outputWrite(sd);
+                            outputWrite(data->GetData() + delimetr);
                             break;
                         default:
                             break;
@@ -69,11 +66,11 @@ class Connection
 
 public:
     explicit Connection(tcp::socket socket, std::shared_ptr<std::condition_variable> removeCV)
-        : m_processedMutex{}
-        , m_processedCV{std::make_shared<std::condition_variable>()}
+        : m_input_queue{std::make_shared<SafeQueue<DataPtr>>()}
+        , m_output_queue{std::make_shared<SafeQueue<DataPtr>>()}
         , m_processedThreadFinish{false}
         , m_processedThread{&Connection::sendProcessed, this}
-        , m_processor{m_processedCV}
+        , m_processor{m_input_queue, m_output_queue}
         , m_removeCV{removeCV}
         , m_input_socket{std::move(socket)}
         , m_input_buffer{}
@@ -89,21 +86,16 @@ public:
         ip_transparent opt(true);
         m_output_socket.set_option(opt);
         m_output_socket.bind(m_input_socket.remote_endpoint());
+        m_processedThread.detach();
     }
 
     Connection(const Connection&) = delete;
     Connection(Connection&&) = delete;
     ~Connection()
     {
-        {
-            std::unique_lock lock(m_processedMutex);
-            m_processedThreadFinish = true;
-        }
-        m_processedCV->notify_one();
-        if (m_processedThread.joinable())
-        {
-            m_processedThread.join();
-        }
+        m_processedThreadFinish = true;
+        m_output_queue->clear();
+        m_output_queue->stop();
     }
 
     void connect()
@@ -120,10 +112,6 @@ public:
         if (error)
         {
             fmt::println("{} {}", __FUNCTION__, error.message());
-        }
-        {
-            std::unique_lock lock(m_processedMutex);
-            m_processor.Stop();
         }
         printConnection("Disconnection");
         if (m_input_socket.is_open())
@@ -143,16 +131,13 @@ public:
 
     void printConnection(std::string action)
     {
-        if (isConnected())
-        {
-            fmt::println("");
-            fmt::println("{}", action);
-            fmt::print("client: {}:{} ", inputEndpoint.address().to_string(),
-                        inputEndpoint.port());
-            fmt::println("server: {}:{}", outputEndpoint.address().to_string(),
-                            outputEndpoint.port());
-            fmt::println("");
-        }
+        fmt::println("");
+        fmt::println("{}", action);
+        fmt::print("client: {}:{} ", inputEndpoint.address().to_string(),
+                    inputEndpoint.port());
+        fmt::println("server: {}:{}", outputEndpoint.address().to_string(),
+                        outputEndpoint.port());
+        fmt::println("");
     }
 
 private:
@@ -167,8 +152,7 @@ private:
             std::string data{asio::buffer_cast<const char*>(m_input_buffer.data()), length};
             boost::trim(data);
             m_input_buffer.consume(length);
-            auto pd = std::make_shared<Data>(DataDirection::FromClient, data);
-            m_processor.push(pd);
+            m_input_queue->push(std::make_shared<Data>(DataDirection::FromClient, data));
             inputRead();
         }
     }
@@ -184,8 +168,7 @@ private:
             std::string data{asio::buffer_cast<const char*>(m_output_buffer.data()), length};
             boost::trim(data);
             m_output_buffer.consume(length);
-            auto pd = std::make_shared<Data>(DataDirection::FromServer, data);
-            m_processor.push(pd);
+            m_input_queue->push(std::make_shared<Data>(DataDirection::FromServer, data));
             outputRead();
         }
     }
@@ -214,45 +197,55 @@ private:
         }
         else
         {
+            m_connectedOutput = true;
             inputRead();
             outputRead();
-            m_connectedOutput = true;
         }
     }
 
     void inputRead()
     {
-        asio::async_read_until(m_input_socket, m_input_buffer, delimetr,
+        if(m_connectedInput)
+        {
+           asio::async_read_until(m_input_socket, m_input_buffer, delimetr,
                                [this](const boost::system::error_code error, const std::size_t length)
                                { handleInputRead(error, length); });
+        }
     }
 
     void outputRead()
     {
-        asio::async_read_until(m_output_socket, m_output_buffer, delimetr,
-                               [this](const boost::system::error_code error, const std::size_t length)
-                               { handleOutputRead(error, length); });
+        if(m_connectedOutput)
+        {
+            asio::async_read_until(m_output_socket, m_output_buffer, delimetr,
+                                [this](const boost::system::error_code error, const std::size_t length)
+                                { handleOutputRead(error, length); });
+        }
     }
 
-    void inputWrite(std::string& data)
+    void inputWrite(const std::string& data)
     {
-        fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
-                     outputEndpoint.port(), inputEndpoint.address().to_string(),
-                     inputEndpoint.port(), data);
-        data += delimetr;
-        asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
-                          [this](const boost::system::error_code error, const std::size_t length)
-                          { handleInputWrite(error, length); });
+        if(m_connectedInput)
+        {
+            fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
+                        outputEndpoint.port(), inputEndpoint.address().to_string(),
+                        inputEndpoint.port(), data);
+            asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
+                            [this](const boost::system::error_code error, const std::size_t length)
+                            { handleInputWrite(error, length); });
+        }
     }
 
-    void outputWrite(std::string& data)
+    void outputWrite(const std::string& data)
     {
-        fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
-                     inputEndpoint.port(), outputEndpoint.address().to_string(),
-                     outputEndpoint.port(), data);
-        data += delimetr;
-        asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
-                          [this](const boost::system::error_code error, const std::size_t length)
-                          { handleOutputWrite(error, length); });
+        if(m_connectedOutput)
+        {
+            fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
+                        inputEndpoint.port(), outputEndpoint.address().to_string(),
+                        outputEndpoint.port(), data);
+            asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
+                            [this](const boost::system::error_code error, const std::size_t length)
+                            { handleOutputWrite(error, length); });
+        }
     }
 };

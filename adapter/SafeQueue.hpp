@@ -3,43 +3,59 @@
 #include <functional>
 #include <mutex>
 #include <queue>
-#include <list>
 #include <memory>
+#include <condition_variable>
 
 /// @brief Шаблонные класс потокобезопасной очереди
 /// @tparam T Тип хранящийся в очереди
 template <typename T> class SafeQueue
 {
-    std::unique_ptr<std::list<T>> _data;
+    std::queue<T> _data;
+    std::condition_variable _cv;
+    std::atomic_bool _stop;
     std::mutex _mutex;
-
-    void check()
-    {
-        if(!_data)
-        {
-            _data = std::make_unique<std::list<T>>();
-        }
-    }
 
   public:
     using data_type = T;
 
-    /// @brief Получить все данные из очереди
-    /// @return Массив данных
-    std::unique_ptr<std::list<T>> popAll()
+    void wait()
     {
         std::unique_lock lock(_mutex);
-        check();
-        return std::move(_data);
+        _cv.wait(lock, [this] { return _stop || !_data.empty(); });
+    }
+
+    void stop()
+    {
+        _stop = true;
+        _cv.notify_one();
+    }
+
+    void notify()
+    {
+        _cv.notify_one();
+    }
+
+    /// @brief Получить данные из очереди
+    /// @return Массив данных
+    T pop()
+    {
+        std::unique_lock lock(_mutex);
+        T data;
+        if(!_data.empty())
+        {
+            data = _data.front();
+            _data.pop();
+        }
+        return data;
     }
 
     /// @brief Добавить данные в очередь
     /// @param data Данные
-    void push(const T& data)
+    void push(T&& data)
     {
         std::unique_lock lock(_mutex);
-        check();
-        _data->push_back(data);
+        _data.push(data);
+        _cv.notify_one();
     }
 
     /// @brief Получить размер очереди
@@ -47,8 +63,7 @@ template <typename T> class SafeQueue
     std::size_t size()
     {
         std::unique_lock lock(_mutex);
-        check();
-        return _data->size();
+        return _data.size();
     }
 
     /// @brief Проверить пуста ли очередь
@@ -57,14 +72,17 @@ template <typename T> class SafeQueue
     bool empty()
     {
         std::unique_lock lock(_mutex);
-        check();
-        return _data->empty();
+        return _data.empty();
     }
 
+    /// @brief Очистка очереди
     void clear()
     {
         std::unique_lock lock(_mutex);
-        check();
-        _data->clear();
+        std::queue<T> empty;
+        std::swap( _data, empty );
     }
 };
+
+template <typename T>
+using SafeQueuePtr = std::shared_ptr<SafeQueue<T>>;

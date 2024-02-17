@@ -42,7 +42,7 @@ public:
           }
      }
 
-     auto GetData()
+     auto& GetData()
      {
           return m_data;
      }
@@ -55,6 +55,11 @@ public:
      const auto& GetDirection()
      {
           return m_direction;
+     }
+
+     bool IsEmpty()
+     {
+          return m_data.empty();
      }
 };
 

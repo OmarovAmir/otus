@@ -2,8 +2,8 @@
 
 enum class DataDirection
 {
-     FromClient,
-     ToClient,
-     FromServer,
-     ToServer
+    FromClient,
+    ToClient,
+    FromServer,
+    ToServer
 };

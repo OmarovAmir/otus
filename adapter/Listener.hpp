@@ -6,8 +6,8 @@
 
 #include <Connection.hpp>
 #include <ConnectionManager.hpp>
-#include <SocketIpTransparentOption.hpp>
 #include <Options.hpp>
+#include <SocketIpTransparentOption.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -21,7 +21,7 @@ class Listener
     {
         if (error)
         {
-            if(LOG_ERROR)
+            if (LOG_ERROR)
             {
                 fmt::println("{}: {}", __FUNCTION__, error.message());
             }
@@ -35,11 +35,8 @@ class Listener
 
     void accept()
     {
-        m_acceptor.async_accept(
-            [this](const boost::system::error_code error, tcp::socket socket)
-            {
-                handleAccept(error, std::move(socket));
-            });
+        m_acceptor.async_accept([this](const boost::system::error_code error, tcp::socket socket)
+                                { handleAccept(error, std::move(socket)); });
     }
 
   public:

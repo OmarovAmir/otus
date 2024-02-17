@@ -1,10 +1,10 @@
 #pragma once
 #include <algorithm>
+#include <condition_variable>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <queue>
-#include <memory>
-#include <condition_variable>
 
 /// @brief Шаблонные класс потокобезопасной очереди
 /// @tparam T Тип хранящийся в очереди
@@ -30,10 +30,7 @@ template <typename T> class SafeQueue
         _cv.notify_one();
     }
 
-    void notify()
-    {
-        _cv.notify_one();
-    }
+    void notify() { _cv.notify_one(); }
 
     /// @brief Получить данные из очереди
     /// @return Массив данных
@@ -41,7 +38,7 @@ template <typename T> class SafeQueue
     {
         std::unique_lock lock(_mutex);
         T data;
-        if(!_data.empty())
+        if (!_data.empty())
         {
             data = _data.front();
             _data.pop();
@@ -80,9 +77,8 @@ template <typename T> class SafeQueue
     {
         std::unique_lock lock(_mutex);
         std::queue<T> empty;
-        std::swap( _data, empty );
+        std::swap(_data, empty);
     }
 };
 
-template <typename T>
-using SafeQueuePtr = std::shared_ptr<SafeQueue<T>>;
+template <typename T> using SafeQueuePtr = std::shared_ptr<SafeQueue<T>>;

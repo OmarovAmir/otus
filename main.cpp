@@ -1,8 +1,8 @@
+#include <Listener.hpp>
+#include <ListenerManager.hpp>
 #include <fmt/format.h>
 #include <iostream>
 #include <stdexcept>
-#include <Listener.hpp>
-#include <ListenerManager.hpp>
 
 int main(int argc, char** argv)
 {

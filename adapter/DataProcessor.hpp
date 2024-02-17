@@ -8,6 +8,7 @@
 #include <Data.hpp>
 #include <SafeQueue.hpp>
 #include <Base64.hpp>
+#include <Options.hpp>
 
 class DataProcessor
 {
@@ -43,7 +44,10 @@ class DataProcessor
                }
                catch(const std::exception& e)
                {
-                    fmt::println("{}: {}", __FUNCTION__, e.what());
+                    if(LOG_ERROR)
+                    {
+                         fmt::println("{}: {}", __FUNCTION__, e.what());
+                    }
                }
           }
      }

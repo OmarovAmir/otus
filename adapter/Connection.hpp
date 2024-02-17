@@ -11,6 +11,7 @@
 #include <SocketIpTransparentOption.hpp>
 #include <DataProcessor.hpp>
 #include <Data.hpp>
+#include <Options.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -127,7 +128,7 @@ public:
 
     void printConnection(std::string action)
     {
-        if(isConnected())
+        if(isConnected() && LOG_INFO)
         {
             fmt::println("");
             fmt::println("{}", action);
@@ -144,7 +145,10 @@ private:
     {
         if (error)
         {
-            fmt::println("{}: {}", __FUNCTION__, error.message());
+            if(LOG_ERROR)
+            {
+                fmt::println("{}: {}", __FUNCTION__, error.message());
+            }
             disconnect(error);
         }
         else
@@ -161,7 +165,10 @@ private:
     {
         if (error)
         {
-            fmt::println("{}: {}", __FUNCTION__, error.message());
+            if(LOG_ERROR)
+            {
+                fmt::println("{}: {}", __FUNCTION__, error.message());
+            }
             disconnect(error);
         }
         else
@@ -178,7 +185,10 @@ private:
     {
         if (error)
         {
-            fmt::println("{}: {}", __FUNCTION__, error.message());
+            if(LOG_ERROR)
+            {
+                fmt::println("{}: {}", __FUNCTION__, error.message());
+            }
             disconnect(error);
         }
     }
@@ -187,7 +197,10 @@ private:
     {
         if (error)
         {
-            fmt::println("{}: {}", __FUNCTION__, error.message());
+            if(LOG_ERROR)
+            {
+                fmt::println("{}: {}", __FUNCTION__, error.message());
+            }
             disconnect(error);
         }
     }
@@ -196,7 +209,10 @@ private:
     {
         if (error)
         {
-            fmt::println("{}: {}", __FUNCTION__, error.message());
+            if(LOG_ERROR)
+            {
+                fmt::println("{}: {}", __FUNCTION__, error.message());
+            }
             disconnect(error);
         }
         else
@@ -231,9 +247,12 @@ private:
     {
         if(m_connectedInput)
         {
-            fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
+            if(LOG_INFO)
+            {
+                fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
                         outputEndpoint.port(), inputEndpoint.address().to_string(),
                         inputEndpoint.port(), data);
+            }
             asio::async_write(m_input_socket, asio::buffer(data.data(), data.size()),
                             [this](const boost::system::error_code error, const std::size_t length)
                             { handleInputWrite(error, length); });
@@ -244,9 +263,12 @@ private:
     {
         if(m_connectedOutput)
         {
-            fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
+            if(LOG_INFO)
+            {
+                fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
                         inputEndpoint.port(), outputEndpoint.address().to_string(),
                         outputEndpoint.port(), data);
+            }
             asio::async_write(m_output_socket, asio::buffer(data.data(), data.size()),
                             [this](const boost::system::error_code error, const std::size_t length)
                             { handleOutputWrite(error, length); });

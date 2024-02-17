@@ -7,6 +7,7 @@
 #include <Connection.hpp>
 #include <ConnectionManager.hpp>
 #include <SocketIpTransparentOption.hpp>
+#include <Options.hpp>
 
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
@@ -20,7 +21,10 @@ class Listener
     {
         if (error)
         {
-            fmt::println("{}: {}", __FUNCTION__, error.message());
+            if(LOG_ERROR)
+            {
+                fmt::println("{}: {}", __FUNCTION__, error.message());
+            }
         }
         else
         {

@@ -101,12 +101,10 @@ po::options_description opts_init()
                  ->required(),
              "ports");
     // Context number
-    optsInit(
-        "context-number,c",
-        po::value<std::size_t>()
-            ->default_value(4)
-            ->notifier(make_min_max_notifier<std::size_t>("Context number", 1, 8)),
-        "context number possible values [1;8]");
+    optsInit("context-number,c",
+             po::value<std::size_t>()->default_value(4)->notifier(
+                 make_min_max_notifier<std::size_t>("Context number", 1, 8)),
+             "context number possible values [1;8]");
     // Logger severity
     optsInit("logger-severity,s",
              po::value<Logger::Severity>()

@@ -13,7 +13,8 @@ FetchContent_Declare(fmt
 FetchContent_MakeAvailable(fmt)
 
 find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+set(Boost_USE_STATIC_LIBS   ON)
+find_package(Boost REQUIRED COMPONENTS system program_options)
 
 configure_file(version.h.in version.h)
 

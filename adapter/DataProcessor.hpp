@@ -62,7 +62,7 @@ class DataProcessor
     ~DataProcessor()
     {
         m_processThreadFinish = true;
-        m_input_queue->clear();
         m_input_queue->stop();
+        m_input_queue->clear();
     }
 };

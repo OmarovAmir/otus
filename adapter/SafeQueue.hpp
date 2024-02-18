@@ -20,8 +20,11 @@ template <typename T> class SafeQueue
 
     void wait()
     {
-        std::unique_lock lock(_mutex);
-        _cv.wait(lock, [this] { return _stop || !_data.empty(); });
+        if (!_stop)
+        {
+            std::unique_lock lock(_mutex);
+            _cv.wait(lock, [this] { return _stop || !_data.empty(); });
+        }
     }
 
     void stop()
@@ -50,9 +53,12 @@ template <typename T> class SafeQueue
     /// @param data Данные
     void push(T&& data)
     {
-        std::unique_lock lock(_mutex);
-        _data.push(data);
-        _cv.notify_one();
+        if (!_stop)
+        {
+            std::unique_lock lock(_mutex);
+            _data.push(data);
+            _cv.notify_one();
+        }
     }
 
     /// @brief Получить размер очереди

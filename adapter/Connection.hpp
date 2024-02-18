@@ -105,8 +105,8 @@ class Connection
     ~Connection()
     {
         m_processedThreadFinish = true;
-        m_output_queue->clear();
         m_output_queue->stop();
+        m_output_queue->clear();
     }
 
     void connect()
@@ -131,6 +131,8 @@ class Connection
         }
         m_input_socket.close();
         m_output_socket.close();
+        m_input_buffer.consume(m_input_buffer.size());
+        m_output_buffer.consume(m_output_buffer.size());
         m_removeCV->notify_one();
     }
 

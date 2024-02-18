@@ -47,7 +47,7 @@ class Connection
             auto data = m_output_queue->pop();
             if (data)
             {
-                if (!data->IsEmpty())
+                if (!data->IsEmpty() && data->IsProcessed())
                 {
                     auto logger = Logger::getInstance();
                     switch (data->GetDirection())

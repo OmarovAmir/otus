@@ -74,7 +74,7 @@ sudo ./build/adapter -h
 Options:
   -h [ --help ]                        this screen
   -p [ --ports ] arg                   ports
-  -c [ --context-number ] arg (=12)    context number
+  -c [ --context-number ] arg (=4)     context number possible values [1;8]
   -s [ --logger-severity ] arg (=none) logger severity {none, info, warning, 
                                        error, debug}
   -v [ --verbose ] [=arg(=1)] (=0)     verbose

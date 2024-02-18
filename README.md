@@ -67,8 +67,25 @@ sudo docker/scripts/adapter/adapter.sh
 nc -l -p [port]
 ```
 ### Контейнер adapter
+#### Опции командной строки
 ```
-sudo ./build/adapter port [port]
+sudo ./build/adapter -h
+
+Options:
+  -h [ --help ]                        this screen
+  -p [ --ports ] arg                   ports
+  -c [ --context-number ] arg (=12)    context number
+  -s [ --logger-severity ] arg (=none) logger severity {none, info, warning, 
+                                       error, debug}
+  -v [ --verbose ] [=arg(=1)] (=0)     verbose
+```
+#### Запуск без логирования
+```
+sudo ./build/adapter -p 5555
+```
+#### Запуск с логированием
+```
+sudo ./build/adapter -p 5555 -s <logger severity>
 ```
 ### Контейнер client
 ```

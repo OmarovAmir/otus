@@ -43,6 +43,7 @@ class Connection
     {
         while (!m_processedThreadFinish)
         {
+            m_output_queue->wait();
             auto data = m_output_queue->pop();
             if (data)
             {

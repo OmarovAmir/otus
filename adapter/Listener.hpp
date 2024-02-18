@@ -6,7 +6,7 @@
 
 #include <Connection.hpp>
 #include <ConnectionManager.hpp>
-#include <Options.hpp>
+#include <Logger.hpp>
 #include <SocketIpTransparentOption.hpp>
 
 namespace asio = boost::asio;
@@ -21,10 +21,8 @@ class Listener
     {
         if (error)
         {
-            if (LOG_ERROR)
-            {
-                fmt::println("{}: {}", __FUNCTION__, error.message());
-            }
+            auto logger = Logger::getInstance();
+            logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
         }
         else
         {

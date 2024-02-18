@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include <iostream>
 #include <stdexcept>
+#include <Logger.hpp>
 
 int main(int argc, char** argv)
 {
@@ -21,6 +22,7 @@ int main(int argc, char** argv)
 
     try
     {
+        Logger::getInstance().setSeverity(Logger::Severity::Debug);
         auto mng = ListenerManager(4, ports);
         mng.run();
     }

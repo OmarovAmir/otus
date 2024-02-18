@@ -10,7 +10,7 @@
 
 #include <Data.hpp>
 #include <DataProcessor.hpp>
-#include <Options.hpp>
+#include <Logger.hpp>
 #include <SocketIpTransparentOption.hpp>
 
 namespace asio = boost::asio;
@@ -48,25 +48,22 @@ class Connection
             {
                 if (!data->IsEmpty())
                 {
+                    auto logger = Logger::getInstance();
                     switch (data->GetDirection())
                     {
                     case DataDirection::ToClient:
-                        if (LOG_INFO)
-                        {
-                            fmt::println("From server {}:{} to client {}:{} [{}]", outputEndpoint.address().to_string(),
-                                         outputEndpoint.port(), inputEndpoint.address().to_string(),
-                                         inputEndpoint.port(), data->GetData());
-                        }
+                        logger.info(fmt::format("From server {}:{} to client {}:{} [{}]",
+                                                outputEndpoint.address().to_string(), outputEndpoint.port(),
+                                                inputEndpoint.address().to_string(), inputEndpoint.port(),
+                                                data->GetData()));
                         inputWrite(data->GetData() + delimetr);
                         break;
 
                     case DataDirection::ToServer:
-                        if (LOG_INFO)
-                        {
-                            fmt::println("From client {}:{} to server {}:{} [{}]", inputEndpoint.address().to_string(),
-                                         inputEndpoint.port(), outputEndpoint.address().to_string(),
-                                         outputEndpoint.port(), data->GetData());
-                        }
+                        logger.info(fmt::format("From client {}:{} to server {}:{} [{}]",
+                                                inputEndpoint.address().to_string(), inputEndpoint.port(),
+                                                outputEndpoint.address().to_string(), outputEndpoint.port(),
+                                                data->GetData()));
                         outputWrite(data->GetData() + delimetr);
                         break;
                     default:
@@ -140,13 +137,11 @@ class Connection
 
     void printConnection(std::string action)
     {
-        if (isConnected() && LOG_INFO)
+        if (isConnected())
         {
-            fmt::println("");
-            fmt::println("{}", action);
-            fmt::print("client: {}:{} ", inputEndpoint.address().to_string(), inputEndpoint.port());
-            fmt::println("server: {}:{}", outputEndpoint.address().to_string(), outputEndpoint.port());
-            fmt::println("");
+            auto logger = Logger::getInstance();
+            logger.info(fmt::format("{}: client[{}:{}] server[{}:{}]", action, inputEndpoint.address().to_string(),
+                                    inputEndpoint.port(), outputEndpoint.address().to_string(), outputEndpoint.port()));
         }
     }
 
@@ -155,10 +150,8 @@ class Connection
     {
         if (error)
         {
-            if (LOG_ERROR)
-            {
-                fmt::println("{}: {}", __FUNCTION__, error.message());
-            }
+            auto logger = Logger::getInstance();
+            logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
             disconnect(error);
         }
         else
@@ -175,10 +168,8 @@ class Connection
     {
         if (error)
         {
-            if (LOG_ERROR)
-            {
-                fmt::println("{}: {}", __FUNCTION__, error.message());
-            }
+            auto logger = Logger::getInstance();
+            logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
             disconnect(error);
         }
         else
@@ -195,10 +186,8 @@ class Connection
     {
         if (error)
         {
-            if (LOG_ERROR)
-            {
-                fmt::println("{}: {}", __FUNCTION__, error.message());
-            }
+            auto logger = Logger::getInstance();
+            logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
             disconnect(error);
         }
     }
@@ -207,10 +196,8 @@ class Connection
     {
         if (error)
         {
-            if (LOG_ERROR)
-            {
-                fmt::println("{}: {}", __FUNCTION__, error.message());
-            }
+            auto logger = Logger::getInstance();
+            logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
             disconnect(error);
         }
     }
@@ -219,10 +206,8 @@ class Connection
     {
         if (error)
         {
-            if (LOG_ERROR)
-            {
-                fmt::println("{}: {}", __FUNCTION__, error.message());
-            }
+            auto logger = Logger::getInstance();
+            logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
             disconnect(error);
         }
         else

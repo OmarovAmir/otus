@@ -10,7 +10,8 @@ apt install -y nftables \
                net-tools \
                tshark \
                tmux \
-               gdb && \
+               gdb \
+               htop && \
 apt autoclean && \
 apt clean
 RUN useradd -s /bin/bash -m adapter -p 123456

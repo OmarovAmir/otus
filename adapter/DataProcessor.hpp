@@ -7,7 +7,7 @@
 
 #include <Base64.hpp>
 #include <Data.hpp>
-#include <Options.hpp>
+#include <Logger.hpp>
 #include <SafeQueue.hpp>
 
 class DataProcessor
@@ -44,10 +44,8 @@ class DataProcessor
             }
             catch (const std::exception& e)
             {
-                if (LOG_ERROR)
-                {
-                    fmt::println("{}: {}", __FUNCTION__, e.what());
-                }
+                auto logger = Logger::getInstance();
+                logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, e.what()));
             }
         }
     }

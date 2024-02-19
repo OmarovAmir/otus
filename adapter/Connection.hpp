@@ -32,7 +32,6 @@ class Connection
     boost::asio::streambuf m_input_buffer;
     tcp::socket m_output_socket;
     boost::asio::streambuf m_output_buffer;
-    asio::ip::tcp::resolver m_resolver;
     bool m_connectedInput;
     bool m_connectedOutput;
 
@@ -87,7 +86,6 @@ class Connection
         , m_input_buffer{}
         , m_output_socket{m_input_socket.get_executor()}
         , m_output_buffer{}
-        , m_resolver{m_input_socket.get_executor()}
         , m_connectedInput{true}
         , m_connectedOutput{false}
         , inputEndpoint{m_input_socket.remote_endpoint()}
@@ -116,21 +114,11 @@ class Connection
                                       [this](const boost::system::error_code error) { handleConnect(error); });
     }
 
-    void disconnect(boost::system::error_code error = boost::system::error_code())
+    void disconnect()
     {
         printConnection("Disconnection");
         m_connectedInput = false;
         m_connectedOutput = false;
-        if (m_input_socket.is_open())
-        {
-            m_input_socket.shutdown(tcp::socket::shutdown_both, error);
-        }
-        if (m_output_socket.is_open())
-        {
-            m_output_socket.shutdown(tcp::socket::shutdown_both, error);
-        }
-        m_input_socket.close();
-        m_output_socket.close();
         m_input_buffer.consume(m_input_buffer.size());
         m_output_buffer.consume(m_output_buffer.size());
         m_removeCV->notify_one();
@@ -155,7 +143,7 @@ class Connection
         {
             auto logger = Logger::getInstance();
             logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
-            disconnect(error);
+            disconnect();
         }
         else
         {
@@ -173,7 +161,7 @@ class Connection
         {
             auto logger = Logger::getInstance();
             logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
-            disconnect(error);
+            disconnect();
         }
         else
         {
@@ -191,7 +179,7 @@ class Connection
         {
             auto logger = Logger::getInstance();
             logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
-            disconnect(error);
+            disconnect();
         }
     }
 
@@ -201,7 +189,7 @@ class Connection
         {
             auto logger = Logger::getInstance();
             logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
-            disconnect(error);
+            disconnect();
         }
     }
 
@@ -211,7 +199,7 @@ class Connection
         {
             auto logger = Logger::getInstance();
             logger.error(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
-            disconnect(error);
+            disconnect();
         }
         else
         {

@@ -94,7 +94,13 @@ class Connection
         m_output_socket.open(tcp::v4());
         ip_transparent opt(true);
         m_output_socket.set_option(opt);
-        m_output_socket.bind(m_input_socket.remote_endpoint());
+        boost::system::error_code error;
+        m_output_socket.bind(m_input_socket.remote_endpoint(), error);
+        if (error)
+        {
+            auto logger = Logger::getInstance();
+            logger.info(fmt::format("{}: {}", __PRETTY_FUNCTION__, error.message()));
+        }
         m_processedThread.detach();
     }
 
